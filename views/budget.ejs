@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><% title = 'بودجه' %></title>
+  <style>
+    .main-box {
+      height: 60vh !important;
+    }
+  </style>
+</head>
+
+<body class="bg-main-color overflow-hidden">
+
+  <%- include('partials/header') %>
+
+
+
+  <section class="scrollbar overflow-y-auto px-6 pb-1">
+
+    <h3 class="font-bold text-zinc-950 text-center">مدیریت تراکنش ها</h3>
+
+    <div class="overflow-x-auto scrollbar my-2">
+      <div class="grid grid-cols-3 gap-4 min-w-max">
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-main-color-25 p-2 flex justify-center items-center rounded-lg border border-main-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.25 13.8206H35.75" stroke="#0062AE" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M9.75 26.8206H13" stroke="#0062AE" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M17.0625 26.8206H23.5625" stroke="#0062AE" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M10.465 5.69556H28.5187C34.3037 5.69556 35.75 7.12556 35.75 12.8293V26.1706C35.75 31.8743 34.3037 33.3043 28.535 33.3043H10.465C4.69625 33.3206 3.25 31.8906 3.25 26.1868V12.8293C3.25 7.12556 4.69625 5.69556 10.465 5.69556Z" stroke="#0062AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg ">بودجه کل ماه</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5">۱۱,۰۰۰,۰۰۰ تومان</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-red-color-25 p-2 flex justify-center items-center rounded-lg border border-red-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.25 13.8125H21.9375" stroke="#AE0600" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M9.75 26.8125H13" stroke="#AE0600" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M17.0625 26.8125H23.5625" stroke="#AE0600" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M35.75 19.5487V26.1788C35.75 31.8825 34.3037 33.3125 28.535 33.3125H10.465C4.69625 33.3125 3.25 31.8825 3.25 26.1788V12.8212C3.25 7.1175 4.69625 5.6875 10.465 5.6875H21.9375" stroke="#AE0600" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M28.1265 13.3081L34.4315 7.00305" stroke="#AE0600" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M34.4315 13.3081L28.1265 7.00305" stroke="#AE0600" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg ">مصرف شده</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5">۸,۰۰۰,۰۰۰ تومان</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-green-color-25 p-2 flex justify-center items-center rounded-lg border border-green-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.25 13.8125H21.9375" stroke="#37AE00" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M9.75 26.8125H13" stroke="#37AE00" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M17.0625 26.8125H23.5625" stroke="#37AE00" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M35.75 17.9237V26.1788C35.75 31.8825 34.3037 33.3125 28.535 33.3125H10.465C4.69625 33.3125 3.25 31.8825 3.25 26.1788V12.8212C3.25 7.1175 4.69625 5.6875 10.465 5.6875H21.9375" stroke="#37AE00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M26.8125 9.75L29.25 12.1875L35.75 5.6875" stroke="#37AE00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg ">بودجه کل ماه</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5">۱۱,۰۰۰,۰۰۰ تومان</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-box-small my-2">
+      <div class="flex justify-between items-center">
+        <div class="">
+          <div class="relative">
+            <input type="text" placeholder="درآمد این ماه " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          </div>
+        </div>
+        <div>
+          <button class="main-btn">محاسبه خودکار</button>
+          <button class="main-btn" onclick="openModal('editBudgetManual')">ویرایش دستی </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 my-2">
+      <div class="main-box">
+        <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3 flex-wrap gap-2">
+          <div class="flex items-center gap-3 w-full justify-between">
+            <h2 class="font-bold text-lg text-zinc-800">وضعیت بودجه ماه جاری</h2>
+
+            <div class="flex items-center gap-3">
+              <small class="text-zinc-500 text-xs">مصرف هر دسته بر اساس بودجه تعیین شده است.</small>
+              <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center">
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.0216 3.1525C9.43581 3.1525 6.52164 6.06666 6.52164 9.6525V12.7833C6.52164 13.4442 6.23997 14.4517 5.90414 15.015L4.65831 17.0842C3.88914 18.3625 4.41997 19.7817 5.82831 20.2583C10.4975 21.8183 15.535 21.8183 20.2041 20.2583C21.515 19.825 22.0891 18.2758 21.3741 17.0842L20.1283 15.015C19.8033 14.4517 19.5216 13.4442 19.5216 12.7833V9.6525C19.5216 6.0775 16.5966 3.1525 13.0216 3.1525Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
+                  <path d="M15.0259 3.46665C14.6901 3.36915 14.3434 3.29332 13.9859 3.24999C12.9459 3.11999 11.9492 3.19582 11.0176 3.46665C11.3317 2.66499 12.1117 2.10165 13.0217 2.10165C13.9317 2.10165 14.7117 2.66499 15.0259 3.46665Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M16.2715 20.6483C16.2715 22.4358 14.809 23.8983 13.0215 23.8983C12.1332 23.8983 11.3098 23.53 10.7248 22.945C10.1398 22.36 9.77148 21.5367 9.77148 20.6483" stroke="white" stroke-width="1.5" stroke-miterlimit="10" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="h-[80%] overflow-auto scrollbar px-2">
+          <div class="budgetStatItem">
+          <div class="border-b-zinc-200">
+            <div class="mt-3">
+              <div class="flex justify-between text-sm mb-1">
+                <span>خوراک</span>
+                <span>۵۷٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-orange-color h-2.5 rounded-full progress-bar" style="width: 57%"></div>
+              </div>
+              <div class="flex justify-between text-sm mt-1">
+                <span class="text-orange-color">مصرف شده: ۳,۵۰۰,۰۰۰ تومان</span>
+                <span class="text-gray-500">۶,۰۰۰,۰۰۰ / ۲,۵۰۰,۰۰۰</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="budgetStatItem">
+          <div class="border-b-zinc-200">
+            <div class="mt-3">
+              <div class="flex justify-between text-sm mb-1">
+                <span>خوراک</span>
+                <span>۵۷٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-orange-color h-2.5 rounded-full progress-bar" style="width: 57%"></div>
+              </div>
+              <div class="flex justify-between text-sm mt-1">
+                <span class="text-orange-color">مصرف شده: ۳,۵۰۰,۰۰۰ تومان</span>
+                <span class="text-gray-500">۶,۰۰۰,۰۰۰ / ۲,۵۰۰,۰۰۰</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="budgetStatItem">
+          <div class="border-b-zinc-200">
+            <div class="mt-3">
+              <div class="flex justify-between text-sm mb-1">
+                <span>خوراک</span>
+                <span>۵۷٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-orange-color h-2.5 rounded-full progress-bar" style="width: 57%"></div>
+              </div>
+              <div class="flex justify-between text-sm mt-1">
+                <span class="text-orange-color">مصرف شده: ۳,۵۰۰,۰۰۰ تومان</span>
+                <span class="text-gray-500">۶,۰۰۰,۰۰۰ / ۲,۵۰۰,۰۰۰</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="budgetStatItem">
+          <div class="border-b-zinc-200">
+            <div class="mt-3">
+              <div class="flex justify-between text-sm mb-1">
+                <span>خوراک</span>
+                <span>۵۷٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-orange-color h-2.5 rounded-full progress-bar" style="width: 57%"></div>
+              </div>
+              <div class="flex justify-between text-sm mt-1">
+                <span class="text-orange-color">مصرف شده: ۳,۵۰۰,۰۰۰ تومان</span>
+                <span class="text-gray-500">۶,۰۰۰,۰۰۰ / ۲,۵۰۰,۰۰۰</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="budgetStatItem">
+          <div class="border-b-zinc-200">
+            <div class="mt-3">
+              <div class="flex justify-between text-sm mb-1">
+                <span>خوراک</span>
+                <span>۵۷٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-orange-color h-2.5 rounded-full progress-bar" style="width: 57%"></div>
+              </div>
+              <div class="flex justify-between text-sm mt-1">
+                <span class="text-orange-color">مصرف شده: ۳,۵۰۰,۰۰۰ تومان</span>
+                <span class="text-gray-500">۶,۰۰۰,۰۰۰ / ۲,۵۰۰,۰۰۰</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="budgetStatItem">
+          <div class="border-b-zinc-200">
+            <div class="mt-3">
+              <div class="flex justify-between text-sm mb-1">
+                <span>خوراک</span>
+                <span>۵۷٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-orange-color h-2.5 rounded-full progress-bar" style="width: 57%"></div>
+              </div>
+              <div class="flex justify-between text-sm mt-1">
+                <span class="text-orange-color">مصرف شده: ۳,۵۰۰,۰۰۰ تومان</span>
+                <span class="text-gray-500">۶,۰۰۰,۰۰۰ / ۲,۵۰۰,۰۰۰</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>  
+        
+      </div>
+    </div>
+  </section>
+
+  <div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 z-40" onclick="closeModal()"></div>
+
+  <!-- مودال ویرایش دستی -->
+  <div id="editBudgetManual" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col relative">
+      <!-- هدر ثابت -->
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-lg text-zinc-800">ثبت تراکنش جدید</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body overflow-y-auto flex-1 scrollbar px-6 py-4">
+        <div class="mb-5">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="relative">
+              <input type="text" placeholder="درآمد این ماه " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            </div>
+            <span class="text-main-color font-bold text-sm sm:text-base">
+              مجموع بودجه: ۳۰,۰۰۰,۰۰۰ تومان (۱۰۰.۰٪ از درآمد)
+            </span>
+          </div>
+        </div>
+
+        <!--  دسته‌بندی‌ها -->
+        <div class="overflow-x-auto">
+          <!-- هدر جدول -->
+          <div class="grid grid-cols-3 gap-3 mb-2 px-1">
+            <span class="font-bold text-zinc-700 text-sm">دسته</span>
+            <span class="font-bold text-zinc-700 text-sm text-center">درصد</span>
+            <span class="font-bold text-zinc-700 text-sm text-center">مبلغ</span>
+          </div>
+          <div class="h-[45vh] overflow-auto scrollbar px-2">
+            <!-- ردیف خوراک -->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">خوراک</span>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text"  class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+            <!-- ردیف خرید و پوشاک -->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">خرید و پوشاک</span>
+              <div class="relative">
+                <input type="text"class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+            <!-- ردیف حمل و نقل -->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">حمل و نقل</span>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+            <!-- ردیف تفریح و سرگرمی -->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">تفریح و سرگرمی</span>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+            <!-- ردیف سلامت و تناسب اندام -->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">سلامت و تناسب اندام</span>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+            <!-- ردیف آموزش و توسعه-->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">آموزش و توسعه</span>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+            <!-- ردیف سرمایه گذاری -->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">سرمایه گذاری</span>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+            <!-- ردیف بدهی-->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">بدهی</span>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+            <!-- ردیف مسکن و خدمات-->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">مسکن و خدمات</span>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+            <!-- ردیف سایر -->
+            <div class="grid grid-cols-3 gap-3 items-center mb-3 border-b pb-3 border-b-zinc-200">
+              <span class="font-medium text-zinc-800 text-sm">سایر</span>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">٪</span>
+              </div>
+              <div class="relative">
+                <input type="text" class="w-full h-10 border border-main-color rounded-lg pr-7 pl-3 outline-none text-sm text-center" />
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">تومان</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- جمع کل (اختیاری - نمایش جمع درصدها و مبلغ‌ها) -->
+        <div class="mt-4 pt-3 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between gap-2 text-sm">
+          <span class="text-zinc-600">مجموع درصد: <span class="font-bold text-main-color">۶۰٪</span></span>
+          <span class="text-zinc-600">مجموع مبلغ: <span class="font-bold text-main-color">۱۸,۰۰۰,۰۰۰ تومان</span></span>
+          <span class="text-zinc-600">باقی‌مانده: <span class="font-bold text-green-600">۱۲,۰۰۰,۰۰۰ تومان</span></span>
+        </div>
+      </div>
+
+      <!-- فوتر ثابت -->
+      <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+        <button class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById('modalOverlay').classList.remove('hidden');
+      document.getElementById(id).classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeModal() {
+      document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+      document.getElementById('modalOverlay').classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,453 @@
+:root {
+    --bg-color: #f3f4f6;
+}
+
+@font-face {
+    font-family: 'IranSans';
+    src: url('/fonts/IRANSansX-Regular.ttf') format('ttf'),
+        url('/fonts/IRANSansX-Regular.woff2') format('woff2'),
+        url('/fonts/IRANSansX-Regular.woff') format('woff');
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    font-family: "IranSans" !important;
+    font-size: 14px !important;
+}
+
+.scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+    margin: 4px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: background 0.3s;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
+
+.scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 transparent;
+}
+
+svg {
+    width: 16px;
+}
+
+body {
+    overflow: hidden;
+}
+
+ul {
+    overflow: hidden;
+}
+
+.main-box {
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid #E4E4E4;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    height: 65vh;
+    padding: 12px;
+}
+
+.main-box-small {
+    min-height: 60px !important;
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid #E4E4E4;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 12px;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+.custom-input {
+    width: 100%;
+    height: 34px;
+    /* 12 = 3rem */
+    border: 1px solid #0062AE;
+    /* رنگ main-color */
+    border-radius: 0.5rem;
+    /* 8px = rounded-lg */
+    padding-right: 1rem;
+    /* 4 = 1rem */
+    padding-left: 1rem;
+    outline: none;
+    background-color: #fff;
+    /* در صورت نیاز */
+    transition: border-color 0.2s;
+}
+
+/* اختیاری: استایل فوکوس */
+.custom-input:focus {
+    border-color: #004b8a;
+    box-shadow: 0 0 0 3px rgba(0, 98, 174, 0.15);
+}
+
+/* اختیاری: استایل placeholder */
+.custom-input::placeholder {
+    color: #9ca3af;
+    /* gray-400 */
+    font-size: 0.875rem;
+}
+
+/* -------sidebar------- */
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 30px;
+    margin: 10px 0;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+    border-right: 10px solid #005daa;
+    border-radius: 0 40px 40px 0px;
+}
+
+.menu-item span {
+    color: white;
+}
+
+.menu-item.active {
+    background: var(--color-back-color);
+    color: #000;
+    font-weight: 600;
+}
+
+.menu-item.active span {
+    color: var(--color-zinc-800);
+}
+
+.menu-item.active path {
+    stroke: var(--color-zinc-800);
+}
+
+.menu-item.active::before {
+    content: '';
+    position: absolute;
+    top: -24px;
+    left: 0px;
+    width: 9px;
+    height: 24px;
+    background: var(--color-main-color);
+    border-bottom-left-radius: 20px;
+    box-shadow: 0px 10px 0 var(--color-back-color);
+}
+
+.menu-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -24px;
+    left: 0px;
+    width: 9px;
+    height: 24px;
+    background: var(--color-main-color);
+    border-top-left-radius: 20px;
+    box-shadow: 0px -10px 0 var(--color-back-color);
+}
+
+.scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    background: #d4d4d4;
+    border-radius: 999px;
+}
+
+.logo-wrapper img:first-child {
+    width: 20% !important;
+}
+
+.logo-wrapper img {
+    width: 40%;
+}
+
+/* -------header------- */
+.theme-toggle {
+    width: 65px;
+    height: 30px;
+    border: none;
+    border-radius: 50px;
+    background: var(--color-main-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    cursor: pointer;
+    position: relative;
+    transition: .3s;
+    direction: rtl;
+}
+
+aside .theme-toggle {
+    background: rgba(255, 255, 255, 0.15);
+    display: none;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.theme-toggle .icon {
+    z-index: 2;
+}
+
+.theme-toggle svg {
+    width: 16px !important;
+}
+
+.toggle-ball {
+    position: absolute;
+    inset-inline-start: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    transition: .3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
+}
+
+.theme-toggle.dark {
+    background: #0b4473;
+}
+
+.theme-toggle.dark .toggle-ball {
+    inset-inline-start: calc(100% - 28px);
+    /* حرکت توپ به سمت مخالف */
+}
+
+.user-profile {
+    left: 3%;
+}
+
+#mobile-hamburger {
+    position: absolute;
+    right: 25px;
+}
+
+@media (max-width: 768px) {
+    .theme-toggle {
+        display: none !important;
+    }
+
+    aside .theme-toggle {
+        display: flex !important;
+    }
+
+    .menu-item::before,
+    .menu-item::after {
+        content: none !important;
+        display: none !important;
+
+    }
+}
+
+/* ////progress bar */
+.progress-wrapper {
+    position: relative;
+}
+
+.percent {
+    color: #333;
+}
+
+.bar-bg {
+    width: 100%;
+    height: 12px;
+    background: #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--color-main-color);
+    border-radius: 12px;
+    transition: width 0.03s linear;
+}
+
+/* ////// */
+
+.dashboard-status svg {
+    width: 30px;
+}
+
+.trend-p {
+    background-color: var(--color-green-color-25);
+    color: var(--color-green-color);
+    min-width: 50px;
+    height: fit-content;
+    border-radius: 16px;
+}
+
+.trend-m {
+    background-color: var(--color-red-color-25);
+    color: var(--color-red-color);
+    min-width: 50px;
+    height: fit-content;
+    border-radius: 16px;
+}
+
+.trend {
+    background-color: var(--color-zinc-200);
+    color: var(--color-zinc-600);
+    min-width: 50px;
+    height: fit-content;
+    border-radius: 16px;
+}
+
+.dashboard-status {
+    min-width: 180px;
+    flex-shrink: 0;
+}
+
+/* table */
+.scrollable-table-container {
+    overflow: auto;
+    height: 70%;
+}
+
+th div {
+    text-align: center;
+    justify-content: center;
+    height: 36px;
+}
+
+td {
+    text-align: center;
+}
+
+/* تنظیم حداقل عرض برای جدول تا اسکرول افقی فعال بماند */
+.scrollable-table-container table {
+    min-width: 750px;
+    /* می‌توانید بر اساس محتوای خود تنظیم کنید */
+}
+
+/* جلوگیری از شکسته شدن متن در تمام سلول‌ها */
+.scrollable-table-container th,
+.scrollable-table-container td {
+    white-space: nowrap;
+}
+
+/* برای ستون توضیحات اگر نیاز به فضای بیشتر است، عرض حداقل تعیین کنید */
+.scrollable-table-container td:nth-child(2) {
+    min-width: 180px;
+    max-width: 250px;
+    white-space: normal;
+    /* اگر ترجیح می‌دهید توضیحات بلند در چند خط نشان داده شود، این خط را فعال کنید */
+}
+
+/* button */
+.main-btn {
+    background-color: var(--color-main-color);
+    border-radius: 6px;
+    color: white;
+    padding: 8px;
+    min-width: 80px;
+    height: 36px !important;
+}
+
+.main-btn:hover {
+    background-color: var(--color-main-color-hover);
+    transition: all 1s;
+}
+
+input,
+.select-btn,
+textarea {
+    background-color: #f7fbff;
+    border-color: var(--color-main-color-25) !important;
+}
+
+input:focus,
+.select-btn:focus,
+.select-btn:active,
+textarea:focus {
+    box-shadow: 0px 2px 4px #3d3d3d33;
+}
+
+/* ===== Reminder Toggle Switch ===== */
+.reminder-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #1e293b;
+    user-select: none;
+}
+
+.reminder-toggle input {
+    display: none;
+}
+
+.reminder-toggle .slider-track {
+    width: 35px;
+    height: 19px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    border: 2px solid #cbd5e1;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.3s ease, border-color 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.reminder-toggle .slider-track::after {
+    content: '';
+    position: absolute;
+    top: 0px;
+    right: 2px;
+    width: 15px;
+    height: 15px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: right 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.reminder-toggle input:checked+.slider-track {
+    background: #0062AE;
+    border-color: #0062AE;
+}
+
+.reminder-toggle input:checked+.slider-track::after {
+    right: 15px;
+}
+
+/* ===== Hover effects ===== */
+.reminder-toggle:hover .slider-track {
+    border-color: #94a3b8;
+}
+
+.reminder-toggle input:checked:hover+.slider-track {
+    background: #00509e;
+    border-color: #00509e;
+}
+
+.reminder-toggle input:focus-visible+.slider-track {
+    outline: 2px solid #0062AE;
+    outline-offset: 2px;
+}
+
+.reminder-toggle .toggle-label {
+    line-height: 1.4;
+}

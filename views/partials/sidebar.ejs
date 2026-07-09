@@ -1,0 +1,151 @@
+<!-- سایدبار -->
+ 
+<aside id="sidebar" 
+  class="bg-main-color text-white flex-col py-5 overflow-hidden transition-all duration-300
+         fixed md:static inset-y-0 right-0 w-56 md:w-auto z-30 translate-x-full
+         md:translate-x-0 hidden md:!flex">
+  <button id="sidebar-close" class="md:hidden absolute left-4 top-4 text-white">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+  <div class="my-3 flex justify-center items-center logo-wrapper">
+    <img src="/Images/logo-white.png" alt="">
+    <img src="/Images/logo-typo-white.png" id="logo-typo" alt="حسابینو">
+  </div>
+
+  <div>
+    <button class="items-center justify-between theme-toggle
+               border border-white/20 shadow-md shadow-black/10" id="themeToggle">
+      <div class="icon sun">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 18.5C15.5899 18.5 18.5 15.5899 18.5 12C18.5 8.41015 15.5899 5.5 12 5.5C8.41015 5.5 5.5 8.41015 5.5 12C5.5 15.5899 8.41015 18.5 12 18.5Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M19.14 19.14L19.01 19.01M19.01 4.99L19.14 4.86L19.01 4.99ZM4.86 19.14L4.99 19.01L4.86 19.14ZM12 2.08V2V2.08ZM12 22V21.92V22ZM2.08 12H2H2.08ZM22 12H21.92H22ZM4.99 4.99L4.86 4.86L4.99 4.99Z" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+
+      </div>
+      <span class="toggle-ball"></span>
+      <div class="icon moon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.03009 12.42C2.39009 17.57 6.76009 21.76 11.9901 21.99C15.6801 22.15 18.9801 20.43 20.9601 17.72C21.7801 16.61 21.3401 15.87 19.9701 16.12C19.3001 16.24 18.6101 16.29 17.8901 16.26C13.0001 16.06 9.00009 11.97 8.98009 7.14C8.97009 5.84 9.24009 4.61 9.73009 3.49C10.2701 2.25 9.62009 1.66 8.37009 2.19C4.41009 3.86 1.70009 7.85 2.03009 12.42Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+    </button>
+  </div>
+
+  <ul class="mt-6 flex-1 space-y-1">
+    <!-- داشبورد -->
+    <li class="menu-item flex items-center justify-start px-6 text-sm font-medium gap-3">
+      <a href="/" class="flex items-center gap-3 w-full">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M22 10.9V4.1C22 2.6 21.36 2 19.77 2H15.73C14.14 2 13.5 2.6 13.5 4.1V10.9C13.5 12.4 14.14 13 15.73 13H19.77C21.36 13 22 12.4 22 10.9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M22 19.9V18.1C22 16.6 21.36 16 19.77 16H15.73C14.14 16 13.5 16.6 13.5 18.1V19.9C13.5 21.4 14.14 22 15.73 22H19.77C21.36 22 22 21.4 22 19.9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M10.5 13.1V19.9C10.5 21.4 9.86 22 8.27 22H4.23C2.64 22 2 21.4 2 19.9V13.1C2 11.6 2.64 11 4.23 11H8.27C9.86 11 10.5 11.6 10.5 13.1Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M10.5 4.1V5.9C10.5 7.4 9.86 8 8.27 8H4.23C2.64 8 2 7.4 2 5.9V4.1C2 2.6 2.64 2 4.23 2H8.27C9.86 2 10.5 2.6 10.5 4.1Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="menu-text whitespace-nowrap transition-opacity duration-200">داشبورد</span>
+      </a>
+    </li>
+
+    <!-- تراکنش ها -->
+    <li class="menu-item flex items-center justify-start px-6 text-sm font-medium gap-3">
+      <a href="/transactions" class="flex items-center gap-3 w-full">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M7.5 12L3 16.5L7.5 21M3 16.5H16.5M16.5 12L21 7.5L16.5 3M21 7.5H7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="menu-text whitespace-nowrap transition-opacity duration-200">تراکنش ها</span>
+      </a>
+    </li>
+
+    <!-- بودجه -->
+    <li class="menu-item flex items-center justify-start px-6 text-sm font-medium gap-3">
+      <a href="/budget" class="flex items-center gap-3 w-full">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M4.02 5.97C2.75 7.65 2 9.74 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M5 12C5 15.87 8.13 19 12 19C15.87 19 19 15.87 19 12C19 8.13 15.87 5 12 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M12 16C14.21 16 16 14.21 16 12C16 9.79 14.21 8 12 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="menu-text whitespace-nowrap transition-opacity duration-200">بودجه</span>
+      </a>
+    </li>
+
+    <!-- پس انداز -->
+    <li class="menu-item flex items-center justify-start px-6 text-sm font-medium gap-3">
+      <a href="/savings" class="flex items-center gap-3 w-full">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M12 2V8L14 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M12 8L10 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M7 12C3 12 3 13.79 3 16V17C3 19.76 3 22 8 22H16C20 22 21 19.76 21 17V16C21 13.79 21 12 17 12C16 12 15.72 12.21 15.2 12.6L14.18 13.68C13 14.94 11 14.94 9.81 13.68L8.8 12.6C8.28 12.21 8 12 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M5 12V8.00004C5 5.99004 5 4.33004 8 4.04004" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M19 12V8.00004C19 5.99004 19 4.33004 16 4.04004" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="menu-text whitespace-nowrap transition-opacity duration-200">پس انداز</span>
+      </a>
+    </li>
+
+    <!-- مدیریت چک ها -->
+    <li class="menu-item flex items-center justify-start px-6 text-sm font-medium gap-3">
+      <a href="/cheques" class="flex items-center gap-3 w-full">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M22 10V15C22 20 20 22 15 22H9C4 22 2 20 2 15V9C2 4 4 2 9 2H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M22 10H18C15 10 14 9 14 6V2L22 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M7 13H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M7 17H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="menu-text whitespace-nowrap transition-opacity duration-200">مدیریت چک ها</span>
+      </a>
+    </li>
+
+    <!-- مدیریت بدهی ها -->
+    <li class="menu-item flex items-center justify-start px-6 text-sm font-medium gap-3">
+      <a href="/debts" class="flex items-center gap-3 w-full">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M19.3 6.91998V12.07C19.3 15.15 17.54 16.47 14.9 16.47H6.10995C5.65995 16.47 5.22996 16.43 4.82996 16.34C4.57996 16.3 4.33996 16.23 4.11996 16.15C2.61996 15.59 1.70996 14.29 1.70996 12.07V6.91998C1.70996 3.83998 3.46995 2.52002 6.10995 2.52002H14.9C17.14 2.52002 18.75 3.47001 19.18 5.64001C19.25 6.04001 19.3 6.44998 19.3 6.91998Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M22.3011 9.9201V15.0701C22.3011 18.1501 20.5411 19.4701 17.9011 19.4701H9.11105C8.37105 19.4701 7.70106 19.3701 7.12106 19.1501C5.93106 18.7101 5.12105 17.8001 4.83105 16.3401C5.23105 16.4301 5.66105 16.4701 6.11105 16.4701H14.9011C17.5411 16.4701 19.3011 15.1501 19.3011 12.0701V6.9201C19.3011 6.4501 19.2611 6.03014 19.1811 5.64014C21.0811 6.04014 22.3011 7.38011 22.3011 9.9201Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M10.4984 12.1399C11.9564 12.1399 13.1384 10.9579 13.1384 9.49988C13.1384 8.04185 11.9564 6.85986 10.4984 6.85986C9.04038 6.85986 7.8584 8.04185 7.8584 9.49988C7.8584 10.9579 9.04038 12.1399 10.4984 12.1399Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M4.78003 7.30005V11.7001" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M16.2217 7.30029V11.7003" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="menu-text whitespace-nowrap transition-opacity duration-200">مدیریت بدهی ها</span>
+      </a>
+    </li>
+
+    <!-- گزارشات -->
+    <li class="menu-item flex items-center justify-start px-6 text-sm font-medium gap-3">
+      <a href="/reports" class="flex items-center gap-3 w-full">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M10.11 11.15H7.46005C6.83005 11.15 6.32007 11.66 6.32007 12.29V17.41H10.11V11.15V11.15Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M12.7613 6.59998H11.2413C10.6113 6.59998 10.1013 7.10999 10.1013 7.73999V17.4H13.8913V7.73999C13.8913 7.10999 13.3913 6.59998 12.7613 6.59998Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M16.5482 12.85H13.8982V17.4H17.6882V13.99C17.6782 13.36 17.1682 12.85 16.5482 12.85Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="menu-text whitespace-nowrap transition-opacity duration-200">گزارشات</span>
+      </a>
+    </li>
+
+    <!-- تنظیمات -->
+    <li class="menu-item flex items-center justify-start px-6 text-sm font-medium gap-3">
+      <a href="/settings" class="flex items-center gap-3 w-full">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M2 12.8801V11.1201C2 10.0801 2.85 9.22006 3.9 9.22006C5.71 9.22006 6.45 7.94006 5.54 6.37006C5.02 5.47006 5.33 4.30006 6.24 3.78006L7.97 2.79006C8.76 2.32006 9.78 2.60006 10.25 3.39006L10.36 3.58006C11.26 5.15006 12.74 5.15006 13.65 3.58006L13.76 3.39006C14.23 2.60006 15.25 2.32006 16.04 2.79006L17.77 3.78006C18.68 4.30006 18.99 5.47006 18.47 6.37006C17.56 7.94006 18.3 9.22006 20.11 9.22006C21.15 9.22006 22.01 10.0701 22.01 11.1201V12.8801C22.01 13.9201 21.16 14.7801 20.11 14.7801C18.3 14.7801 17.56 16.0601 18.47 17.6301C18.99 18.5401 18.68 19.7001 17.77 20.2201L16.04 21.2101C15.25 21.6801 14.23 21.4001 13.76 20.6101L13.65 20.4201C12.75 18.8501 11.27 18.8501 10.36 20.4201L10.25 20.6101C9.78 21.4001 8.76 21.6801 7.97 21.2101L6.24 20.2201C5.33 19.7001 5.02 18.5301 5.54 17.6301C6.45 16.0601 5.71 14.7801 3.9 14.7801C2.85 14.7801 2 13.9201 2 12.8801Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="menu-text whitespace-nowrap transition-opacity duration-200">تنظیمات</span>
+      </a>
+    </li>
+
+  </ul>
+</aside>
+
+<!-- دکمه‌ی toggle -->
+<button id="sidebar-toggle" class="absolute top-16 right-[14rem] translate-x-1/2 z-30
+       w-8 h-8 rounded-full
+       bg-main-color
+       hidden md:!flex items-center justify-end
+       text-white
+       transition-all duration-300 cursor-pointer">
+  <svg id="toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300">
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+</button>

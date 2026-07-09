@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <% title = 'مدیریت چک ها' %>
+  </title>
+  <style>
+    .main-box {
+      height: 60vh !important;
+    }
+  </style>
+</head>
+
+<body class="bg-main-color overflow-hidden">
+
+  <%- include('partials/header') %>
+
+  <section class="scrollbar overflow-y-auto px-6 pb-1">
+
+    <h3 class="font-bold text-zinc-950 text-center">مدیریت چک ها</h3>
+
+    <div class="overflow-x-auto scrollbar my-2">
+      <div class="grid grid-cols-4 gap-4 min-w-max">
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-main-color-25 p-2 flex justify-center items-center rounded-lg border border-main-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M31.6875 20.3125C31.6875 18.07 33.5075 16.25 35.75 16.25V14.625C35.75 8.125 34.125 6.5 27.625 6.5H11.375C4.875 6.5 3.25 8.125 3.25 14.625V15.4375C5.4925 15.4375 7.3125 17.2575 7.3125 19.5C7.3125 21.7425 5.4925 23.5625 3.25 23.5625V24.375C3.25 30.875 4.875 32.5 11.375 32.5H27.625C34.125 32.5 35.75 30.875 35.75 24.375C33.5075 24.375 31.6875 22.555 31.6875 20.3125Z" stroke="#0062AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M16.25 6.5L16.25 32.5" stroke="#0062AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 5" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">کل چک ها</div>
+              <div class="text-zinc-500 !text-md text-start my-2.5">۵ عدد</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-green-color-25 p-2 flex justify-center items-center rounded-lg border border-green-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.5 35.75C28.4375 35.75 35.75 28.4375 35.75 19.5C35.75 10.5625 28.4375 3.25 19.5 3.25C10.5625 3.25 3.25 10.5625 3.25 19.5C3.25 28.4375 10.5625 35.75 19.5 35.75Z" stroke="#37AE00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M12.5938 19.5L17.1925 24.0987L26.4062 14.9012" stroke="#37AE00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">وصول شده</div>
+              <div class="text-zinc-500 !text-md text-start my-2.5">۱ عدد</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-red-color-25 p-2 flex justify-center items-center rounded-lg border border-red-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.7168 32.2889H28.2305C34.243 32.2889 35.738 30.7939 35.738 24.7814C33.658 24.7814 31.9843 23.0914 31.9843 21.0276C31.9843 18.9476 33.658 17.2576 35.738 17.2576V15.7626C35.738 9.75013 34.243 8.25513 28.2305 8.25513H17.863V19.2889" stroke="#AE0600" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M17.8645 27.4137V32.2887H13.3633C10.9583 32.2887 9.54454 30.6475 7.98454 26.8775L7.69204 26.1462C9.65829 25.3662 10.617 23.0913 9.78829 21.125C8.99204 19.1587 6.73329 18.2163 4.75079 19.0288L4.47454 18.33C2.13454 12.61 2.94704 10.6112 8.66704 8.255L12.957 6.5L17.8645 18.395V22.5387" stroke="#AE0600" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M13.2636 32.2889H12.9873" stroke="#AE0600" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">برگشت خورده</div>
+              <div class="text-zinc-500 !text-md text-start my-2.5">۱ عدد</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-orange-color-25 p-2 flex justify-center items-center rounded-lg border border-orange-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24.7647 3.25H14.2347C8.1247 3.25 7.65345 8.7425 10.9522 11.7325L28.0472 27.2675C31.3459 30.2575 30.8747 35.75 24.7647 35.75H14.2347C8.1247 35.75 7.65345 30.2575 10.9522 27.2675L28.0472 11.7325C31.3459 8.7425 30.8747 3.25 24.7647 3.25Z" stroke="#FF7F0F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">در انتظار</div>
+              <div class="text-zinc-500 !text-md text-start my-2.5">۳ عدد</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 my-2">
+      <div class="main-box">
+        <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3 flex-wrap gap-2">
+          <div class="flex items-center gap-3 w-full justify-between">
+            <h2 class="font-bold text-lg text-zinc-800">لیست چک ها</h2>
+            <div class="flex items-center gap-3">
+              <button class="main-btn" onclick="openModal('addCheque')">ثبت چک جدید</button>
+              <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center">
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.0216 3.1525C9.43581 3.1525 6.52164 6.06666 6.52164 9.6525V12.7833C6.52164 13.4442 6.23997 14.4517 5.90414 15.015L4.65831 17.0842C3.88914 18.3625 4.41997 19.7817 5.82831 20.2583C10.4975 21.8183 15.535 21.8183 20.2041 20.2583C21.515 19.825 22.0891 18.2758 21.3741 17.0842L20.1283 15.015C19.8033 14.4517 19.5216 13.4442 19.5216 12.7833V9.6525C19.5216 6.0775 16.5966 3.1525 13.0216 3.1525Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"></path>
+                  <path d="M15.0259 3.46665C14.6901 3.36915 14.3434 3.29332 13.9859 3.24999C12.9459 3.11999 11.9492 3.19582 11.0176 3.46665C11.3317 2.66499 12.1117 2.10165 13.0217 2.10165C13.9317 2.10165 14.7117 2.66499 15.0259 3.46665Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path d="M16.2715 20.6483C16.2715 22.4358 14.809 23.8983 13.0215 23.8983C12.1332 23.8983 11.3098 23.53 10.7248 22.945C10.1398 22.36 9.77148 21.5367 9.77148 20.6483" stroke="white" stroke-width="1.5" stroke-miterlimit="10"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4 bg-white">
+          <!-- Search -->
+          <div class="relative">
+            <input type="text" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m20 20-3.5-3.5"></path>
+            </svg>
+          </div>
+
+          <!-- نوع چک -->
+          <div class="custom-select relative">
+            <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+              <span class="selected-value text-gray-700">نوع چک</span>
+              <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+              <div class="p-2 border-b border-main-color-25">
+                <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
+              </div>
+              <div class="options max-h-52 overflow-y-auto">
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">همه</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">دریافتی</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">پرداختی</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- وضعیت -->
+          <div class="custom-select relative">
+            <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+              <span class="selected-value text-gray-700">وضعیت</span>
+              <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+              <div class="p-2 border-b border-main-color-25">
+                <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
+              </div>
+              <div class="options max-h-52 overflow-y-auto">
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">همه</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">در انتظار</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">وصول شده</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">برگشت خورده</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- تاریخ -->
+          <div class="relative">
+            <input type="text" id="filterDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none pwt-datepicker-input-element" placeholder="تاریخ" autocomplete="off">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+              <path d="M16 2v4M8 2v4M3 10h18"></path>
+            </svg>
+          </div>
+
+          <div class="col-span-2">
+            <div class="flex w-full justify-end">
+              <button onclick="resetFilter()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">بازنشانی</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="scrollable-table-container relative scrollbar border-gray-200 border rounded-md">
+          <table class="w-full text-sm md:text-base">
+            <thead class="bg-blue-50 shadow-sm">
+              <tr>
+                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                  <div class="flex items-center justify-between gap-2">
+                    <span> شماره چک</span>
+                  </div>
+                </th>
+                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                  <div class="flex items-center gap-1.5">
+                    <span> نوع</span>
+                  </div>
+                </th>
+                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                  <div class="flex items-center gap-1.5">
+                    <span> مبلغ</span>
+                  </div>
+                </th>
+                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                  <div class="flex items-center gap-1.5">
+                    <span> طرف حساب</span>
+                  </div>
+                </th>
+                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                  <div class="flex items-center justify-between gap-2">
+                    <span>تاریخ</span>
+                  </div>
+                </th>
+                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                  <div class="flex items-center justify-between gap-2">
+                    <span> بانک</span>
+                  </div>
+                </th>
+                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                  <div class="flex items-center justify-between gap-2">
+                    <span> وضعیت</span>
+                  </div>
+                </th>
+                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                  <div class="flex items-center justify-between gap-2">
+                    <span> عملیات</span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+              <!-- ردیف اول: چک دریافتی وصول شده -->
+              <tr class="transition-all duration-150 hover:bg-gray-50">
+                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap font-mono">۱۲۳۴۵۶</td>
+                <td class="px-5 py-3.5">
+                  <span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">دریافتی</span>
+                </td>
+                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۵۰,۰۰۰,۰۰۰ ریال</td>
+                <td class="px-5 py-3.5 text-gray-700">شرکت آلفا</td>
+                <td class="px-5 py-3.5 text-gray-700 whitespace-nowrap">۱۴۰۳/۰۵/۱۵</td>
+                <td class="px-5 py-3.5 text-gray-700">بانک ملی</td>
+                <td class="px-5 py-3.5">
+                  <span class="bg-green-50 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">وصول شده</span>
+                </td>
+                <td>
+                  <div class="flex justify-center gap-2.5">
+                    <button class="bg-main-color p-1 rounded-md" onclick="openModal('editCheque')">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.6142 2.46067L13.9984 1.07566C14.2869 0.787107 14.6783 0.625 15.0864 0.625C15.4944 0.625 15.8858 0.787107 16.1743 1.07566C16.4629 1.36421 16.625 1.75557 16.625 2.16364C16.625 2.57172 16.4629 2.96308 16.1743 3.25163L4.38454 15.0414C3.95076 15.475 3.41583 15.7936 2.82805 15.9686L0.625 16.625L1.2814 14.422C1.4564 13.8342 1.77504 13.2992 2.20857 12.8655L12.615 2.46067H12.6142ZM12.6142 2.46067L14.7787 4.62515" stroke="white" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </button>
+                    <button class="bg-main-color p-1 rounded-md">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- ردیف دوم: چک پرداختی در انتظار -->
+              <tr class="transition-all duration-150 hover:bg-gray-50">
+                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap font-mono">۷۸۹۰۱۲</td>
+                <td class="px-5 py-3.5">
+                  <span class="bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full text-xs font-medium">پرداختی</span>
+                </td>
+                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۱۲,۵۰۰,۰۰۰ ریال</td>
+                <td class="px-5 py-3.5 text-gray-700">شرکت بتا</td>
+                <td class="px-5 py-3.5 text-gray-700 whitespace-nowrap">۱۴۰۳/۰۶/۲۰</td>
+                <td class="px-5 py-3.5 text-gray-700">بانک صادرات</td>
+                <td class="px-5 py-3.5">
+                  <span class="bg-orange-50 text-orange-600 px-2.5 py-1 rounded-full text-xs font-medium">در
+                    انتظار</span>
+                </td>
+                <td>
+                  <div class="flex justify-center gap-2.5">
+                    <button class="bg-main-color p-1 rounded-md" onclick="openModal('editCheque')">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.6142 2.46067L13.9984 1.07566C14.2869 0.787107 14.6783 0.625 15.0864 0.625C15.4944 0.625 15.8858 0.787107 16.1743 1.07566C16.4629 1.36421 16.625 1.75557 16.625 2.16364C16.625 2.57172 16.4629 2.96308 16.1743 3.25163L4.38454 15.0414C3.95076 15.475 3.41583 15.7936 2.82805 15.9686L0.625 16.625L1.2814 14.422C1.4564 13.8342 1.77504 13.2992 2.20857 12.8655L12.615 2.46067H12.6142ZM12.6142 2.46067L14.7787 4.62515" stroke="white" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </button>
+                    <button class="bg-main-color p-1 rounded-md">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 z-40" onclick="closeModal()"></div>
+
+  <!-- مودال افزودن پس انداز  -->
+  <div id="addCheque" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-2xl max-h-[90vh] lg:w-[35vw] w-full flex flex-col relative">
+      <!-- هدر ثابت -->
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-lg text-zinc-800">ثبت چک جدید</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+        <div class="relative">
+          <input type="text" placeholder="شماره چک" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+
+          <div class="custom-select relative">
+            <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+              <span class="selected-value text-gray-700">نوع مالی</span>
+              <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+              <div class="p-2 border-b border-main-color-25">
+                <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
+              </div>
+              <div class="options max-h-52 overflow-y-auto">
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">درآمد</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">هزینه</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سرمایه گذاری</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">وام</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">پس انداز</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سایر</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative">
+            <input type="number" placeholder="مبلغ " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          </div>
+
+          <div class="relative">
+            <input type="text" placeholder="طرف حساب" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          </div>
+
+          <div class="relative">
+            <input type="text" placeholder="نام بانک " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          </div>
+
+          <div class="relative">
+            <input type="text" id="filterDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+              <path d="M16 2v4M8 2v4M3 10h18"></path>
+            </svg>
+          </div>
+
+          <div class="custom-select relative">
+            <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+              <span class="selected-value text-gray-700">وضعیت</span>
+              <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+              <div class="p-2 border-b border-main-color-25">
+                <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
+              </div>
+              <div class="options max-h-52 overflow-y-auto">
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">همه</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">در انتظار</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">وصول شده</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">برگشت خورده</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="reminder-toggle">
+              <input type="checkbox" id="addReminder">
+              <span class="slider-track"></span>
+              <span class="toggle-label"> یادآور</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- فوتر ثابت -->
+      <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+        <button class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال ویرایش پس انداز -->
+  <div id="editCheque" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl lg:w-[25vw] w-full max-w-2xl max-h-[90vh] flex flex-col relative">
+      <!-- هدر ثابت -->
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-lg text-zinc-800">ویرایش چک</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+        <div class="relative">
+          <input type="text" placeholder="شماره چک" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+
+          <div class="custom-select relative">
+            <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+              <span class="selected-value text-gray-700">نوع مالی</span>
+              <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+              <div class="p-2 border-b border-main-color-25">
+                <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
+              </div>
+              <div class="options max-h-52 overflow-y-auto">
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">درآمد</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">هزینه</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سرمایه گذاری</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">وام</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">پس انداز</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سایر</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative">
+            <input type="number" placeholder="مبلغ " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          </div>
+
+          <div class="relative">
+            <input type="text" placeholder="طرف حساب" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          </div>
+
+          <div class="relative">
+            <input type="text" placeholder="نام بانک " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          </div>
+
+          <div class="relative">
+            <input type="text" id="filterDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+              <path d="M16 2v4M8 2v4M3 10h18"></path>
+            </svg>
+          </div>
+
+          <div class="custom-select relative">
+            <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+              <span class="selected-value text-gray-700">وضعیت</span>
+              <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+              <div class="p-2 border-b border-main-color-25">
+                <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
+              </div>
+              <div class="options max-h-52 overflow-y-auto">
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">همه</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">در انتظار</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">وصول شده</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">برگشت خورده</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="reminder-toggle">
+              <input type="checkbox" id="addReminder">
+              <span class="slider-track"></span>
+              <span class="toggle-label"> یادآور</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- فوتر ثابت -->
+      <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+        <button class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById('modalOverlay').classList.remove('hidden');
+      document.getElementById(id).classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeModal() {
+      document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+      document.getElementById('modalOverlay').classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+  </script>
+</body>
+
+</html>
