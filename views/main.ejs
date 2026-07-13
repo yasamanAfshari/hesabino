@@ -23,6 +23,18 @@
       }
     })();
   </script>
+  <script>
+    // اعمال فوری تم (روشن/تیره) و رنگ تاکیدی قبل از رندر صفحه، تا چشمک نزنه
+    (function () {
+      try {
+        var theme = localStorage.getItem('hesabino:theme') || 'light';
+        var accent = localStorage.getItem('hesabino:accent') || 'blue';
+        var root = document.documentElement;
+        if (theme === 'dark') root.classList.add('dark-theme');
+        root.setAttribute('data-accent', accent);
+      } catch (e) { /* localStorage در دسترس نبود، از تم پیش‌فرض استفاده می‌شه */ }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title || 'اپ' %></title>
   <link rel="stylesheet" href="/css/output.css">
@@ -82,7 +94,7 @@
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/JS/chart.js"></script>
   <script src="/JS/jquery-3.6.1.min.js"></script>
   <script src="/JS/persian-date.min.js"></script>
   <script src="/JS/persian-datepicker.js"></script>
@@ -90,6 +102,8 @@
   <script src="/JS/flatpickr.js"></script>
   <script src="/JS/public.js" defer></script>
   <script src="/JS/sidebar.js" defer></script>
+  <script src="/JS/user-menu.js" defer></script>
+  <script src="/JS/theme.js" defer></script>
 
   <script>
     function logout() {

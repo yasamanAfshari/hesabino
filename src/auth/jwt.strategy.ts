@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ConfigService } from '@nestjs/config';
+import { JWT_SECRET_ENV_KEY, INSECURE_FALLBACK_SECRET } from './constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(config: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'my-secret-key', // بعداً به env منتقلش می‌کنیم
+      secretOrKey: config.get<string>(JWT_SECRET_ENV_KEY) || INSECURE_FALLBACK_SECRET,
     });
   }
 

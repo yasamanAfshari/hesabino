@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><% title = 'تنظیمات' %></title>
+</head>
+
+<body class="bg-main-color overflow-hidden">
+
+  <%- include('partials/header') %>
+
+  <section class="scrollbar overflow-y-auto px-6 pb-6">
+
+    <h3 class="font-bold text-zinc-950 text-center my-3">تنظیمات حساب کاربری</h3>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-6">
+
+      <!-- ===== ویرایش پروفایل ===== -->
+      <div class="main-box !h-auto !p-6">
+        <h2 class="font-bold text-lg text-zinc-800 mb-4">ویرایش پروفایل</h2>
+
+        <div class="flex items-center gap-4 mb-6">
+          <div id="settings-avatar" class="w-20 h-20 rounded-full bg-gray-300 shrink-0 overflow-hidden flex items-center justify-center">
+            <img id="settings-avatar-img" src="" alt="" class="w-full h-full object-cover hidden" />
+          </div>
+          <div>
+            <label for="avatarInput"
+              class="cursor-pointer inline-flex items-center gap-2 text-sm font-medium text-main-color hover:text-main-color-hover border border-main-color rounded-lg px-3 py-2 transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 16.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" />
+                <path d="M7 9l5-5 5 5" />
+                <path d="M12 4v13" />
+              </svg>
+              <span>آپلود عکس جدید</span>
+            </label>
+            <input type="file" id="avatarInput" accept="image/png, image/jpeg, image/webp" class="hidden" />
+            <p class="text-xs text-gray-400 mt-2">فرمت JPG، PNG یا WebP - حداکثر ۲ مگابایت</p>
+            <p id="avatarPendingNote" class="hidden text-xs text-main-color mt-1">عکس انتخاب شد؛ برای اعمال آن دکمه‌ی «ذخیره تغییرات» را بزنید</p>
+            <div class="error-message hidden text-red-color text-xs mt-1" id="avatarError"></div>
+          </div>
+        </div>
+
+        <form id="profileForm" class="flex flex-col gap-4">
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">نام کامل</label>
+            <div class="relative">
+              <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6" />
+              </svg>
+              <input type="text" id="profileFullname" required
+                class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+            </div>
+            <div class="error-message hidden text-red-color text-xs mt-1" id="profileFullnameError">نام کامل الزامی است</div>
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">ایمیل</label>
+            <div class="relative">
+              <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 8L10.89 13.26C11.5 13.67 12.5 13.67 13.11 13.26L21 8" />
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+              </svg>
+              <input type="email" id="profileEmail" required
+                class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+            </div>
+            <div class="error-message hidden text-red-color text-xs mt-1" id="profileEmailError">لطفاً یک ایمیل معتبر وارد کنید</div>
+          </div>
+
+          <button type="submit" id="profileBtn"
+            class="w-full h-11 bg-main-color hover:bg-main-color-hover text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 mt-1">
+            <span class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            <span class="btn-text">ذخیره تغییرات</span>
+          </button>
+          <div class="message hidden text-sm rounded-lg p-3 text-center" id="profileMessage"></div>
+        </form>
+      </div>
+
+      <!-- ===== تغییر رمز عبور ===== -->
+      <div class="main-box !h-auto !p-6">
+        <h2 class="font-bold text-lg text-zinc-800 mb-4">تغییر رمز عبور</h2>
+
+        <form id="passwordForm" class="flex flex-col gap-4">
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">رمز عبور فعلی</label>
+            <div class="relative">
+              <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="10" width="16" height="10" rx="2" />
+                <path d="M7 10V7a5 5 0 0 1 10 0v3" />
+              </svg>
+              <input type="password" id="currentPassword" required
+                class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+            </div>
+            <div class="error-message hidden text-red-color text-xs mt-1" id="currentPasswordError">رمز عبور فعلی الزامی است</div>
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">رمز عبور جدید</label>
+            <div class="relative">
+              <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="10" width="16" height="10" rx="2" />
+                <path d="M7 10V7a5 5 0 0 1 10 0v3" />
+              </svg>
+              <input type="password" id="newPassword" placeholder="حداقل ۶ کاراکتر" required minlength="6"
+                class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+            </div>
+            <div class="error-message hidden text-red-color text-xs mt-1" id="newPasswordError">رمز عبور حداقل ۶ کاراکتر باید باشد</div>
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">تکرار رمز عبور جدید</label>
+            <div class="relative">
+              <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="10" width="16" height="10" rx="2" />
+                <path d="M7 10V7a5 5 0 0 1 10 0v3" />
+              </svg>
+              <input type="password" id="confirmPassword" placeholder="حداقل ۶ کاراکتر" required minlength="6"
+                class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+            </div>
+            <div class="error-message hidden text-red-color text-xs mt-1" id="confirmPasswordError">رمزهای عبور یکسان نیستند</div>
+          </div>
+
+          <button type="submit" id="passwordBtn"
+            class="w-full h-11 bg-main-color hover:bg-main-color-hover text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 mt-1">
+            <span class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            <span class="btn-text">تغییر رمز عبور</span>
+          </button>
+          <div class="message hidden text-sm rounded-lg p-3 text-center" id="passwordMessage"></div>
+        </form>
+      </div>
+
+      <!-- ===== ظاهر برنامه ===== -->
+      <div class="main-box !h-auto !p-6">
+        <h2 class="font-bold text-lg text-zinc-800 mb-4">ظاهر برنامه</h2>
+
+        <div class="flex items-center justify-between py-2">
+          <div>
+            <div class="text-sm font-medium text-zinc-700">حالت شب</div>
+            <p class="text-xs text-gray-400 mt-0.5">تم تیره برای استفاده در محیط کم‌نور</p>
+          </div>
+          <button class="theme-toggle" id="settingsThemeToggle">
+            <div class="icon sun">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 18.5C15.5899 18.5 18.5 15.5899 18.5 12C18.5 8.41015 15.5899 5.5 12 5.5C8.41015 5.5 5.5 8.41015 5.5 12C5.5 15.5899 8.41015 18.5 12 18.5Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M19.14 19.14L19.01 19.01M19.01 4.99L19.14 4.86L19.01 4.99ZM4.86 19.14L4.99 19.01L4.86 19.14ZM12 2.08V2V2.08ZM12 22V21.92V22ZM2.08 12H2H2.08ZM22 12H21.92H22ZM4.99 4.99L4.86 4.86L4.99 4.99Z" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <span class="toggle-ball"></span>
+            <div class="icon moon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.03009 12.42C2.39009 17.57 6.76009 21.76 11.9901 21.99C15.6801 22.15 18.9801 20.43 20.9601 17.72C21.7801 16.61 21.3401 15.87 19.9701 16.12C19.3001 16.24 18.6101 16.29 17.8901 16.26C13.0001 16.06 9.00009 11.97 8.98009 7.14C8.97009 5.84 9.24009 4.61 9.73009 3.49C10.2701 2.25 9.62009 1.66 8.37009 2.19C4.41009 3.86 1.70009 7.85 2.03009 12.42Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </button>
+        </div>
+
+        <div class="h-px bg-gray-100 my-4"></div>
+
+        <div>
+          <div class="text-sm font-medium text-zinc-700 mb-3">رنگ تاکیدی</div>
+          <div class="flex items-center gap-4">
+            <button type="button" data-accent-option="blue" class="accent-swatch" style="background:#005DAA" title="آبی" aria-label="رنگ آبی"></button>
+            <button type="button" data-accent-option="green" class="accent-swatch" style="background:#0E9F6E" title="سبز" aria-label="رنگ سبز"></button>
+            <button type="button" data-accent-option="purple" class="accent-swatch" style="background:#7C3AED" title="بنفش" aria-label="رنگ بنفش"></button>
+            <button type="button" data-accent-option="orange" class="accent-swatch" style="background:#EA580C" title="نارنجی" aria-label="رنگ نارنجی"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== منطقه خطر ===== -->
+      <div class="main-box !h-auto !p-6 border-red-color">
+        <h2 class="font-bold text-lg text-red-color mb-2">حذف حساب کاربری</h2>
+        <p class="text-sm text-gray-500 mb-4">
+          با حذف حساب، تمام اطلاعات شما (تراکنش‌ها، بودجه‌ها، پس‌اندازها و چک‌ها) برای همیشه پاک می‌شود و امکان بازگردانی وجود ندارد.
+        </p>
+        <button type="button" id="deleteAccountBtn"
+          class="h-11 px-5 border border-red-color text-red-color hover:bg-red-color hover:text-white rounded-lg text-sm font-medium transition-colors">
+          حذف حساب کاربری
+        </button>
+        <div class="message hidden text-sm rounded-lg p-3 text-center mt-3" id="deleteAccountMessage"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <script src="/JS/settings.js" defer></script>
+
+</body>
+
+</html>

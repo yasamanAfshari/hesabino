@@ -3,16 +3,27 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, BadRequestException } from '@nestjs/common';
 import { join } from 'path';
 import expressLayouts from 'express-ejs-layouts';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(
+    helmet({
+      // چون فایل‌های CSS/JS این پروژه از همون سرور با روش معمولی (نه nonce/hash) لود می‌شن،
+      // CSP پیش‌فرض helmet رو غیرفعال می‌کنیم تا چیزی بلاک نشه؛ بقیه‌ی هدرهای امنیتی (مثل
+      // X-Frame-Options، X-Content-Type-Options و...) فعال می‌مونن.
+      contentSecurityPolicy: false,
+    }),
+  );
 
   app.enableCors();
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
       exceptionFactory: (errors) => {
         const message = errors

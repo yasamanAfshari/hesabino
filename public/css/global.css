@@ -1,5 +1,18 @@
 :root {
     --bg-color: #f3f4f6;
+
+    /* توکن‌های سطح/متن/بوردر - مقادیر پیش‌فرض روشن */
+    --color-surface-color: #FFFFFF;
+    --color-surface2-color: #F5F7FA;
+    --color-border-color: #E4E4E4;
+    --color-text-color: #1F2937;
+    --color-text2-color: #6B7280;
+
+    /* توکن‌های مخصوص نمودارها */
+    --color-chart-income: #0062AE;
+    --color-chart-expense: #BDD7EA;
+    --color-chart-track: #D7E4EF;
+    --color-chart-grid: #E4E4E4;
 }
 
 @font-face {
@@ -109,6 +122,11 @@ button:hover {
 }
 
 /* -------sidebar------- */
+/* سایدبار همیشه پس‌زمینه‌ی آبی برند داره، پس متنش صرف‌نظر از تم روشن/تیره همیشه سفید می‌مونه */
+#sidebar {
+    color: #fff;
+}
+
 .menu-item {
     display: flex;
     align-items: center;
@@ -118,7 +136,7 @@ button:hover {
     color: #fff;
     cursor: pointer;
     position: relative;
-    border-right: 10px solid #005daa;
+    border-right: 10px solid var(--color-main-color);
     border-radius: 0 40px 40px 0px;
 }
 
@@ -450,4 +468,313 @@ textarea:focus {
 
 .reminder-toggle .toggle-label {
     line-height: 1.4;
+}
+/* =========================================================
+   تم تیره (Dark Mode) + رنگ‌های تاکیدی (Accent Colors)
+   =========================================================
+   منطق کار: توکن‌های رنگی (main-color, back-color, gray-*, zinc-*, white, ...)
+   همه از طریق متغیرهای CSS تعریف می‌شن (خروجی تیلویند هم از همین متغیرها استفاده
+   می‌کنه). با override کردن این متغیرها زیر html.dark-theme، تقریباً کل ظاهر
+   برنامه (کارت‌ها، جدول‌ها، حاشیه‌ها، متن‌ها) بدون دست‌زدن به EJSها هماهنگ
+   با تم تیره می‌شه. کلاس dark-theme و اتریبیوت data-accent روی <html> توسط
+   public/JS/theme.js مدیریت می‌شن.
+   ========================================================= */
+
+/* ترنزیشن نرم برای عوض شدن تم روی سطوح اصلی */
+body,
+.main-box,
+.main-box-small,
+header,
+#sidebar,
+#user-menu-dropdown,
+input,
+textarea,
+.select-btn,
+.custom-input {
+    transition: background-color .25s ease, color .25s ease, border-color .25s ease;
+}
+
+html.dark-theme {
+    color-scheme: dark;
+
+    /* ----- برند / وضعیت‌ها (روشن‌تر شده برای کنتراست کافی روی پس‌زمینه‌ی تیره) ----- */
+    --color-back-color: #0F172A;
+    --color-main-color: #2E8FD6;
+    --color-main-color-hover: #4FA8E6;
+    --color-main-color-25: #2e8fd640;
+    --color-green-color: #22C55E;
+    --color-green-color-25: #22C55E40;
+    --color-red-color: #F87171;
+    --color-red-color-25: #F8717140;
+    --color-orange-color: #FB923C;
+    --color-orange-color-25: #FB923C40;
+    --color-purple-color: #A78BFA;
+    --color-purple-color-25: #A78BFA40;
+    --color-green2-color: #5EEAD4;
+    --color-green2-color-25: #5EEAD440;
+    --color-yellow-color-20: rgba(250, 204, 21, 0.18);
+
+    /* ----- سطح/متن/بوردر سفارشی پروژه ----- */
+    --color-surface-color: #3a3c3d;
+    --color-surface2-color: #263449;
+    --color-border-color: #33415A;
+    --color-text-color: #E5E7EB;
+    --color-text2-color: #94A3B8;
+
+    /* ----- پالت خنثی پیش‌فرض تیلویند (white/gray/zinc) -----
+       چون خیلی از کلاس‌های پروژه (bg-white, text-gray-700, border-gray-200, ...)
+       مستقیم از این متغیرها استفاده می‌کنن، override کردن‌شون باعث می‌شه اکثر
+       صفحات بدون نیاز به کلاس dark: هماهنگ بشن. */
+    --color-white: #3a3c3d;
+    --color-gray-50: #1A2332;
+    --color-gray-100: #212D3F;
+    --color-gray-200: #2D3B50;
+    --color-gray-300: #45566E;
+    --color-gray-400: #93A4BA;
+    --color-gray-500: #9FB0C3;
+    --color-gray-600: #B7C4D6;
+    --color-gray-700: #E2E8F0;
+    --color-gray-800: #F1F5F9;
+    --color-gray-900: #FFFFFF;
+    --color-gray-950: #FFFFFF;
+    --color-zinc-50: #1A2332;
+    --color-zinc-100: #212D3F;
+    --color-zinc-200: #2D3B50;
+    --color-zinc-300: #45566E;
+    --color-zinc-400: #93A4BA;
+    --color-zinc-500: #9FB0C3;
+    --color-zinc-600: #B7C4D6;
+    --color-zinc-700: #E2E8F0;
+    --color-zinc-800: #F1F5F9;
+    --color-zinc-900: #FFFFFF;
+    --color-zinc-950: #FFFFFF;
+
+    /* -----------------------------------------------------------------
+       پالت‌های پیش‌فرض تیلویند که مستقیم در ویوها استفاده شده‌اند
+       (بج‌های دسته‌بندی، هدر جدول، کارت‌های هشدار مالی و ...).
+       این‌ها بخشی از توکن‌های سفارشی پروژه نبودن، برای همین بدون این
+       بخش، تو حالت تیره همون رنگ‌های روشن رو نشون می‌دادن و تو ذوق می‌زدن.
+       ----------------------------------------------------------------- */
+
+    /* آبی (هدر جدول، بج‌های دسته) */
+    --color-blue-50: #303640;
+    --color-blue-100: #1e3a8a;
+    --color-blue-200: #1e40af;
+    --color-blue-400: #93c5fd;
+    --color-blue-500: #60a5fa;
+    --color-blue-600: #60a5fa;
+    --color-blue-700: #93c5fd;
+
+    /* کهربایی (هشدارهای مالی) */
+    --color-amber-50: #451a03;
+    --color-amber-100: #78350f;
+    --color-amber-200: #92400e;
+    --color-amber-600: #fbbf24;
+    --color-amber-700: #fcd34d;
+
+    /* زرشکی/قرمز پیش‌فرض */
+    --color-red-50: #450a0a;
+    --color-red-100: #7f1d1d;
+    --color-red-300: #b91c1c;
+    --color-red-600: #f87171;
+    --color-red-700: #fca5a5;
+    --color-red-800: #fca5a5;
+
+    /* رز (بج «هزینه» و موارد اضطراری) */
+    --color-rose-50: #4c0519;
+    --color-rose-100: #881337;
+    --color-rose-200: #9f1239;
+    --color-rose-500: #fb7185;
+    --color-rose-600: #fb7185;
+    --color-rose-700: #fda4af;
+    --color-rose-800: #fda4af;
+
+    /* زمردی (بج «درآمد») */
+    --color-emerald-50: #022c22;
+    --color-emerald-100: #064e3b;
+    --color-emerald-500: #34d399;
+    --color-emerald-600: #34d399;
+    --color-emerald-700: #6ee7b7;
+
+    /* سبز، نارنجی و بنفش پیش‌فرض تیلویند */
+    --color-green-50: #052e16;
+    --color-green-600: #4ade80;
+    --color-green-700: #86efac;
+    --color-orange-50: #431407;
+    --color-orange-600: #fb923c;
+    --color-orange-700: #fdba74;
+    --color-purple-50: #3b0764;
+    --color-purple-700: #d8b4fe;
+    --color-indigo-50: #1e1b4b;
+    --color-indigo-600: #818cf8;
+    --color-indigo-700: #a5b4fc;
+
+    /* اسلیت و زرد */
+    --color-slate-100: #1e293b;
+    --color-slate-700: #cbd5e1;
+    --color-yellow-500: #facc15;
+
+    /* توکن‌های نمودار در حالت تیره */
+    --color-chart-income: var(--color-main-color);
+    --color-chart-expense: #3B5169;
+    --color-chart-track: var(--color-surface2-color);
+    --color-chart-grid: var(--color-border-color);
+
+    background-color: var(--color-back-color);
+}
+
+html.dark-theme body {
+    color: var(--color-text-color);
+}
+
+/* کارت‌ها */
+html.dark-theme .main-box,
+html.dark-theme .main-box-small {
+    background-color: var(--color-surface-color);
+    border-color: var(--color-border-color);
+}
+
+/* ورودی‌ها */
+html.dark-theme input,
+html.dark-theme .select-btn,
+html.dark-theme textarea {
+    background-color: var(--color-surface2-color);
+    color: var(--color-text-color);
+}
+
+html.dark-theme .custom-input {
+    background-color: var(--color-surface2-color);
+    border-color: var(--color-main-color);
+    color: var(--color-text-color);
+}
+
+html.dark-theme .custom-input::placeholder {
+    color: var(--color-text2-color);
+}
+
+/* دراپ‌داون پروفایل کاربر */
+html.dark-theme #user-menu-button:hover {
+    background-color: var(--color-surface2-color);
+}
+
+
+html.dark-theme .menu-item.active span {
+    color: var(--color-text-color) !important;
+}
+
+html.dark-theme .menu-item.active path {
+    stroke: var(--color-text-color) !important;
+}
+
+/* نوار پیشرفت */
+html.dark-theme .percent {
+    color: var(--color-text2-color);
+}
+
+html.dark-theme .bar-bg {
+    background: var(--color-surface2-color);
+}
+
+/* سوییچ یادآور/توگل‌های سبک reminder-toggle */
+html.dark-theme .reminder-toggle {
+    color: var(--color-text-color);
+}
+
+html.dark-theme .reminder-toggle .slider-track {
+    background: var(--color-surface2-color);
+    border-color: var(--color-border-color);
+}
+
+html.dark-theme .reminder-toggle .slider-track::after {
+    background: var(--color-text-color);
+}
+
+/* اسکرول‌بار */
+html.dark-theme .scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-gray-300);
+}
+
+html.dark-theme .scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray-400);
+}
+
+html.dark-theme .scrollbar {
+    scrollbar-color: var(--color-gray-300) transparent;
+}
+
+/* لودر صفحه */
+html.dark-theme #page-loader {
+    background: rgba(15, 23, 42, 0.9);
+}
+
+/* =========================================================
+   رنگ‌های تاکیدی (Accent Colors)
+   چهار پیش‌فرض محبوب؛ فقط main-color و مشتقاتش عوض می‌شن.
+   "آبی" همون رنگ برند فعلیه و نیازی به override نداره.
+   ========================================================= */
+
+/* سبز */
+html[data-accent="green"] {
+    --color-main-color: #0E9F6E;
+    --color-main-color-hover: #12B981;
+    --color-main-color-25: #0E9F6E40;
+}
+
+html.dark-theme[data-accent="green"] {
+    --color-main-color: #34D399;
+    --color-main-color-hover: #6EE7B7;
+    --color-main-color-25: #34D39940;
+}
+
+/* بنفش */
+html[data-accent="purple"] {
+    --color-main-color: #7C3AED;
+    --color-main-color-hover: #9061F9;
+    --color-main-color-25: #7C3AED40;
+}
+
+html.dark-theme[data-accent="purple"] {
+    --color-main-color: #A78BFA;
+    --color-main-color-hover: #C4B5FD;
+    --color-main-color-25: #A78BFA40;
+}
+
+/* نارنجی */
+html[data-accent="orange"] {
+    --color-main-color: #EA580C;
+    --color-main-color-hover: #F97316;
+    --color-main-color-25: #EA580C40;
+}
+
+html.dark-theme[data-accent="orange"] {
+    --color-main-color: #FB923C;
+    --color-main-color-hover: #FDBA74;
+    --color-main-color-25: #FB923C40;
+}
+
+/* نمایه‌ی رنگ روی سواچ‌های انتخاب تم (صفحه‌ی تنظیمات) */
+.accent-swatch {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform .15s ease, border-color .15s ease;
+}
+
+.accent-swatch:hover {
+    transform: scale(1.08);
+}
+
+.accent-swatch-active {
+    border-color: var(--color-text-color);
+}
+
+.accent-swatch-active::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--color-main-color);
 }

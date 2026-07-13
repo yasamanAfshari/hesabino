@@ -52,5 +52,9 @@ pids
 *.seed
 *.pid.lock
 
+# عکس پروفایل کاربرها (روی دیسک سرور ذخیره می‌مونه، نیازی به کامیت شدن توی گیت نیست)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

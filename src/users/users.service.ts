@@ -1,8 +1,9 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -60,5 +61,67 @@ export class UsersService {
             return result;
         }
         return null;
+    }
+
+    // ===== ویرایش پروفایل (نام / ایمیل) =====
+    async updateProfile(id: number, dto: UpdateUserDto): Promise<Omit<User, 'password'>> {
+        const user = await this.findById(id);
+        if (!user) {
+            throw new NotFoundException('کاربر یافت نشد');
+        }
+
+        if (dto.email && dto.email !== user.email) {
+            const existing = await this.findByEmail(dto.email);
+            if (existing) {
+                throw new ConflictException('این ایمیل قبلاً توسط کاربر دیگری استفاده شده است');
+            }
+            user.email = dto.email;
+        }
+
+        if (dto.fullname) {
+            user.fullname = dto.fullname;
+        }
+
+        const saved = await this.usersRepository.save(user);
+        const { password: _pw, ...result } = saved;
+        return result;
+    }
+
+    // ===== تغییر رمز عبور =====
+    async updatePassword(id: number, currentPassword: string, newPassword: string): Promise<void> {
+        const user = await this.findById(id);
+        if (!user) {
+            throw new NotFoundException('کاربر یافت نشد');
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            throw new UnauthorizedException('رمز عبور فعلی اشتباه است');
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await this.usersRepository.save(user);
+    }
+
+    // ===== به‌روزرسانی عکس پروفایل =====
+    async updateAvatar(id: number, avatarUrl: string): Promise<Omit<User, 'password'>> {
+        const user = await this.findById(id);
+        if (!user) {
+            throw new NotFoundException('کاربر یافت نشد');
+        }
+
+        user.avatarUrl = avatarUrl;
+        const saved = await this.usersRepository.save(user);
+        const { password: _pw, ...result } = saved;
+        return result;
+    }
+
+    // ===== حذف حساب کاربری =====
+    async remove(id: number): Promise<void> {
+        const user = await this.findById(id);
+        if (!user) {
+            throw new NotFoundException('کاربر یافت نشد');
+        }
+        await this.usersRepository.remove(user);
     }
 }

@@ -1,18 +1,7 @@
 (function () {
   'use strict';
 
-  // ===== ۱. تغییر تم =====
-  function setupThemeToggle() {
-    const themeToggles = document.querySelectorAll('.theme-toggle');
-    themeToggles.forEach(button => {
-      button.addEventListener('click', () => {
-        themeToggles.forEach(btn => btn.classList.toggle('dark'));
-        document.body.classList.toggle('dark-theme');
-      });
-    });
-  }
-
-  // ===== ۲. لودر صفحه =====
+  // ===== ۱. لودر صفحه =====
   function setupLoader() {
     window.addEventListener('load', () => {
       const loader = document.getElementById('page-loader');
@@ -26,6 +15,15 @@
     });
   }
 
+  // ===== خواندن مقدار زنده‌ی متغیرهای CSS، برای هماهنگی نمودارها با تم روشن/تیره =====
+  function cssVar(name, fallback) {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return value || fallback;
+  }
+
+  // نگه‌داری نمونه‌ی نمودارها و ویجت گیج، تا موقع عوض شدن تم بتونیم رنگ‌هاشون رو به‌روز کنیم
+  const chartInstances = {};
+
   // ===== ۳. نمودارها (دونات و میله‌ای) =====
   function initCharts() {
     const donutEl = document.getElementById('donutChart');
@@ -36,12 +34,14 @@
           labels: ['خوراک', 'خرید و پوشاک', 'حمل و نقل', 'تفریح و سرگرمی', 'سلامت', 'آموزش', 'سرمایه', 'بدهی', 'مسکن', 'سایر'],
           datasets: [{
             data: [30, 15, 10, 25, 12, 8, 5, 6, 7, 2],
+            // این‌ها رنگ‌های دسته‌بندی (categorical) هستن؛ چون هر رنگ نماینده‌ی یک دسته‌ی
+            // ثابته و ربطی به روشن/تیره بودن پس‌زمینه نداره، عمداً دست‌نخورده باقی می‌مونن.
             backgroundColor: ['#FF9B44', '#FF9EE7', '#C8AC4E', '#55B5B1', '#9DE18B', '#9D5C8F', '#E5DC44', '#B9403C', '#745C52', '#DADADA'],
             borderWidth: 0,
             cutout: '70%'
           }]
         };
-        new Chart(donutCtx, { type: 'doughnut', data: donutData, options: { plugins: { legend: { display: false } } } });
+        chartInstances.donut = new Chart(donutCtx, { type: 'doughnut', data: donutData, options: { plugins: { legend: { display: false } } } });
       } catch (err) {
         console.warn('donut chart init failed', err);
       }
@@ -54,21 +54,44 @@
         const labels = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
         const incomeValues = [12000000, 18000000, 22000000, 15000000, 28000000, 31000000, 25000000, 20000000, 17000000, 35000000, 29000000, 24000000];
         const costValues = [9000000, 14000000, 18000000, 12000000, 22000000, 26000000, 20000000, 16000000, 13000000, 28000000, 23000000, 19000000];
-        new Chart(myCtx, {
+        chartInstances.bar = new Chart(myCtx, {
           type: 'bar',
           data: {
             labels,
             datasets: [
-              { label: 'درآمد', data: incomeValues, backgroundColor: '#0062AE', borderRadius: 6 },
-              { label: 'هزینه', data: costValues, backgroundColor: '#BDD7EA', borderRadius: 6 }
+              { label: 'درآمد', data: incomeValues, backgroundColor: cssVar('--color-chart-income', '#0062AE'), borderRadius: 6 },
+              { label: 'هزینه', data: costValues, backgroundColor: cssVar('--color-chart-expense', '#BDD7EA'), borderRadius: 6 }
             ]
           },
-          options: { responsive: true, plugins: { legend: { position: 'top' } } }
+          options: {
+            responsive: true,
+            plugins: { legend: { position: 'top', labels: { color: cssVar('--color-text-color', '#1F2937') } } },
+            scales: {
+              x: { ticks: { color: cssVar('--color-text2-color', '#6B7280') }, grid: { color: cssVar('--color-chart-grid', '#E4E4E4') } },
+              y: { ticks: { color: cssVar('--color-text2-color', '#6B7280') }, grid: { color: cssVar('--color-chart-grid', '#E4E4E4') } }
+            }
+          }
         });
       } catch (err) {
         console.warn('myChart init failed', err);
       }
     }
+  }
+
+  // موقع تغییر تم، رنگ نمودار میله‌ای (که رنگ‌هاش برای تم مهمن) رو به‌روز می‌کنیم
+  function updateChartsTheme() {
+    const bar = chartInstances.bar;
+    if (bar) {
+      bar.data.datasets[0].backgroundColor = cssVar('--color-chart-income', '#0062AE');
+      bar.data.datasets[1].backgroundColor = cssVar('--color-chart-expense', '#BDD7EA');
+      bar.options.plugins.legend.labels.color = cssVar('--color-text-color', '#1F2937');
+      bar.options.scales.x.ticks.color = cssVar('--color-text2-color', '#6B7280');
+      bar.options.scales.y.ticks.color = cssVar('--color-text2-color', '#6B7280');
+      bar.options.scales.x.grid.color = cssVar('--color-chart-grid', '#E4E4E4');
+      bar.options.scales.y.grid.color = cssVar('--color-chart-grid', '#E4E4E4');
+      bar.update();
+    }
+    initExpenseRatioChart();
   }
 
   // ===== ۴. نمودار نسبت هزینه به درآمد =====
@@ -99,10 +122,11 @@
 
       const circle = document.createElement("div");
       circle.className = "relative w-16 h-16 rounded-full flex items-center justify-center";
-      circle.style.background = `conic-gradient(#0B67B2 ${item.value * 3.6}deg, #D7E4EF ${item.value * 3.6}deg)`;
+      circle.style.background = `conic-gradient(${cssVar('--color-chart-income', '#0062AE')} ${item.value * 3.6}deg, ${cssVar('--color-chart-track', '#D7E4EF')} ${item.value * 3.6}deg)`;
 
       const inner = document.createElement("div");
-      inner.className = "w-12 h-12 rounded-full bg-[#F3F3F3] flex items-center justify-center";
+      inner.className = "w-12 h-12 rounded-full flex items-center justify-center";
+      inner.style.background = cssVar('--color-surface2-color', '#F5F7FA');
       inner.innerHTML = `<span class="text-sm font-bold text-gray-700">${item.value}٪</span>`;
 
       circle.appendChild(inner);
@@ -247,7 +271,6 @@
 
   // ===== ۹. اجرای همه توابع بعد از آماده شدن DOM =====
   function onReady() {
-    setupThemeToggle();
     setupLoader();
     initCharts();
     initExpenseRatioChart();
@@ -262,5 +285,9 @@
   } else {
     onReady();
   }
+
+  // وقتی کاربر تم رو عوض می‌کنه (از هدر یا تنظیمات)، رنگ نمودارها هم آپدیت بشه
+  document.addEventListener('hesabino:theme-changed', updateChartsTheme);
+  document.addEventListener('hesabino:accent-changed', updateChartsTheme);
 
 })();

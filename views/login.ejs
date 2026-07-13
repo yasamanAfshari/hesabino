@@ -1,507 +1,359 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
-    <meta charset="UTF-8">
-    <script>
-        // اگه کاربر از قبل توکن معتبر داره، مستقیم بفرستش داشبورد
-        (function () {
-            var token = localStorage.getItem('access_token');
-            if (!token) return;
-            try {
-                var payload = JSON.parse(atob(token.split('.')[1]));
-                if (!payload.exp || Date.now() < payload.exp * 1000) {
-                    window.location.replace('/');
-                } else {
-                    localStorage.removeItem('access_token');
-                }
-            } catch (e) {
-                localStorage.removeItem('access_token');
-            }
-        })();
-    </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حسابینو - ورود و ثبت‌نام</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+  <meta charset="UTF-8">
+  <script>
+    // اگه کاربر از قبل توکن معتبر داره، مستقیم بفرستش داشبورد
+    (function () {
+      var token = localStorage.getItem('access_token');
+      if (!token) return;
+      try {
+        var payload = JSON.parse(atob(token.split('.')[1]));
+        if (!payload.exp || Date.now() < payload.exp * 1000) {
+          window.location.replace('/');
+        } else {
+          localStorage.removeItem('access_token');
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px 30px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-            font-size: 28px;
-        }
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            background: none;
-            font-size: 16px;
-            font-weight: 600;
-            color: #888;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-radius: 10px;
-        }
-        .tab-btn.active {
-            background: #667eea;
-            color: white;
-        }
-        .tab-btn:hover {
-            background: #f0f0f0;
-        }
-        .tab-btn.active:hover {
-            background: #667eea;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .form-group input.error {
-            border-color: #e74c3c;
-        }
-        .error-message {
-            color: #e74c3c;
-            font-size: 12px;
-            margin-top: 5px;
-            display: none;
-        }
-        .error-message.show {
-            display: block;
-        }
-        button[type="submit"] {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        button[type="submit"]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-        button[type="submit"]:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .message {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 10px;
-            display: none;
-            text-align: center;
-            font-size: 14px;
-        }
-        .message.success {
-            display: block;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .message.error {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .form-container {
-            display: none;
-        }
-        .form-container.active {
-            display: block;
-        }
-        .profile-section {
-            display: none;
-            text-align: center;
-            padding: 20px 0;
-        }
-        .profile-section.show {
-            display: block;
-        }
-        .profile-section h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .profile-section p {
-            color: #666;
-            font-size: 16px;
-        }
-        .logout-btn {
-            margin-top: 20px;
-            padding: 10px 30px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .logout-btn:hover {
-            background: #c0392b;
-        }
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid white;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 0.6s linear infinite;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+      } catch (e) {
+        localStorage.removeItem('access_token');
+      }
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>حسابینو - ورود و ثبت‌نام</title>
+  <link rel="stylesheet" href="/css/output.css">
+  <link rel="stylesheet" href="/css/global.css">
 </head>
-<body>
-    <div class="container" id="app">
-        <h1>💰 حسابینو</h1>
 
-        <!-- بخش پروفایل (بعد از لاگین) -->
-        <div class="profile-section" id="profileSection">
-            <h2>👋 خوش آمدی، <span id="userName"></span></h2>
-            <p>ایمیل: <span id="userEmail"></span></p>
-            <button class="logout-btn" onclick="logout()">خروج</button>
-        </div>
+<body class="bg-back-color min-h-screen flex items-center justify-center p-5 relative overflow-hidden">
 
-        <!-- بخش لاگین/ثبت‌نام (قبل از لاگین) -->
-        <div id="authSection">
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('login')" id="loginTab">ورود</button>
-                <button class="tab-btn" onclick="switchTab('register')" id="registerTab">ثبت‌نام</button>
-            </div>
+  <!-- یه هاله‌ی نرم از رنگ برند پشت کارت، به‌جای پس‌زمینه‌ی تخت -->
+  <div class="pointer-events-none absolute -top-32 -left-32 w-96 h-96 rounded-full bg-main-color-25 blur-3xl opacity-60"></div>
+  <div class="pointer-events-none absolute -bottom-32 -right-24 w-96 h-96 rounded-full bg-green2-color-25 blur-3xl opacity-50"></div>
 
-            <!-- فرم ورود -->
-            <div class="form-container active" id="loginForm">
-                <form onsubmit="login(event)">
-                    <div class="form-group">
-                        <label>ایمیل</label>
-                        <input type="email" id="loginEmail" placeholder="example@email.com" required>
-                        <div class="error-message" id="loginEmailError">لطفاً یک ایمیل معتبر وارد کنید</div>
-                    </div>
-                    <div class="form-group">
-                        <label>رمز عبور</label>
-                        <input type="password" id="loginPassword" placeholder="حداقل ۶ کاراکتر" required minlength="6">
-                        <div class="error-message" id="loginPasswordError">رمز عبور حداقل ۶ کاراکتر باید باشد</div>
-                    </div>
-                    <button type="submit" id="loginBtn">ورود</button>
-                    <div class="message" id="loginMessage"></div>
-                </form>
-            </div>
+  <div class="main-box w-full max-w-md !h-auto !p-8 flex flex-col relative">
 
-            <!-- فرم ثبت‌نام -->
-            <div class="form-container" id="registerForm">
-                <form onsubmit="register(event)">
-                    <div class="form-group">
-                        <label>نام کامل</label>
-                        <input type="text" id="registerFullname" placeholder="یاسمن افشاری" required>
-                        <div class="error-message" id="registerFullnameError">نام کامل الزامی است</div>
-                    </div>
-                    <div class="form-group">
-                        <label>ایمیل</label>
-                        <input type="email" id="registerEmail" placeholder="example@email.com" required>
-                        <div class="error-message" id="registerEmailError">لطفاً یک ایمیل معتبر وارد کنید</div>
-                    </div>
-                    <div class="form-group">
-                        <label>رمز عبور</label>
-                        <input type="password" id="registerPassword" placeholder="حداقل ۶ کاراکتر" required minlength="6">
-                        <div class="error-message" id="registerPasswordError">رمز عبور حداقل ۶ کاراکتر باید باشد</div>
-                    </div>
-                    <button type="submit" id="registerBtn">ثبت‌نام</button>
-                    <div class="message" id="registerMessage"></div>
-                </form>
-            </div>
-        </div>
+    <!-- لوگو -->
+    <div class="flex flex-col items-center mb-7">
+      <img src="/Images/logo-typo.png" alt="حسابینو" class="h-9 mb-2">
+      <p class="text-xs text-gray-400">مدیریت هوشمند درآمد، هزینه و پس‌انداز شما</p>
     </div>
 
-    <script>
-        // ===== متغیرها =====
-        const API_BASE = 'http://localhost:3000';
+    <!-- تب‌ها -->
+    <div class="flex mb-7">
+      <button type="button" onclick="switchTab('login')" id="loginTab"
+        class="tab-btn flex-1 pb-3 text-sm font-medium transition-colors border-b-2 border-main-color text-main-color">
+        ورود
+      </button>
+      <button type="button" onclick="switchTab('register')" id="registerTab"
+        class="tab-btn flex-1 pb-3 text-sm font-medium transition-colors border-b-2 border-transparent text-gray-400 hover:text-gray-600">
+        ثبت‌نام
+      </button>
+    </div>
 
-        // ===== تابع تغییر تب =====
-        function switchTab(tab) {
-            document.querySelectorAll('.form-container').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    <!-- فرم ورود -->
+    <div class="form-container" id="loginForm">
+      <form onsubmit="login(event)" class="flex flex-col gap-4">
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">ایمیل</label>
+          <div class="relative">
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8L10.89 13.26C11.5 13.67 12.5 13.67 13.11 13.26L21 8" />
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+            </svg>
+            <input type="email" id="loginEmail" placeholder="example@email.com" required
+              class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+          </div>
+          <div class="error-message hidden text-red-color text-xs mt-1" id="loginEmailError">لطفاً یک ایمیل معتبر
+            وارد کنید</div>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">رمز عبور</label>
+          <div class="relative">
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="10" width="16" height="10" rx="2" />
+              <path d="M7 10V7a5 5 0 0 1 10 0v3" />
+            </svg>
+            <input type="password" id="loginPassword" placeholder="حداقل ۶ کاراکتر" required minlength="6"
+              class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+          </div>
+          <div class="error-message hidden text-red-color text-xs mt-1" id="loginPasswordError">رمز عبور حداقل ۶
+            کاراکتر باید باشد</div>
+        </div>
+        <button type="submit" id="loginBtn"
+          class="w-full h-11 bg-main-color hover:bg-main-color-hover text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 mt-1">
+          <span class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <span class="btn-text">ورود</span>
+        </button>
+        <div class="message hidden text-sm rounded-lg p-3 text-center" id="loginMessage"></div>
+      </form>
+    </div>
 
-            if (tab === 'login') {
-                document.getElementById('loginForm').classList.add('active');
-                document.getElementById('loginTab').classList.add('active');
-                clearMessages();
-            } else {
-                document.getElementById('registerForm').classList.add('active');
-                document.getElementById('registerTab').classList.add('active');
-                clearMessages();
-            }
-        }
+    <!-- فرم ثبت‌نام -->
+    <div class="form-container hidden" id="registerForm">
+      <form onsubmit="register(event)" class="flex flex-col gap-4">
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">نام کامل</label>
+          <div class="relative">
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6" />
+            </svg>
+            <input type="text" id="registerFullname" placeholder="یاسمن افشاری" required
+              class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+          </div>
+          <div class="error-message hidden text-red-color text-xs mt-1" id="registerFullnameError">نام کامل الزامی
+            است</div>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">ایمیل</label>
+          <div class="relative">
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8L10.89 13.26C11.5 13.67 12.5 13.67 13.11 13.26L21 8" />
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+            </svg>
+            <input type="email" id="registerEmail" placeholder="example@email.com" required
+              class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+          </div>
+          <div class="error-message hidden text-red-color text-xs mt-1" id="registerEmailError">لطفاً یک ایمیل معتبر
+            وارد کنید</div>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">رمز عبور</label>
+          <div class="relative">
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="10" width="16" height="10" rx="2" />
+              <path d="M7 10V7a5 5 0 0 1 10 0v3" />
+            </svg>
+            <input type="password" id="registerPassword" placeholder="حداقل ۶ کاراکتر" required minlength="6"
+              class="w-full h-11 border border-gray-200 focus:border-main-color rounded-lg pr-10 pl-4 outline-none transition-colors">
+          </div>
+          <div class="error-message hidden text-red-color text-xs mt-1" id="registerPasswordError">رمز عبور حداقل ۶
+            کاراکتر باید باشد</div>
+        </div>
+        <button type="submit" id="registerBtn"
+          class="w-full h-11 bg-main-color hover:bg-main-color-hover text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 mt-1">
+          <span class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <span class="btn-text">ثبت‌نام</span>
+        </button>
+        <div class="message hidden text-sm rounded-lg p-3 text-center" id="registerMessage"></div>
+      </form>
+    </div>
 
-        // ===== پاک کردن پیام‌ها =====
-        function clearMessages() {
-            document.querySelectorAll('.message').forEach(el => {
-                el.className = 'message';
-                el.textContent = '';
-            });
-            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
-            document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
-        }
+  </div>
 
-        // ===== نمایش پیام =====
-        function showMessage(elementId, text, type) {
-            const el = document.getElementById(elementId);
-            el.className = `message ${type}`;
-            el.textContent = text;
-        }
+  <script>
+    // ===== متغیرها =====
+    const API_BASE = '';
 
-        // ===== اعتبارسنجی ورودی‌ها =====
-        function validateLogin() {
-            let valid = true;
-            const email = document.getElementById('loginEmail');
-            const password = document.getElementById('loginPassword');
+    // ===== تابع تغییر تب =====
+    function switchTab(tab) {
+      const isLogin = tab === 'login';
 
-            if (!email.value || !email.value.includes('@')) {
-                document.getElementById('loginEmailError').classList.add('show');
-                email.classList.add('error');
-                valid = false;
-            } else {
-                document.getElementById('loginEmailError').classList.remove('show');
-                email.classList.remove('error');
-            }
+      document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
+      document.getElementById('registerForm').classList.toggle('hidden', isLogin);
 
-            if (!password.value || password.value.length < 6) {
-                document.getElementById('loginPasswordError').classList.add('show');
-                password.classList.add('error');
-                valid = false;
-            } else {
-                document.getElementById('loginPasswordError').classList.remove('show');
-                password.classList.remove('error');
-            }
+      const loginTab = document.getElementById('loginTab');
+      const registerTab = document.getElementById('registerTab');
 
-            return valid;
-        }
+      loginTab.classList.toggle('border-main-color', isLogin);
+      loginTab.classList.toggle('text-main-color', isLogin);
+      loginTab.classList.toggle('border-transparent', !isLogin);
+      loginTab.classList.toggle('text-gray-400', !isLogin);
 
-        function validateRegister() {
-            let valid = true;
-            const fullname = document.getElementById('registerFullname');
-            const email = document.getElementById('registerEmail');
-            const password = document.getElementById('registerPassword');
+      registerTab.classList.toggle('border-main-color', !isLogin);
+      registerTab.classList.toggle('text-main-color', !isLogin);
+      registerTab.classList.toggle('border-transparent', isLogin);
+      registerTab.classList.toggle('text-gray-400', isLogin);
 
-            if (!fullname.value.trim()) {
-                document.getElementById('registerFullnameError').classList.add('show');
-                fullname.classList.add('error');
-                valid = false;
-            } else {
-                document.getElementById('registerFullnameError').classList.remove('show');
-                fullname.classList.remove('error');
-            }
+      clearMessages();
+    }
 
-            if (!email.value || !email.value.includes('@')) {
-                document.getElementById('registerEmailError').classList.add('show');
-                email.classList.add('error');
-                valid = false;
-            } else {
-                document.getElementById('registerEmailError').classList.remove('show');
-                email.classList.remove('error');
-            }
+    // ===== پاک کردن پیام‌ها =====
+    function clearMessages() {
+      document.querySelectorAll('.message').forEach(el => {
+        el.className = 'message hidden text-sm rounded-lg p-3 text-center';
+        el.textContent = '';
+      });
+      document.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('input').forEach(el => el.classList.remove('!border-red-color'));
+    }
 
-            if (!password.value || password.value.length < 6) {
-                document.getElementById('registerPasswordError').classList.add('show');
-                password.classList.add('error');
-                valid = false;
-            } else {
-                document.getElementById('registerPasswordError').classList.remove('show');
-                password.classList.remove('error');
-            }
+    // ===== نمایش پیام =====
+    function showMessage(elementId, text, type) {
+      const el = document.getElementById(elementId);
+      const isSuccess = type === 'success';
+      el.className = `message text-sm rounded-lg p-3 text-center ${isSuccess ? 'bg-green-color-25 text-green-color' : 'bg-red-color-25 text-red-color'}`;
+      el.textContent = text;
+    }
 
-            return valid;
-        }
+    // ===== نمایش/مخفی کردن حالت لودینگ دکمه =====
+    function setLoading(btn, loading, loadingText) {
+      const spinner = btn.querySelector('.spinner');
+      const btnText = btn.querySelector('.btn-text');
+      btn.disabled = loading;
+      spinner.classList.toggle('hidden', !loading);
+      if (loading) {
+        btn.dataset.originalText = btnText.textContent;
+        btnText.textContent = loadingText;
+      } else {
+        btnText.textContent = btn.dataset.originalText || btnText.textContent;
+      }
+    }
 
-        // ===== ثبت‌نام =====
-        async function register(event) {
-            event.preventDefault();
-            clearMessages();
+    // ===== اعتبارسنجی ورودی‌ها =====
+    function validateLogin() {
+      let valid = true;
+      const email = document.getElementById('loginEmail');
+      const password = document.getElementById('loginPassword');
 
-            if (!validateRegister()) return;
+      if (!email.value || !email.value.includes('@')) {
+        document.getElementById('loginEmailError').classList.remove('hidden');
+        email.classList.add('!border-red-color');
+        valid = false;
+      } else {
+        document.getElementById('loginEmailError').classList.add('hidden');
+        email.classList.remove('!border-red-color');
+      }
 
-            const btn = document.getElementById('registerBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> در حال ثبت‌نام...';
+      if (!password.value || password.value.length < 6) {
+        document.getElementById('loginPasswordError').classList.remove('hidden');
+        password.classList.add('!border-red-color');
+        valid = false;
+      } else {
+        document.getElementById('loginPasswordError').classList.add('hidden');
+        password.classList.remove('!border-red-color');
+      }
 
-            const data = {
-                fullname: document.getElementById('registerFullname').value.trim(),
-                email: document.getElementById('registerEmail').value.trim(),
-                password: document.getElementById('registerPassword').value
-            };
+      return valid;
+    }
 
-            try {
-                const response = await fetch(`${API_BASE}/users/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+    function validateRegister() {
+      let valid = true;
+      const fullname = document.getElementById('registerFullname');
+      const email = document.getElementById('registerEmail');
+      const password = document.getElementById('registerPassword');
 
-                const result = await response.json();
+      if (!fullname.value.trim()) {
+        document.getElementById('registerFullnameError').classList.remove('hidden');
+        fullname.classList.add('!border-red-color');
+        valid = false;
+      } else {
+        document.getElementById('registerFullnameError').classList.add('hidden');
+        fullname.classList.remove('!border-red-color');
+      }
 
-                if (response.ok) {
-                    showMessage('registerMessage', '✅ ثبت‌نام با موفقیت انجام شد! حالا می‌توانی وارد شوی.', 'success');
-                    document.getElementById('registerForm').reset();
-                    // بعد از ۲ ثانیه به تب لاگین برو
-                    setTimeout(() => {
-                        switchTab('login');
-                        showMessage('loginMessage', 'حالا با ایمیل و رمز عبور وارد شو.', 'success');
-                    }, 2000);
-                } else {
-                    showMessage('registerMessage', result.message || 'خطا در ثبت‌نام. لطفاً دوباره تلاش کن.', 'error');
-                }
-            } catch (error) {
-                showMessage('registerMessage', '❌ خطا در ارتباط با سرور. مطمئن شو سرور روشن است.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'ثبت‌نام';
-            }
-        }
+      if (!email.value || !email.value.includes('@')) {
+        document.getElementById('registerEmailError').classList.remove('hidden');
+        email.classList.add('!border-red-color');
+        valid = false;
+      } else {
+        document.getElementById('registerEmailError').classList.add('hidden');
+        email.classList.remove('!border-red-color');
+      }
 
-        // ===== ورود =====
-        async function login(event) {
-            event.preventDefault();
-            clearMessages();
+      if (!password.value || password.value.length < 6) {
+        document.getElementById('registerPasswordError').classList.remove('hidden');
+        password.classList.add('!border-red-color');
+        valid = false;
+      } else {
+        document.getElementById('registerPasswordError').classList.add('hidden');
+        password.classList.remove('!border-red-color');
+      }
 
-            if (!validateLogin()) return;
+      return valid;
+    }
 
-            const btn = document.getElementById('loginBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> در حال ورود...';
+    // ===== ثبت‌نام =====
+    async function register(event) {
+      event.preventDefault();
+      clearMessages();
 
-            const data = {
-                email: document.getElementById('loginEmail').value.trim(),
-                password: document.getElementById('loginPassword').value
-            };
+      if (!validateRegister()) return;
 
-            try {
-                const response = await fetch(`${API_BASE}/users/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+      const btn = document.getElementById('registerBtn');
+      setLoading(btn, true, 'در حال ثبت‌نام...');
 
-                const result = await response.json();
+      const data = {
+        fullname: document.getElementById('registerFullname').value.trim(),
+        email: document.getElementById('registerEmail').value.trim(),
+        password: document.getElementById('registerPassword').value
+      };
 
-                if (response.ok && result.access_token) {
-                    // ذخیره توکن در localStorage تا وقتی خودش خروج بزنه معتبر بمونه
-                    localStorage.setItem('access_token', result.access_token);
-
-                    // انتقال به داشبورد (روت اصلی)
-                    window.location.href = '/';
-                } else {
-                    showMessage('loginMessage', result.message || '❌ ایمیل یا رمز عبور اشتباه است.', 'error');
-                }
-            } catch (error) {
-                showMessage('loginMessage', '❌ خطا در ارتباط با سرور. مطمئن شو سرور روشن است.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'ورود';
-            }
-        }
-
-        // ===== دریافت پروفایل کاربر =====
-        async function loadProfile() {
-            const token = localStorage.getItem('access_token');
-            if (!token) return;
-
-            try {
-                const response = await fetch(`${API_BASE}/users/profile`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    const user = await response.json();
-                    document.getElementById('userName').textContent = user.fullname || user.email;
-                    document.getElementById('userEmail').textContent = user.email;
-                    document.getElementById('authSection').style.display = 'none';
-                    document.getElementById('profileSection').classList.add('show');
-                } else {
-                    // توکن نامعتبر است
-                    localStorage.removeItem('access_token');
-                }
-            } catch (error) {
-                console.error('خطا در دریافت پروفایل:', error);
-            }
-        }
-
-        // ===== خروج =====
-        function logout() {
-            localStorage.removeItem('access_token');
-            document.getElementById('profileSection').classList.remove('show');
-            document.getElementById('authSection').style.display = 'block';
-            document.getElementById('loginForm').reset();
-            document.getElementById('registerForm').reset();
-            clearMessages();
-            switchTab('login');
-        }
-
-        // ===== بررسی توکن هنگام لود صفحه =====
-        // (چک اصلی و ریدایرکت همون بالای head انجام میشه؛ این فقط یه پشتیبان برای مرورگرهای قدیمیه)
-        document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('access_token');
-            if (token) {
-                window.location.replace('/');
-            }
+      try {
+        const response = await fetch(`${API_BASE}/users/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
         });
-    </script>
+
+        const result = await response.json();
+
+        if (response.ok && result.access_token) {
+          // ثبت‌نام موفق بود و سرور خودش توکن ورود رو هم برگردوند؛
+          // نیازی نیست کاربر دوباره فرم لاگین رو پر کنه
+          localStorage.setItem('access_token', result.access_token);
+          window.location.href = '/';
+        } else {
+          showMessage('registerMessage', result.message || 'خطا در ثبت‌نام. لطفاً دوباره تلاش کن.', 'error');
+          setLoading(btn, false);
+        }
+      } catch (error) {
+        showMessage('registerMessage', '❌ خطا در ارتباط با سرور. مطمئن شو سرور روشن است.', 'error');
+        setLoading(btn, false);
+      }
+    }
+
+    // ===== ورود =====
+    async function login(event) {
+      event.preventDefault();
+      clearMessages();
+
+      if (!validateLogin()) return;
+
+      const btn = document.getElementById('loginBtn');
+      setLoading(btn, true, 'در حال ورود...');
+
+      const data = {
+        email: document.getElementById('loginEmail').value.trim(),
+        password: document.getElementById('loginPassword').value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/users/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.access_token) {
+          // ذخیره توکن در localStorage تا وقتی خودش خروج بزنه معتبر بمونه
+          localStorage.setItem('access_token', result.access_token);
+
+          // انتقال به داشبورد (روت اصلی)
+          window.location.href = '/';
+        } else {
+          showMessage('loginMessage', result.message || '❌ ایمیل یا رمز عبور اشتباه است.', 'error');
+          setLoading(btn, false);
+        }
+      } catch (error) {
+        showMessage('loginMessage', '❌ خطا در ارتباط با سرور. مطمئن شو سرور روشن است.', 'error');
+        setLoading(btn, false);
+      }
+    }
+
+    // ===== بررسی توکن هنگام لود صفحه =====
+    // (چک اصلی و ریدایرکت همون بالای head انجام میشه؛ این فقط یه پشتیبان برای مرورگرهای قدیمیه)
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        window.location.replace('/');
+      }
+    });
+  </script>
 </body>
+
 </html>
