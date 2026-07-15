@@ -63,6 +63,7 @@ svg {
 
 body {
     overflow: hidden;
+    color: var(--color-text-color);
 }
 
 ul {
@@ -95,23 +96,23 @@ button:hover {
     width: 100%;
     height: 34px;
     /* 12 = 3rem */
-    border: 1px solid #0062AE;
-    /* رنگ main-color */
+    border: 1px solid var(--color-main-color);
+    /* رنگ main-color؛ با اکسنت انتخابی و تم روشن/تیره هماهنگ می‌مونه */
     border-radius: 0.5rem;
     /* 8px = rounded-lg */
     padding-right: 1rem;
     /* 4 = 1rem */
     padding-left: 1rem;
     outline: none;
-    background-color: #fff;
-    /* در صورت نیاز */
-    transition: border-color 0.2s;
+    background-color: var(--color-surface-color);
+    transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+    color: var(--color-text-color);
 }
 
 /* اختیاری: استایل فوکوس */
 .custom-input:focus {
-    border-color: #004b8a;
-    box-shadow: 0 0 0 3px rgba(0, 98, 174, 0.15);
+    border-color: var(--color-main-color-hover);
+    box-shadow: 0 0 0 3px var(--color-main-color-25);
 }
 
 /* اختیاری: استایل placeholder */
@@ -141,7 +142,7 @@ button:hover {
 }
 
 .menu-item span {
-    color: var(--text-color);
+    color: var(--color-on-accent);
 }
 
 .menu-item.active {
@@ -380,7 +381,7 @@ td {
 .main-btn {
     background-color: var(--color-main-color);
     border-radius: 6px;
-    color: var(--text-color);
+    color: var(--color-on-accent);
     padding: 8px;
     min-width: 80px;
     height: 36px !important;
@@ -394,8 +395,9 @@ td {
 input,
 .select-btn,
 textarea {
-    background-color: #f7fbff;
+    background-color: var(--color-surface-color);
     border-color: var(--color-main-color-25) !important;
+    color: var(--color-text-color);
 }
 
 input:focus,
@@ -500,14 +502,17 @@ textarea,
 
 html.dark-theme {
     color-scheme: dark;
-    --text-color: #c8c8c8 !important;
     --table-txt: #c8c8c8;
 
-    /* ----- برند / وضعیت‌ها (روشن‌تر شده برای کنتراست کافی روی پس‌زمینه‌ی تیره) ----- */
-    --color-back-color: #0F172A;
-    --color-main-color: #2E8FD6;
-    --color-main-color-hover: #525457;
-    --color-main-color-25: #2e8fd640;
+    /* ----- برند / وضعیت‌ها -----
+       رنگ main-color در تم تیره باید هم روی پس‌زمینه‌ی تیره خوش‌خوان باشه و هم
+       زیر متن سفید (روی دکمه‌ها) کنتراست کافی داشته باشه؛ برای همین به‌جای
+       رنگ‌های خیلی روشن/پاستیلی، از سایه‌ای متعادل استفاده شده که هر دو شرط
+       رو برآورده می‌کنه (کنتراست متن سفید ≥ 4.5:1). */
+    --color-back-color: #1b1c1f;
+    --color-main-color: #2563EB;
+    --color-main-color-hover: #3B82F6;
+    --color-main-color-25: #2563EB40;
     --color-green-color: #22C55E;
     --color-green-color-25: #22C55E40;
     --color-red-color: #F87171;
@@ -521,9 +526,9 @@ html.dark-theme {
     --color-yellow-color-20: rgba(142, 137, 115, 0.18);
 
     /* ----- سطح/متن/بوردر سفارشی پروژه ----- */
-    --color-surface-color: #3a3c3d;
+    --color-surface-color: #27292a;
     --color-surface2-color: #4e5156;
-    --color-border-color: #33415A;
+    --color-border-color: #37393d;
     --color-text-color: #E5E7EB;
     --color-text2-color: #94A3B8;
 
@@ -531,7 +536,7 @@ html.dark-theme {
        چون خیلی از کلاس‌های پروژه (bg-white, text-gray-700, border-gray-200, ...)
        مستقیم از این متغیرها استفاده می‌کنن، override کردن‌شون باعث می‌شه اکثر
        صفحات بدون نیاز به کلاس dark: هماهنگ بشن. */
-    --color-white: #3a3c3d;
+    --color-white: #27292a;
     --color-gray-50: #1A2332;
     --color-gray-100: #51555b;
     --color-gray-200: #72777f;
@@ -630,7 +635,7 @@ html.dark-theme {
 }
 
 html.dark-theme body {
-    color: var(--text-color);
+    color: var(--color-text-color);
 }
 
 /* کارت‌ها */
@@ -721,15 +726,9 @@ html.dark-theme #page-loader {
 
 /* سبز */
 html[data-accent="green"] {
-    --color-main-color: #0E9F6E;
-    --color-main-color-hover: #12B981;
-    --color-main-color-25: #0E9F6E40;
-}
-
-html.dark-theme[data-accent="green"] {
-    --color-main-color: #34D399;
-    --color-main-color-hover: #6EE7B7;
-    --color-main-color-25: #34D39940;
+    --color-main-color: #047857;
+    --color-main-color-hover: #059669;
+    --color-main-color-25: #04785740;
 }
 
 /* بنفش */
@@ -739,23 +738,29 @@ html[data-accent="purple"] {
     --color-main-color-25: #7C3AED40;
 }
 
-html.dark-theme[data-accent="purple"] {
-    --color-main-color: #A78BFA;
-    --color-main-color-hover: #C4B5FD;
-    --color-main-color-25: #A78BFA40;
-}
-
 /* نارنجی */
 html[data-accent="orange"] {
-    --color-main-color: #EA580C;
-    --color-main-color-hover: #F97316;
-    --color-main-color-25: #EA580C40;
+    --color-main-color: #C2410C;
+    --color-main-color-hover: #EA580C;
+    --color-main-color-25: #C2410C40;
 }
 
-html.dark-theme[data-accent="orange"] {
-    --color-main-color: #FB923C;
-    --color-main-color-hover: #FDBA74;
-    --color-main-color-25: #FB923C40;
+/* آبی (پیش‌فرض) — این بلوک صرفاً برای وضوح ثبت شده؛ چون آبی رنگ برندِ
+   پیش‌فرضِ توکن --color-main-color (در input.css و بلوک dark-theme) هست،
+   بدون data-accent هم به‌درستی اعمال می‌شه. */
+html[data-accent="blue"] {
+    --color-main-color: #005DAA;
+    --color-main-color-hover: #1D83D1;
+    --color-main-color-25: #005daa40;
+}
+
+html.dark-theme[data-accent="blue"],
+html.dark-theme[data-accent="purple"],
+html.dark-theme[data-accent="orange"],
+html.dark-theme[data-accent="green"] {
+    --color-main-color: #151517;
+    --color-main-color-hover: #4e5156;
+    --color-main-color-25: #1515178c;
 }
 
 /* نمایه‌ی رنگ روی سواچ‌های انتخاب تم (صفحه‌ی تنظیمات) */
