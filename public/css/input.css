@@ -16,10 +16,12 @@
   --color-green2-color: #53B8AB;
   --color-green2-color-25:#53B8AB40;
   --color-yellow-color-20:rgba(255, 232, 83, 0.2);
+  --text-color: #fff;
+  --table-txt: #000;
 
   /* توکن‌های سطح/متن/بوردر برای پشتیبانی از تم روشن و تیره (public/css/global.css این‌ها رو override می‌کنه) */
   --color-surface-color: #FFFFFF;
-  --color-surface2-color: #F5F7FA;
+  --color-surface2-color: #4e5156;
   --color-border-color: #E4E4E4;
   --color-text-color: #1F2937;
   --color-text2-color: #6B7280;

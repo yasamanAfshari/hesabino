@@ -7,6 +7,8 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './users/users.entity';
+import { TransactionsModule } from './transactions/transactions.module';
+import { Transaction } from './transactions/transactions.entity';
 
 @Module({
   imports: [
@@ -22,12 +24,13 @@ import { User } from './users/users.entity';
         username: config.get<string>('DB_USERNAME', 'root'),
         password: config.get<string>('DB_PASSWORD', ''),
         database: config.get<string>('DB_NAME', 'hesabino'),
-        entities: [User],
+        entities: [User, Transaction],
         synchronize: true,
       }),
     }),
     UsersModule,
     AuthModule,
+    TransactionsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

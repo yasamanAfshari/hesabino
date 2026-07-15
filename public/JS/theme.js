@@ -1,8 +1,4 @@
-/**
- * مدیریت متمرکز تم روشن/تیره و رنگ تأکیدی (accent)
- * تمام مقادیر متغیرهای CSS مستقیماً با جاوااسکریپت تنظیم می‌شوند.
- * دیگر نیازی به قانون‌های html.dark-theme یا [data-accent] در CSS نیست.
- */
+
 (function () {
   'use strict';
 
@@ -27,7 +23,7 @@
   const DARK_BASE = {
     '--color-back-color': '#303030',
     '--color-main-color': '#262728',
-    '--color-main-color-hover': '#4FA8E6',
+    '--color-main-color-hover': '#525457',
     '--color-main-color-25': '#2e8fd640',
     '--color-green-color': '#22C55E',
     '--color-green-color-25': '#22C55E40',
@@ -39,18 +35,18 @@
     '--color-purple-color-25': '#A78BFA40',
     '--color-green2-color': '#5EEAD4',
     '--color-green2-color-25': '#5EEAD440',
-    '--color-yellow-color-20': 'rgba(250, 204, 21, 0.18)',
+    '--color-yellow-color-20': 'rgba(142, 137, 115, 0.18)',
     '--color-surface-color': '#3a3c3d',
-    '--color-surface2-color': '#303640',
+    '--color-surface2-color': '#4e5156',
     '--color-border-color': '#33415A',
     '--color-text-color': '#E5E7EB',
     '--color-text2-color': '#94A3B8',
     // بازنویسی پالت خنثی تیلویند (white/gray/zinc)
     '--color-white': '#3a3c3d',
     '--color-gray-50': '#1A2332',
-    '--color-gray-100': '#212D3F',
-    '--color-gray-200': '#2D3B50',
-    '--color-gray-300': '#45566E',
+    '--color-gray-100': '#51555b',
+    '--color-gray-200': '#72777f',
+    '--color-gray-300': '#717478',
     '--color-gray-400': '#93A4BA',
     '--color-gray-500': '#9FB0C3',
     '--color-gray-600': '#B7C4D6',
@@ -59,9 +55,9 @@
     '--color-gray-900': '#FFFFFF',
     '--color-gray-950': '#FFFFFF',
     '--color-zinc-50': '#1A2332',
-    '--color-zinc-100': '#212D3F',
-    '--color-zinc-200': '#2D3B50',
-    '--color-zinc-300': '#45566E',
+    '--color-zinc-100': '#51555b',
+    '--color-zinc-200': '#72777f',
+    '--color-zinc-300': '#717478',
     '--color-zinc-400': '#93A4BA',
     '--color-zinc-500': '#9FB0C3',
     '--color-zinc-600': '#B7C4D6',

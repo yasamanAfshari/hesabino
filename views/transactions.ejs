@@ -19,7 +19,7 @@
           <button class="main-btn">دریافت خروجی</button>
           <button class="main-btn">افزودن csv بانکی</button>
         </div>
-        <button class="main-btn" onclick="openModal('addTransactionModal')">ثبت تراکنش</button>
+        <button class="main-btn" onclick="openAddTransactionModal()">ثبت تراکنش</button>
       </div>
     </div>
 
@@ -34,7 +34,7 @@
         <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4 bg-white">
           <!-- Search -->
           <div class="relative">
-            <input type="text" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none" />
+            <input type="text" id="filterSearchInput" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none" />
             <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="7"></circle>
               <path d="m20 20-3.5-3.5"></path>
@@ -42,9 +42,9 @@
           </div>
 
           <!-- نوع مالی -->
-          <div class="custom-select relative">
+          <div id="filterTypeSelect" class="custom-select relative">
             <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
-              <span class="selected-value text-gray-700">نوع مالی</span>
+              <span class="selected-value text-gray-700" data-placeholder="نوع مالی">نوع مالی</span>
               <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path d="m6 9 6 6 6-6"></path>
               </svg>
@@ -54,20 +54,16 @@
                 <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
               </div>
               <div class="options max-h-52 overflow-y-auto">
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">درآمد</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">هزینه</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سرمایه گذاری</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">وام</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">پس انداز</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سایر</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="income">درآمد</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="expense">هزینه</div>
               </div>
             </div>
           </div>
 
           <!-- دسته -->
-          <div class="custom-select relative">
+          <div id="filterCategorySelect" class="custom-select relative">
             <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
-              <span class="selected-value text-gray-700">دسته</span>
+              <span class="selected-value text-gray-700" data-placeholder="دسته">دسته</span>
               <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path d="m6 9 6 6 6-6"></path>
               </svg>
@@ -78,9 +74,15 @@
               </div>
               <div class="options max-h-52 overflow-y-auto">
                 <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خوراک</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید و پوشاک</div>
                 <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">حمل و نقل</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">تفریح</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">درمان</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">تفریح و سرگرمی</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سلامت و تناسب اندام</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">آموزش و توسعه</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سرمایه گذاری</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">بدهی</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">مسکن و خدمات</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سایر</div>
               </div>
             </div>
           </div>
@@ -137,322 +139,9 @@
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۰ - ۱۴:۳۰</td>
-                <td class="px-5 py-3.5 text-gray-700">خرید ملزومات اداری و پرینتر</td>
-                <td class="px-5 py-3.5"><span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">لوازم تحریر</span></td>
-                <td class="px-5 py-3.5"><span class="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-xs font-medium">هزینه</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۳,۴۵۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md" onclick="openModal('viewTransactionModal')">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <!-- سطر ۲ -->
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۱ - ۰۹:۱۵</td>
-                <td class="px-5 py-3.5 text-gray-700">دریافت حقوق فروردین ماه</td>
-                <td class="px-5 py-3.5"><span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-medium">درآمد</span></td>
-                <td class="px-5 py-3.5"><span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full text-xs font-medium">درآمد</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۴۸,۰۰۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <!-- سطر ۳ -->
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۲ - ۱۷:۴۵</td>
-                <td class="px-5 py-3.5 text-gray-700">خرید مواد غذایی و خواربار</td>
-                <td class="px-5 py-3.5"><span class="bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full text-xs font-medium">خورد و خوراک</span></td>
-                <td class="px-5 py-3.5"><span class="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-xs font-medium">هزینه</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۵,۶۲۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <!-- سطر ۴ -->
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۳ - ۱۱:۰۰</td>
-                <td class="px-5 py-3.5 text-gray-700">سود سهام شرکت سرمایه‌گذاری</td>
-                <td class="px-5 py-3.5"><span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-medium">سرمایه‌گذاری</span></td>
-                <td class="px-5 py-3.5"><span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full text-xs font-medium">درآمد</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۱۲,۳۰۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <!-- سطر ۵ -->
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۴ - ۲۰:۲۰</td>
-                <td class="px-5 py-3.5 text-gray-700">پرداخت قبض اینترنت و همراه</td>
-                <td class="px-5 py-3.5"><span class="bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full text-xs font-medium">خدمات مخابراتی</span></td>
-                <td class="px-5 py-3.5"><span class="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-xs font-medium">هزینه</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۱,۲۸۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۵ - ۱۰:۱۰</td>
-                <td class="px-5 py-3.5 text-gray-700">دریافت فریلنسری (پروژه طراحی UI)</td>
-                <td class="px-5 py-3.5"><span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-medium">خدمات فنی</span></td>
-                <td class="px-5 py-3.5"><span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full text-xs font-medium">درآمد</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۲۵,۰۰۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۶ - ۱۸:۰۰</td>
-                <td class="px-5 py-3.5 text-gray-700">خرید کتاب و منابع آموزشی</td>
-                <td class="px-5 py-3.5"><span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full text-xs font-medium">آموزش</span></td>
-                <td class="px-5 py-3.5"><span class="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-xs font-medium">هزینه</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۱,۹۸۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۷ - ۱۴:۴۵</td>
-                <td class="px-5 py-3.5 text-gray-700">واگذاری خودرو (دست دوم)</td>
-                <td class="px-5 py-3.5"><span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-medium">دارایی</span></td>
-                <td class="px-5 py-3.5"><span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full text-xs font-medium">درآمد</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۲۵۰,۰۰۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۸ - ۰۸:۳۰</td>
-                <td class="px-5 py-3.5 text-gray-700">خرید دارو و لوازم بهداشتی</td>
-                <td class="px-5 py-3.5"><span class="bg-rose-50 text-rose-700 px-2.5 py-1 rounded-full text-xs font-medium">سلامت</span></td>
-                <td class="px-5 py-3.5"><span class="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-xs font-medium">هزینه</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۸۵۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۱۹ - ۲۲:۰۰</td>
-                <td class="px-5 py-3.5 text-gray-700">پرداخت شارژ ساختمان</td>
-                <td class="px-5 py-3.5"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-medium">مسکن</span></td>
-                <td class="px-5 py-3.5"><span class="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-xs font-medium">هزینه</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۲,۵۰۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۲۰ - ۱۲:۲۰</td>
-                <td class="px-5 py-3.5 text-gray-700">بازپرداخت وام دانشجویی</td>
-                <td class="px-5 py-3.5"><span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-medium">بدهی</span></td>
-                <td class="px-5 py-3.5"><span class="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-xs font-medium">هزینه</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۷,۸۰۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="transition-all duration-150">
-                <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">۱۴۰۳/۰۲/۲۱ - ۱۶:۳۰</td>
-                <td class="px-5 py-3.5 text-gray-700">جشن تولد و پذیرایی</td>
-                <td class="px-5 py-3.5"><span class="bg-orange-50 text-orange-700 px-2.5 py-1 rounded-full text-xs font-medium">تفریحی</span></td>
-                <td class="px-5 py-3.5"><span class="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-xs font-medium">هزینه</span></td>
-                <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">۴,۱۵۰,۰۰۰</td>
-                <td>
-                  <div class="flex justify-center gap-2.5">
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <button class="bg-main-color p-1 rounded-md">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
+            <tbody id="transactionsTableBody" class="bg-white divide-y divide-gray-100">
+              <tr id="transactionsLoadingRow">
+                <td colspan="6" class="px-5 py-6 text-center text-gray-400">در حال بارگذاری تراکنش‌ها...</td>
               </tr>
             </tbody>
           </table>
@@ -463,144 +152,175 @@
 
   <div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 z-40" onclick="closeModal()"></div>
 
-  <!-- مودال ثبت تراکنش -->
+  <!-- مودال ثبت / ویرایش تراکنش (هر دو از همین مودال استفاده می‌کنن) -->
   <div id="addTransactionModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col relative">
       <!-- هدر ثابت -->
       <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
-        <h3 class="font-bold text-lg text-zinc-800">ثبت تراکنش جدید</h3>
-        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+        <h3 id="transactionModalTitle" class="font-bold text-lg text-zinc-800">ثبت تراکنش جدید</h3>
+        <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <!-- بدنه اسکرول‌شونده -->
-      <div class="modal-body overflow-y-auto flex-1 scrollbar px-6 py-4">
-        <div class="grid grid-cols-2 gap-3.5">
+      <form id="transactionForm" class="flex flex-col flex-1">
+        <!-- شناسه‌ی تراکنش موقع ویرایش پر می‌شه؛ موقع ثبت جدید خالیه -->
+        <input type="hidden" id="transactionId" value="">
 
-          <div class="col-span-1">
-            <div class="relative">
-              <input type="text" id="modalDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
+        <!-- بدنه اسکرول‌شونده -->
+        <div class="modal-body overflow-y-auto flex-1 scrollbar px-6 py-4">
+          <div id="transactionFormError" class="hidden mb-3 rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
 
-              <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                <path d="M16 2v4M8 2v4M3 10h18"></path>
-              </svg>
-            </div>
-          </div>
+          <div class="grid grid-cols-2 gap-3.5">
 
-          <div class="col-span-1">
-            <div class="relative">
-              <input type="text" id="modalTimePicker" class="time-picker w-full h-10 date-none-txt border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="ساعت" autocomplete="off">
+            <div class="col-span-1">
+              <div class="relative">
+                <input type="text" id="modalDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
 
-              <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="9"></circle>
-                <path d="M12 7v5l3 3"></path>
-              </svg>
-            </div>
-          </div>
-
-          <div class="col-span-1">
-            <div class="custom-select relative">
-              <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
-                <span class="selected-value text-gray-700">نوع تراکنش</span>
-                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="m6 9 6 6 6-6"></path>
+                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                  <path d="M16 2v4M8 2v4M3 10h18"></path>
                 </svg>
-              </button>
+              </div>
+            </div>
 
-              <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
-                <div class="p-2 border-b border-main-color-25">
-                  <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
-                </div>
-                <div class="options max-h-52 overflow-y-auto">
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید اینترنتی</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید فروشگاه</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">انتقال به کارت</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">دریافت از کارت</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">کارمزد</div>
+            <div class="col-span-1">
+              <div class="relative">
+                <input type="text" id="modalTimePicker" class="time-picker w-full h-10 date-none-txt border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="ساعت" autocomplete="off">
+
+                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <path d="M12 7v5l3 3"></path>
+                </svg>
+              </div>
+            </div>
+
+            <div class="col-span-1">
+              <div id="modalSubtypeSelect" class="custom-select relative">
+                <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                  <span class="selected-value text-gray-700" data-placeholder="نوع تراکنش">نوع تراکنش</span>
+                  <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+                </button>
+
+                <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+                  <div class="p-2 border-b border-main-color-25">
+                    <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                  </div>
+                  <div class="options max-h-52 overflow-y-auto">
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید اینترنتی</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید فروشگاه</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">انتقال به کارت</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">دریافت از کارت</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">کارمزد</div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="col-span-1">
-            <div class="custom-select relative">
-              <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
-                <span class="selected-value text-gray-700">نوع مالی</span>
-                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="m6 9 6 6 6-6"></path>
-                </svg>
-              </button>
+            <div class="col-span-1">
+              <div id="modalFinancialTypeSelect" class="custom-select relative">
+                <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                  <span class="selected-value text-gray-700" data-placeholder="نوع مالی">نوع مالی</span>
+                  <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+                </button>
 
-              <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
-                <div class="p-2 border-b border-main-color-25">
-                  <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
-                </div>
-                <div class="options max-h-52 overflow-y-auto">
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">همه</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">واریز</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">برداشت</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-span-1">
-            <div class="relative">
-              <input type="text" placeholder="قیمت " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
-            </div>
-          </div>
-
-          <div class="col-span-1">
-            <div class="custom-select relative">
-              <button class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
-                <span class="selected-value text-gray-700">دسته</span>
-                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="m6 9 6 6 6-6"></path>
-                </svg>
-              </button>
-
-              <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
-                <div class="p-2 border-b border-main-color-25">
-                  <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
-                </div>
-                <div class="options max-h-52 overflow-y-auto">
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خوراک</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید و پوشاک</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">حمل و نقل</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">تفریح و سرگرمی</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سلامت و تناسب اندام</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">آموزش و توسعه</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سرمایه گذاری</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">بدهی</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">مسکن و خدمات</div>
-                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سایر</div>
+                <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+                  <div class="p-2 border-b border-main-color-25">
+                    <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                  </div>
+                  <div class="options max-h-52 overflow-y-auto">
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="income">واریز (درآمد)</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="expense">برداشت (هزینه)</div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="col-span-2">
-            <div class="relative">
-              <input type="text" placeholder="حساب " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            <div class="col-span-1">
+              <div class="relative">
+                <input type="number" min="0" step="1" id="modalAmountInput" placeholder="قیمت " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+              </div>
             </div>
-          </div>
 
-          <div class="col-span-2">
-            <div class="relative">
-              <textarea rows="6" class="w-full border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="توضیحات مربوطه را بنویسید"></textarea>
+            <div class="col-span-1">
+              <div id="modalCategorySelect" class="custom-select relative">
+                <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                  <span class="selected-value text-gray-700" data-placeholder="دسته">دسته</span>
+                  <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+                </button>
+
+                <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+                  <div class="p-2 border-b border-main-color-25">
+                    <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                  </div>
+                  <div class="options max-h-52 overflow-y-auto">
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خوراک</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید و پوشاک</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">حمل و نقل</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">تفریح و سرگرمی</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سلامت و تناسب اندام</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">آموزش و توسعه</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سرمایه گذاری</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">بدهی</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">مسکن و خدمات</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سایر</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-span-2">
+              <div class="relative">
+                <input type="text" id="modalAccountInput" placeholder="حساب " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+              </div>
+            </div>
+
+            <div class="col-span-2">
+              <div class="relative">
+                <textarea rows="6" id="modalDescriptionInput" class="w-full border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="توضیحات مربوطه را بنویسید"></textarea>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- فوتر ثابت -->
+        <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+          <button type="submit" id="transactionSubmitBtn" class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- مودال تأیید حذف تراکنش -->
+  <div id="deleteTransactionModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-md flex flex-col relative">
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-lg text-zinc-800">حذف تراکنش</h3>
+        <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      <!-- فوتر ثابت -->
-      <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
-        <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
-        <button class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+      <div class="px-6 py-5">
+        <p class="text-gray-700">آیا از حذف این تراکنش مطمئن هستید؟ این عمل غیرقابل بازگشت است.</p>
+        <div id="deleteTransactionError" class="hidden mt-3 rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
+        <input type="hidden" id="deleteTransactionId" value="">
+      </div>
+
+      <div class="flex justify-end gap-2 px-6 pb-6 pt-2">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+        <button type="button" id="confirmDeleteTransactionBtn" class="bg-red-color text-white px-4 py-2 rounded-lg">حذف تراکنش</button>
       </div>
     </div>
   </div>
@@ -622,39 +342,35 @@
       <!-- بدنه اسکرول‌شونده -->
       <div class="modal-body overflow-y-auto flex-1 scrollbar px-6 py-4">
         <div class="flex items-center justify-between py-4">
-          <span class="transaction-type-badge inline-block bg-emerald-100 text-emerald-600 font-bold px-6 py-2 rounded-full text-sm">
+          <span id="viewTypeBadge" class="transaction-type-badge inline-block bg-emerald-100 text-emerald-600 font-bold px-6 py-2 rounded-full text-sm">
             واریز
           </span>
-          <span class="transaction-date text-gray-400 text-sm">
-            ۱۴۰۵/۰۲/۰۲ - ۱۵:۴۸:۳۲
+          <span id="viewDate" class="transaction-date text-gray-400 text-sm">
+            -
           </span>
         </div>
 
         <div class="transaction-amount-box bg-gray-100 rounded-xl text-center py-6 px-4 mb-2">
-          <p class="text-gray-400 text-sm mb-2">مبلغ</p>
-          <p class="transaction-amount-value text-emerald-600 font-extrabold text-3xl mb-3">+۱,۰۰۰,۰۰۰</p>
-          <p class="text-gray-400 text-sm">
-            موجودی پس از تراکنش:
-            <span class="transaction-balance-after">۱۲,۰۰۰,۰۰۰</span>
-          </p>
+          <p class="text-gray-400 text-sm mb-2">مبلغ (تومان)</p>
+          <p id="viewAmount" class="transaction-amount-value text-emerald-600 font-extrabold text-3xl mb-3">-</p>
         </div>
 
         <div class="transaction-detail-list">
           <div class="transaction-detail-row flex items-center py-4 border-b border-gray-100 text-gray-500">
             <span class="w-28 inline-block">دسته بندی :</span>
-            <span class="transaction-detail-value text-gray-800 font-semibold">حقوق</span>
+            <span id="viewCategory" class="transaction-detail-value text-gray-800 font-semibold">-</span>
           </div>
           <div class="transaction-detail-row flex items-center py-4 border-b border-gray-100 text-gray-500">
             <span class="w-28 inline-block">نوع تراکنش :</span>
-            <span class="transaction-detail-value text-gray-800 font-semibold">حقوق</span>
+            <span id="viewSubtype" class="transaction-detail-value text-gray-800 font-semibold">-</span>
           </div>
           <div class="transaction-detail-row flex items-center py-4 border-b border-gray-100 text-gray-500">
             <span class="w-28 inline-block">توضیحات :</span>
-            <span class="transaction-detail-value text-gray-800 font-semibold">حقوق</span>
+            <span id="viewDescription" class="transaction-detail-value text-gray-800 font-semibold">-</span>
           </div>
           <div class="transaction-detail-row flex items-center py-4 border-b border-gray-100 text-gray-500">
             <span class="w-28 inline-block">حساب مرتبط :</span>
-            <span class="transaction-detail-value text-gray-800 font-semibold">ملی</span>
+            <span id="viewAccount" class="transaction-detail-value text-gray-800 font-semibold">-</span>
           </div>
         </div>
       </div>
@@ -689,6 +405,8 @@
       document.body.classList.remove('overflow-hidden');
     }
   </script>
+
+  <script src="/JS/transactions.js" defer></script>
 </body>
 
 </html>

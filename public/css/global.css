@@ -141,7 +141,7 @@ button:hover {
 }
 
 .menu-item span {
-    color: white;
+    color: var(--text-color);
 }
 
 .menu-item.active {
@@ -342,6 +342,10 @@ aside .theme-toggle {
     height: 70%;
 }
 
+tr, td{
+    color: var(--table-txt);
+}
+
 th div {
     text-align: center;
     justify-content: center;
@@ -376,7 +380,7 @@ td {
 .main-btn {
     background-color: var(--color-main-color);
     border-radius: 6px;
-    color: white;
+    color: var(--text-color);
     padding: 8px;
     min-width: 80px;
     height: 36px !important;
@@ -496,11 +500,13 @@ textarea,
 
 html.dark-theme {
     color-scheme: dark;
+    --text-color: #c8c8c8 !important;
+    --table-txt: #c8c8c8;
 
     /* ----- برند / وضعیت‌ها (روشن‌تر شده برای کنتراست کافی روی پس‌زمینه‌ی تیره) ----- */
     --color-back-color: #0F172A;
     --color-main-color: #2E8FD6;
-    --color-main-color-hover: #4FA8E6;
+    --color-main-color-hover: #525457;
     --color-main-color-25: #2e8fd640;
     --color-green-color: #22C55E;
     --color-green-color-25: #22C55E40;
@@ -512,11 +518,11 @@ html.dark-theme {
     --color-purple-color-25: #A78BFA40;
     --color-green2-color: #5EEAD4;
     --color-green2-color-25: #5EEAD440;
-    --color-yellow-color-20: rgba(250, 204, 21, 0.18);
+    --color-yellow-color-20: rgba(142, 137, 115, 0.18);
 
     /* ----- سطح/متن/بوردر سفارشی پروژه ----- */
     --color-surface-color: #3a3c3d;
-    --color-surface2-color: #263449;
+    --color-surface2-color: #4e5156;
     --color-border-color: #33415A;
     --color-text-color: #E5E7EB;
     --color-text2-color: #94A3B8;
@@ -527,9 +533,9 @@ html.dark-theme {
        صفحات بدون نیاز به کلاس dark: هماهنگ بشن. */
     --color-white: #3a3c3d;
     --color-gray-50: #1A2332;
-    --color-gray-100: #212D3F;
-    --color-gray-200: #2D3B50;
-    --color-gray-300: #45566E;
+    --color-gray-100: #51555b;
+    --color-gray-200: #72777f;
+    --color-gray-300: #717478;
     --color-gray-400: #93A4BA;
     --color-gray-500: #9FB0C3;
     --color-gray-600: #B7C4D6;
@@ -538,9 +544,9 @@ html.dark-theme {
     --color-gray-900: #FFFFFF;
     --color-gray-950: #FFFFFF;
     --color-zinc-50: #1A2332;
-    --color-zinc-100: #212D3F;
-    --color-zinc-200: #2D3B50;
-    --color-zinc-300: #45566E;
+    --color-zinc-100: #51555b;
+    --color-zinc-200: #72777f;
+    --color-zinc-300: #717478;
     --color-zinc-400: #93A4BA;
     --color-zinc-500: #9FB0C3;
     --color-zinc-600: #B7C4D6;
@@ -557,7 +563,7 @@ html.dark-theme {
        ----------------------------------------------------------------- */
 
     /* آبی (هدر جدول، بج‌های دسته) */
-    --color-blue-50: #303640;
+    --color-blue-50: #4e5156;
     --color-blue-100: #1e3a8a;
     --color-blue-200: #1e40af;
     --color-blue-400: #93c5fd;
@@ -566,22 +572,22 @@ html.dark-theme {
     --color-blue-700: #93c5fd;
 
     /* کهربایی (هشدارهای مالی) */
-    --color-amber-50: #451a03;
+    --color-amber-50: #34241c;
     --color-amber-100: #78350f;
     --color-amber-200: #92400e;
     --color-amber-600: #fbbf24;
     --color-amber-700: #fcd34d;
 
     /* زرشکی/قرمز پیش‌فرض */
-    --color-red-50: #450a0a;
-    --color-red-100: #7f1d1d;
+    --color-red-50: #341a1a;
+    --color-red-100: #461c1c;
     --color-red-300: #b91c1c;
     --color-red-600: #f87171;
     --color-red-700: #fca5a5;
     --color-red-800: #fca5a5;
 
     /* رز (بج «هزینه» و موارد اضطراری) */
-    --color-rose-50: #4c0519;
+    --color-rose-50: #49232d;
     --color-rose-100: #881337;
     --color-rose-200: #9f1239;
     --color-rose-500: #fb7185;
@@ -590,8 +596,8 @@ html.dark-theme {
     --color-rose-800: #fda4af;
 
     /* زمردی (بج «درآمد») */
-    --color-emerald-50: #022c22;
-    --color-emerald-100: #064e3b;
+    --color-emerald-50: #24322e;
+    --color-emerald-100: #2a6a59;
     --color-emerald-500: #34d399;
     --color-emerald-600: #34d399;
     --color-emerald-700: #6ee7b7;
@@ -603,7 +609,7 @@ html.dark-theme {
     --color-orange-50: #431407;
     --color-orange-600: #fb923c;
     --color-orange-700: #fdba74;
-    --color-purple-50: #3b0764;
+    --color-purple-50: #2f2437;
     --color-purple-700: #d8b4fe;
     --color-indigo-50: #1e1b4b;
     --color-indigo-600: #818cf8;
@@ -624,7 +630,7 @@ html.dark-theme {
 }
 
 html.dark-theme body {
-    color: var(--color-text-color);
+    color: var(--text-color);
 }
 
 /* کارت‌ها */
