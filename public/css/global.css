@@ -255,27 +255,10 @@ aside .theme-toggle {
     left: 3%;
 }
 
-#mobile-hamburger {
+/* .ham-wrapper {
     position: absolute;
     right: 25px;
-}
-
-@media (max-width: 768px) {
-    .theme-toggle {
-        display: none !important;
-    }
-
-    aside .theme-toggle {
-        display: flex !important;
-    }
-
-    .menu-item::before,
-    .menu-item::after {
-        content: none !important;
-        display: none !important;
-
-    }
-}
+} */
 
 /* ////progress bar */
 .progress-wrapper {
@@ -343,7 +326,8 @@ aside .theme-toggle {
     height: 70%;
 }
 
-tr, td{
+tr,
+td {
     color: var(--table-txt);
 }
 
@@ -475,6 +459,7 @@ textarea:focus {
 .reminder-toggle .toggle-label {
     line-height: 1.4;
 }
+
 /* =========================================================
    تم تیره (Dark Mode) + رنگ‌های تاکیدی (Accent Colors)
    =========================================================
@@ -788,4 +773,10 @@ html.dark-theme[data-accent="green"] {
     inset: -6px;
     border-radius: 50%;
     border: 2px solid var(--color-main-color);
+}
+
+@media (max-width: 768px) {
+    .scrollable-table-container {
+        height: 45%;
+    }
 }
