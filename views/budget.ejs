@@ -14,15 +14,11 @@
 
 <body class="bg-main-color overflow-hidden">
 
-  <%- include('partials/header') %>
-
-
+  <%- include('partials/header' , { pageTitle: 'مدیریت بودجه' } ) %>
 
   <section class="scrollbar overflow-y-auto px-6 pb-1">
 
-    <h3 class="font-bold text-zinc-950 text-center">مدیریت تراکنش ها</h3>
-
-    <div class="overflow-x-auto scrollbar my-2">
+    <div class="overflow-x-auto scrollbar mb-2">
       <div class="grid grid-cols-3 gap-4 min-w-max">
         <div class="main-box-small dashboard-status">
           <div class="flex justify-start gap-4">
