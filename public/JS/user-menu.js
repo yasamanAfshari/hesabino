@@ -35,7 +35,10 @@
   function applyUserToHeader(user) {
     const nameEl = document.getElementById('user-fullname');
     const imgEl = document.getElementById('user-avatar-img');
-    if (nameEl) nameEl.textContent = user.fullname || 'کاربر';
+    if (nameEl) {
+      nameEl.textContent = user.fullname || 'کاربر';
+      nameEl.setAttribute('title', user.fullname || 'کاربر'); // ← اضافه شود
+    }
 
     if (imgEl) {
       if (user.avatarUrl) {
