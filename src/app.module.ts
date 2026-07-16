@@ -9,6 +9,9 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './users/users.entity';
 import { TransactionsModule } from './transactions/transactions.module';
 import { Transaction } from './transactions/transactions.entity';
+import { BudgetModule } from './budget/budget.module';
+import { Budget } from './budget/budget.entity';
+import { BudgetCategory } from './budget/budget-category.entity';
 
 @Module({
   imports: [
@@ -24,13 +27,14 @@ import { Transaction } from './transactions/transactions.entity';
         username: config.get<string>('DB_USERNAME', 'root'),
         password: config.get<string>('DB_PASSWORD', ''),
         database: config.get<string>('DB_NAME', 'hesabino'),
-        entities: [User, Transaction],
+        entities: [User, Transaction, Budget, BudgetCategory],
         synchronize: true,
       }),
     }),
     UsersModule,
     AuthModule,
     TransactionsModule,
+    BudgetModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
