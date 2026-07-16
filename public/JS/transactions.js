@@ -110,7 +110,10 @@
 
   // ===== ساخت یک سطر جدول برای یک تراکنش (داینامیک) =====
   function renderRow(tx) {
-    const dateTime = tx.time ? `${tx.date} - ${tx.time}` : tx.date;
+    // const dateTime = tx.time ? `${tx.date} - ${tx.time}` : tx.date;
+     const dateTime = tx.time 
+    ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}` 
+    : toPersianDigits(tx.date);
     return `
       <tr class="transition-all duration-150" data-id="${tx.id}">
         <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">${escapeHtml(dateTime)}</td>
@@ -393,7 +396,10 @@
     badge.className = 'transaction-type-badge inline-block font-bold px-6 py-2 rounded-full text-sm ' +
       (tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600');
 
-    document.getElementById('viewDate').textContent = tx.time ? `${tx.date} - ${tx.time}` : tx.date;
+    // document.getElementById('viewDate').textContent = tx.time ? `${tx.date} - ${tx.time}` : tx.date;
+     document.getElementById('viewDate').textContent = tx.time 
+    ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}` 
+    : toPersianDigits(tx.date);
 
     const amountEl = document.getElementById('viewAmount');
     amountEl.textContent = (tx.type === 'income' ? '+' : '-') + formatAmount(tx.amount);
