@@ -172,27 +172,56 @@
     }
   }
 
-  function initTimePickers() {
+function initTimePickers() {
     if (typeof flatpickr === 'undefined') {
-      console.warn('flatpickr بارگذاری نشده است');
-      return;
+        console.warn('flatpickr بارگذاری نشده است');
+        return;
     }
 
     if (flatpickr.l10ns && flatpickr.l10ns.fa) {
-      flatpickr.localize(flatpickr.l10ns.fa);
+        flatpickr.localize(flatpickr.l10ns.fa);
     }
 
     flatpickr('.time-picker', {
-      enableTime: true,
-      noCalendar: true,    
-      dateFormat: 'H:i',   
-      time_24hr: true,
-      allowInput: true,
-      onReady: function (selectedDates, dateStr, instance) {
-        instance.calendarContainer.classList.add('rtl-timepicker');
-      }
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: 'H:i',
+        time_24hr: true,
+        allowInput: true,
+        minuteIncrement: 1, 
+        onReady: function (selectedDates, dateStr, instance) {
+            instance.calendarContainer.classList.add('rtl-timepicker');
+
+            const input = instance.input;
+            let ignore = false;
+
+            input.addEventListener('input', function () {
+                if (ignore) return;
+                ignore = true;
+
+                let val = input.value.replace(/[^0-9]/g, '');
+                if (val.length > 4) val = val.slice(0, 4);
+
+                let formatted = val;
+                if (val.length >= 2) {
+                    formatted = val.substring(0, 2) + ':' + val.substring(2);
+                }
+
+                input.value = formatted;
+
+                if (val.length === 2) {
+                    input.setSelectionRange(3, 3);
+                } else if (val.length > 2) {
+                    input.setSelectionRange(formatted.length, formatted.length); 
+                } else {
+                    input.setSelectionRange(val.length, val.length);
+                }
+
+                ignore = false;
+            });
+        }
     });
-  }
+}
 
   // ===== ۸. سلکت باکس سفارشی =====
   function initCustomSelects() {
