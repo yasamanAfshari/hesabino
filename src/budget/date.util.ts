@@ -10,6 +10,14 @@ export function toEnglishDigits(input: string): string {
     .replace(/[٠-٩]/g, (d) => String(arabic.indexOf(d)));
 }
 
+// عکس عملیات بالا: ارقام انگلیسی داخل رشته رو به ارقام فارسی تبدیل می‌کنه.
+// برای این لازمه که در کوئری‌های دیتابیس بتونیم هر دو حالت ممکن ذخیره‌شده
+// (ارقام انگلیسی یا فارسی) رو با یک پیشوند ماه فیلتر کنیم.
+export function toPersianDigits(input: string): string {
+  const persian = '۰۱۲۳۴۵۶۷۸۹';
+  return String(input || '').replace(/[0-9]/g, (d) => persian[Number(d)]);
+}
+
 // تبدیل تاریخ میلادی به سال/ماه شمسی (الگوریتم استاندارد تبدیل جلالی، بدون کتابخانه‌ی خارجی)
 function gregorianToJalali(gy: number, gm: number, gd: number): [number, number, number] {
   const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];

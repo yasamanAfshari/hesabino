@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { Budget } from './budget.entity';
 import { BudgetCategory } from './budget-category.entity';
 import { Transaction } from '../transactions/transactions.entity';
 import { SavingDeposit } from '../savings/saving-deposit.entity';
 import { BUDGET_CATEGORIES, DEFAULT_BUDGET_ALLOCATION } from './budget.constants';
-import { currentJalaliMonthKey, toEnglishDigits } from './date.util';
+import { currentJalaliMonthKey, toEnglishDigits, toPersianDigits } from './date.util';
 import { CalculateBudgetDto } from './dto/calculate-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 
@@ -35,14 +35,23 @@ export class BudgetService {
     userId: number,
     monthKey: string,
   ): Promise<Record<string, number>> {
+    // تاریخ تراکنش‌ها ممکنه با ارقام فارسی یا انگلیسی ذخیره شده باشه، پس هر دو
+    // حالت پیشوند رو مستقیماً در کوئری دیتابیس فیلتر می‌کنیم (به‌جای خوندن کل
+    // تاریخچه‌ی تراکنش‌های کاربر و فیلتر کردن توی جاوااسکریپت که با رشد داده کند می‌شه).
+    const persianMonthKey = toPersianDigits(monthKey);
+
     const expenses = await this.transactionsRepository.find({
-      where: { userId, type: 'expense' },
+      where: [
+        { userId, type: 'expense', date: Like(`${monthKey}%`) },
+        { userId, type: 'expense', date: Like(`${persianMonthKey}%`) },
+      ],
     });
 
     const spent: Record<string, number> = {};
     for (const category of BUDGET_CATEGORIES) spent[category] = 0;
 
     for (const tx of expenses) {
+      // بررسی نهایی با یکسان‌سازی ارقام، برای حالت‌های نادر تاریخ با ارقام ترکیبی
       const normalizedDate = toEnglishDigits(tx.date || '');
       if (!normalizedDate.startsWith(monthKey)) continue;
 
@@ -50,10 +59,12 @@ export class BudgetService {
       spent[category] += Number(tx.amount) || 0;
     }
 
-    const deposits = await this.savingDepositRepository.find({ where: { userId } });
+    // تاریخ واریزهای پس‌انداز همیشه توسط خود سرور و با ارقام انگلیسی تولید می‌شه
+    // (نگاه کنید به SavingsService.todayJalaliString)، پس نیازی به حالت فارسی نیست.
+    const deposits = await this.savingDepositRepository.find({
+      where: { userId, date: Like(`${monthKey}%`) },
+    });
     for (const deposit of deposits) {
-      const normalizedDate = toEnglishDigits(deposit.date || '');
-      if (!normalizedDate.startsWith(monthKey)) continue;
       spent[SAVINGS_BUDGET_CATEGORY] += Number(deposit.amount) || 0;
     }
 
@@ -165,14 +176,25 @@ export class BudgetService {
       budget = this.budgetRepository.create({ userId, month, income, categories: [] });
     }
 
+    // به‌جای حذف و ساخت دوباره‌ی همه‌ی ردیف‌های دسته‌بندی در هر بار ذخیره،
+    // ردیف‌های موجود رو (با تطبیق نام دسته) به‌روزرسانی می‌کنیم تا هم نوشتار
+    // دیتابیس کمتر بشه و هم شناسه‌ی ردیف‌ها حفظ بشه.
+    const existingByName = new Map((budget.categories || []).map((c) => [c.category, c]));
+
     budget.income = income;
-    budget.categories = categories.map((c) =>
-      this.budgetCategoryRepository.create({
+    budget.categories = categories.map((c) => {
+      const existing = existingByName.get(c.category);
+      if (existing) {
+        existing.percentage = c.percentage;
+        existing.amount = c.amount;
+        return existing;
+      }
+      return this.budgetCategoryRepository.create({
         category: c.category,
         percentage: c.percentage,
         amount: c.amount,
-      }),
-    );
+      });
+    });
 
     return this.budgetRepository.save(budget);
   }
