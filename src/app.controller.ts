@@ -1,4 +1,5 @@
 import { Controller, Get, Render } from '@nestjs/common';
+import { BUDGET_CATEGORIES } from './budget/budget.constants';
 
 @Controller()
 export class AppController {
@@ -17,7 +18,9 @@ export class AppController {
   @Get('transactions')
   @Render('transactions')
   transactions() {
-    return { title: 'تراکنش‌ها' };
+    // دسته‌بندی‌ها از همون منبع واحدی خونده می‌شن که BudgetService استفاده می‌کنه،
+    // تا هیچ‌وقت لیست دسته‌های فرم تراکنش با دسته‌های صفحه‌ی بودجه ناهم‌خوان نشه.
+    return { title: 'تراکنش‌ها', categories: BUDGET_CATEGORIES };
   }
 
   @Get('budget')
