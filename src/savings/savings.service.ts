@@ -129,7 +129,7 @@ export class SavingsService {
     return this.getOverview(userId);
   }
 
-  // ===== ویرایش هدف (بدون تغییر مبلغ فعلی از این مسیر؛ برای اون «افزودن مبلغ» هست) =====
+  // ===== ویرایش هدف =====
   async update(userId: number, id: number, dto: UpdateSavingGoalDto) {
     const goal = await this.findOwned(userId, id);
 
@@ -138,8 +138,25 @@ export class SavingsService {
     if (dto.deadline !== undefined) goal.deadline = dto.deadline || null;
     if (dto.reminder !== undefined) goal.reminder = dto.reminder;
 
-    // اگه مبلغ فعلی هم صراحتاً ویرایش بشه (نه از طریق افزودن مبلغ)، مستقیم جایگزین می‌شه
-    if (dto.currentAmount !== undefined) goal.currentAmount = dto.currentAmount;
+    // اگه مبلغ فعلی هم صراحتاً از این مسیر ویرایش بشه، به‌جای جایگزینی مستقیم،
+    // تفاوتش با مقدار قبلی به‌صورت یک رکورد «واریز» (مثبت یا منفی) ثبت می‌شه.
+    // چون صفحه‌ی بودجه، «هزینه‌ی سرمایه‌گذاری» رو از روی همین رکوردهای واریز و
+    // برای ماه جاری جمع می‌زنه؛ اگه اینجا فقط goal.currentAmount عوض بشه بدون
+    // ثبت رکورد واریز، بودجه‌ی ماه با مبلغ واقعی پس‌انداز هم‌خوانی نخواهد داشت.
+    if (dto.currentAmount !== undefined) {
+      const delta = Number(dto.currentAmount) - Number(goal.currentAmount);
+      if (delta !== 0) {
+        await this.savingDepositRepository.save(
+          this.savingDepositRepository.create({
+            savingGoalId: goal.id,
+            userId,
+            amount: delta,
+            date: this.todayJalaliString(),
+          }),
+        );
+      }
+      goal.currentAmount = dto.currentAmount;
+    }
 
     await this.savingGoalRepository.save(goal);
     return this.getOverview(userId);
