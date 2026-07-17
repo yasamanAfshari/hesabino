@@ -72,16 +72,9 @@
                 <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
               </div>
               <div class="options max-h-52 overflow-y-auto">
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خوراک</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید و پوشاک</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">حمل و نقل</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">تفریح و سرگرمی</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سلامت و تناسب اندام</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">آموزش و توسعه</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سرمایه گذاری</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">بدهی</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">مسکن و خدمات</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سایر</div>
+                <% categories.forEach((cat) => { %>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100"><%= cat %></div>
+                <% }) %>
               </div>
             </div>
           </div>
@@ -261,16 +254,9 @@
                     <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
                   </div>
                   <div class="options max-h-52 overflow-y-auto">
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خوراک</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید و پوشاک</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">حمل و نقل</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">تفریح و سرگرمی</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سلامت و تناسب اندام</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">آموزش و توسعه</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سرمایه گذاری</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">بدهی</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">مسکن و خدمات</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سایر</div>
+                    <% categories.forEach((cat) => { %>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100"><%= cat %></div>
+                    <% }) %>
                   </div>
                 </div>
               </div>

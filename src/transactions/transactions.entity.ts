@@ -13,6 +13,9 @@ import { User } from '../users/users.entity';
 export type TransactionType = 'income' | 'expense';
 
 @Entity('transactions')
+// این ایندکس ترکیبی مخصوص کوئری‌ای هست که BudgetService برای جمع هزینه‌های
+// هر ماه (به تفکیک کاربر و نوع تراکنش) اجرا می‌کنه.
+@Index(['userId', 'type', 'date'])
 export class Transaction {
   @PrimaryGeneratedColumn()
   id: number;
