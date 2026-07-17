@@ -12,6 +12,9 @@ import { Transaction } from './transactions/transactions.entity';
 import { BudgetModule } from './budget/budget.module';
 import { Budget } from './budget/budget.entity';
 import { BudgetCategory } from './budget/budget-category.entity';
+import { SavingsModule } from './savings/savings.module';
+import { SavingGoal } from './savings/saving-goal.entity';
+import { SavingDeposit } from './savings/saving-deposit.entity';
 
 @Module({
   imports: [
@@ -27,7 +30,7 @@ import { BudgetCategory } from './budget/budget-category.entity';
         username: config.get<string>('DB_USERNAME', 'root'),
         password: config.get<string>('DB_PASSWORD', ''),
         database: config.get<string>('DB_NAME', 'hesabino'),
-        entities: [User, Transaction, Budget, BudgetCategory],
+        entities: [User, Transaction, Budget, BudgetCategory, SavingGoal, SavingDeposit],
         synchronize: true,
       }),
     }),
@@ -35,6 +38,7 @@ import { BudgetCategory } from './budget/budget-category.entity';
     AuthModule,
     TransactionsModule,
     BudgetModule,
+    SavingsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

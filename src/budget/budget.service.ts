@@ -4,10 +4,15 @@ import { Repository } from 'typeorm';
 import { Budget } from './budget.entity';
 import { BudgetCategory } from './budget-category.entity';
 import { Transaction } from '../transactions/transactions.entity';
+import { SavingDeposit } from '../savings/saving-deposit.entity';
 import { BUDGET_CATEGORIES, DEFAULT_BUDGET_ALLOCATION } from './budget.constants';
 import { currentJalaliMonthKey, toEnglishDigits } from './date.util';
 import { CalculateBudgetDto } from './dto/calculate-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
+
+// دسته‌ای که مبلغ پس‌انداز شده توش لحاظ می‌شه (چون از نظر بودجه‌بندی، پس‌انداز
+// همون سرمایه‌گذاریه)
+const SAVINGS_BUDGET_CATEGORY = 'سرمایه‌گذاری';
 
 @Injectable()
 export class BudgetService {
@@ -18,11 +23,14 @@ export class BudgetService {
     private budgetCategoryRepository: Repository<BudgetCategory>,
     @InjectRepository(Transaction)
     private transactionsRepository: Repository<Transaction>,
+    @InjectRepository(SavingDeposit)
+    private savingDepositRepository: Repository<SavingDeposit>,
   ) {}
 
   // ===== جمع هزینه‌های واقعی ماه جاری، به تفکیک دسته‌بندی =====
   // چون تاریخ تراکنش‌ها یک رشته‌ی آزاد شمسی است (و ممکنه با ارقام فارسی ذخیره شده باشه)،
   // مقایسه‌ی ماه رو بعد از یکسان‌سازی ارقام و روی پیشوند «YYYY/MM» انجام می‌دیم.
+  // مبلغی که همین ماه به هر هدف پس‌انداز اضافه شده هم به دسته‌ی «سرمایه‌گذاری» اضافه می‌شه.
   private async getSpentByCategory(
     userId: number,
     monthKey: string,
@@ -40,6 +48,13 @@ export class BudgetService {
 
       const category = tx.category && spent[tx.category] !== undefined ? tx.category : 'سایر';
       spent[category] += Number(tx.amount) || 0;
+    }
+
+    const deposits = await this.savingDepositRepository.find({ where: { userId } });
+    for (const deposit of deposits) {
+      const normalizedDate = toEnglishDigits(deposit.date || '');
+      if (!normalizedDate.startsWith(monthKey)) continue;
+      spent[SAVINGS_BUDGET_CATEGORY] += Number(deposit.amount) || 0;
     }
 
     return spent;

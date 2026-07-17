@@ -38,7 +38,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg ">کل اهداف</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5">۳ عدد</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5" id="savingsTotalGoals">۰ عدد</div>
             </div>
           </div>
         </div>
@@ -53,7 +53,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg ">محقق شده</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5">۰ عدد</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5" id="savingsAchievedGoals">۰ عدد</div>
             </div>
           </div>
         </div>
@@ -67,7 +67,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg ">مجموع هدف</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5">۲,۵۰۰,۰۰۰ تومان</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5" id="savingsTotalGoalAmount">۰ تومان</div>
             </div>
           </div>
         </div>
@@ -84,7 +84,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg ">پس انداز شده</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5">۴۵,۰۰۰,۰۰۰ تومان</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5" id="savingsTotalSaved">۰ تومان</div>
             </div>
           </div>
         </div>
@@ -98,7 +98,7 @@
             <h2 class="font-bold text-lg text-zinc-800">اهداف پس انداز</h2>
 
             <div class="flex items-center gap-3">
-              <button class="main-btn" onclick="openModal('addSaving')">پس انداز جدید</button>
+              <button class="main-btn" onclick="SavingsApp.openAddModal()">پس انداز جدید</button>
               <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center">
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M13.0216 3.1525C9.43581 3.1525 6.52164 6.06666 6.52164 9.6525V12.7833C6.52164 13.4442 6.23997 14.4517 5.90414 15.015L4.65831 17.0842C3.88914 18.3625 4.41997 19.7817 5.82831 20.2583C10.4975 21.8183 15.535 21.8183 20.2041 20.2583C21.515 19.825 22.0891 18.2758 21.3741 17.0842L20.1283 15.015C19.8033 14.4517 19.5216 13.4442 19.5216 12.7833V9.6525C19.5216 6.0775 16.5966 3.1525 13.0216 3.1525Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
@@ -111,192 +111,8 @@
         </div>
 
         <div class="h-[86%] overflow-auto scrollbar px-2">
-          <div class="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 grc gap-4 mt-2">
-
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md">
-              <div class="cursor-pointer" onclick="openModal('editSaving')" title="ویرایش">
-                <!-- Title & Date -->
-                <div class="flex justify-between items-center mb-2">
-                  <span class="font-bold text-zinc-800 text-base">خرید طلا</span>
-                  <span class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">۱۴۰۵/۰۵/۰۱</span>
-                </div>
-
-                <div class="mt-3">
-                  <div class="flex justify-between text-sm mb-1">
-                    <span>۶۰٪</span>
-                  </div>
-                  <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div class="bg-green-color h-2.5 rounded-full progress-bar" style="width: 60%"></div>
-                  </div>
-                  <div class="flex justify-between text-sm mt-1">
-                    <span class="text-green-color">ذخیره شده: ۳۰,۰۰۰,۰۰۰ تومان </span>
-                    <span class="text-gray-500">۵۰,۰۰۰,۰۰۰ / ۲۵,۰۰۰,۰۰۰</span>
-                  </div>
-                </div>
-
-                <!-- Monthly Need -->
-                <div class="flex items-center justify-between gap-1 text-sm bg-zinc-100 rounded-xl m-3 p-2 border border-zinc-300">
-                  <div>
-                    نیاز ماهانه
-                  </div>
-                  <div class="font-bold text-main-color">۲۵,۰۰۰,۰۰۰</div>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="flex justify-end items-center pt-2 border-t border-gray-200 gap-3">
-                <button class="text-sm main-btn transition-colors font-medium flex items-center gap-1 bg-main-color/5 px-3 py-1 rounded-full" onclick="openModal('addPriceToSaving')">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  افزودن مبلغ
-                </button>
-                <button class="bg-red-400 p-1 rounded-md w-10 flex justify-center">
-                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="white" stroke-width="2">
-                    <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                  </svg>
-                </button>
-
-              </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md">
-              <div class="cursor-pointer" onclick="openModal('addPriceToSaving')" title="ویرایش">  
-                <!-- Title & Date -->
-                <div class="flex justify-between items-center mb-2">
-                  <span class="font-bold text-zinc-800 text-base">خرید ساعت هوشمند</span>
-                  <span class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">۱۴۰۵/۰۵/۰۱</span>
-                </div>
-
-                <div class="mt-3">
-                  <div class="flex justify-between text-sm mb-1">
-                    <span>۹۰٪</span>
-                  </div>
-                  <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div class="bg-green-color h-2.5 rounded-full progress-bar" style="width: 90%"></div>
-                  </div>
-                  <div class="flex justify-between text-sm mt-1">
-                    <span class="text-green-color">ذخیره شده: ۴۰,۰۰۰,۰۰۰ تومان </span>
-                    <span class="text-gray-500">۵۰,۰۰۰,۰۰۰ / ۱۰,۰۰۰,۰۰۰</span>
-                  </div>
-                </div>
-
-                <!-- Monthly Need -->
-                <div class="flex items-center justify-between gap-1 text-sm bg-zinc-100 rounded-xl m-3 p-2 border border-zinc-300">
-                  <div>
-                    نیاز ماهانه
-                  </div>
-                  <div class="font-bold text-main-color">۵,۰۰۰,۰۰۰</div>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="flex justify-end items-center pt-2 border-t border-gray-200 gap-3">
-                <button class="text-sm main-btn transition-colors font-medium flex items-center gap-1 bg-main-color/5 px-3 py-1 rounded-full" onclick="openModal('addPriceToSaving')">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  افزودن مبلغ
-                </button>
-                <button class="bg-red-400 p-1 rounded-md w-10 flex justify-center">
-                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="white" stroke-width="2">
-                    <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                  </svg>
-                </button>
-
-              </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md cursor-pointer">
-              <!-- Title & Date -->
-              <div class="flex justify-between items-center mb-2">
-                <span class="font-bold text-zinc-800 text-base">تست</span>
-                <span class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">۱۴۰۵/۰۵/۰۱</span>
-              </div>
-
-              <div class="mt-3">
-                <div class="flex justify-between text-sm mb-1">
-                  <span>۵۷٪</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                  <div class="bg-orange-color h-2.5 rounded-full progress-bar" style="width: 40%"></div>
-                </div>
-                <div class="flex justify-between text-sm mt-1">
-                  <span class="text-orange-color">ذخیره شده: ۲۵,۵۰۰,۰۰۰ تومان </span>
-                  <span class="text-gray-500">۵۰,۰۰۰,۰۰۰ / ۲۴,۵۰۰,۰۰۰</span>
-                </div>
-              </div>
-
-              <!-- Monthly Need -->
-              <div class="flex items-center justify-between gap-1 text-sm bg-zinc-100 rounded-xl m-3 p-2 border border-zinc-300">
-                <div>
-                  نیاز ماهانه
-                </div>
-                <div class="font-bold text-main-color">مهلت تمام شده</div>
-              </div>
-
-              <!-- Actions -->
-              <div class="flex justify-end items-center pt-2 border-t border-gray-200 gap-3">
-                <button class="text-sm main-btn transition-colors font-medium flex items-center gap-1 bg-main-color/5 px-3 py-1 rounded-full">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  افزودن مبلغ
-                </button>
-                <button class="bg-red-400 p-1 rounded-md w-10 flex justify-center">
-                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="white" stroke-width="2">
-                    <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                  </svg>
-                </button>
-
-              </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md cursor-pointer">
-              <!-- Title & Date -->
-              <div class="flex justify-between items-center mb-2">
-                <span class="font-bold text-zinc-800 text-base">تست</span>
-                <span class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">۱۴۰۵/۰۵/۰۱</span>
-              </div>
-
-              <div class="mt-3">
-                <div class="flex justify-between text-sm mb-1">
-                  <span>۵۷٪</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                  <div class="bg-red-color h-2.5 rounded-full progress-bar" style="width: 20%"></div>
-                </div>
-                <div class="flex justify-between text-sm mt-1">
-                  <span class="text-red-color">ذخیره شده: ۲۵,۵۰۰,۰۰۰ تومان </span>
-                  <span class="text-gray-500">۵۰,۰۰۰,۰۰۰ / ۲۴,۵۰۰,۰۰۰</span>
-                </div>
-              </div>
-
-              <!-- Monthly Need -->
-              <div class="flex items-center justify-between gap-1 text-sm bg-zinc-100 rounded-xl m-3 p-2 border border-zinc-300">
-                <div>
-                  نیاز ماهانه
-                </div>
-                <div class="font-bold text-main-color">مهلت تمام شده</div>
-              </div>
-
-              <!-- Actions -->
-              <div class="flex justify-end items-center pt-2 border-t border-gray-200 gap-3">
-                <button class="text-sm main-btn transition-colors font-medium flex items-center gap-1 bg-main-color/5 px-3 py-1 rounded-full">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  افزودن مبلغ
-                </button>
-                <button class="bg-red-400 p-1 rounded-md w-10 flex justify-center">
-                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="white" stroke-width="2">
-                    <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                  </svg>
-                </button>
-
-              </div>
-            </div>
-
+          <div class="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 grc gap-4 mt-2" id="savingsGoalsList">
+            <p class="text-center text-gray-400 mt-6 col-span-full">در حال بارگذاری اهداف پس‌انداز...</p>
           </div>
         </div>
 
@@ -320,20 +136,22 @@
       </div>
 
       <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+        <div id="addSavingError" class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2"></div>
+
         <div class="relative">
-          <input type="text" placeholder="نام هدف" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <input type="text" id="addSavingTitle" placeholder="نام هدف" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div class="relative">
-          <input type="number" placeholder="مبلغ هدف" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <input type="number" id="addSavingTarget" placeholder="مبلغ هدف" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div class="relative">
-          <input type="number" placeholder="مبلغ فعلی پس انداز" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <input type="number" id="addSavingCurrent" placeholder="مبلغ فعلی پس انداز" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div class="relative">
-          <input type="text" id="filterDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
+          <input type="text" id="addSavingDeadline" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="مهلت (مثلاً ۱۴۰۵/۰۵/۰۱)" autocomplete="off">
           <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <rect x="3" y="4" width="18" height="18" rx="2"></rect>
             <path d="M16 2v4M8 2v4M3 10h18"></path>
@@ -342,7 +160,7 @@
 
         <div>
           <label class="reminder-toggle">
-            <input type="checkbox" id="addReminder">
+            <input type="checkbox" id="addSavingReminder">
             <span class="slider-track"></span>
             <span class="toggle-label"> یادآور</span>
           </label>
@@ -352,7 +170,7 @@
       <!-- فوتر ثابت -->
       <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
         <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
-        <button class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+        <button class="main-btn px-4 py-2 rounded-lg" id="addSavingSubmitBtn" onclick="SavingsApp.submitCreate()">ثبت</button>
       </div>
     </div>
   </div>
@@ -371,20 +189,23 @@
       </div>
 
       <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+        <input type="hidden" id="editSavingId">
+        <div id="editSavingError" class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2"></div>
+
         <div class="relative">
-          <input type="text" placeholder="نام هدف" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <input type="text" id="editSavingTitle" placeholder="نام هدف" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div class="relative">
-          <input type="number" placeholder="مبلغ هدف" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <input type="number" id="editSavingTarget" placeholder="مبلغ هدف" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div class="relative">
-          <input type="number" placeholder="مبلغ فعلی پس انداز" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <input type="number" id="editSavingCurrent" placeholder="مبلغ فعلی پس انداز" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div class="relative">
-          <input type="text" id="filterDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
+          <input type="text" id="editSavingDeadline" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="مهلت (مثلاً ۱۴۰۵/۰۵/۰۱)" autocomplete="off">
           <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <rect x="3" y="4" width="18" height="18" rx="2"></rect>
             <path d="M16 2v4M8 2v4M3 10h18"></path>
@@ -393,7 +214,7 @@
 
         <div>
           <label class="reminder-toggle">
-            <input type="checkbox" id="addReminder">
+            <input type="checkbox" id="editSavingReminder">
             <span class="slider-track"></span>
             <span class="toggle-label"> یادآور</span>
           </label>
@@ -402,8 +223,9 @@
 
       <!-- فوتر ثابت -->
       <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+        <button onclick="SavingsApp.submitDelete()" class="px-4 py-2 rounded-lg border border-red-color text-red-color">حذف هدف</button>
         <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
-        <button class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+        <button class="main-btn px-4 py-2 rounded-lg" id="editSavingSubmitBtn" onclick="SavingsApp.submitUpdate()">ثبت</button>
       </div>
     </div>
   </div>
@@ -421,16 +243,18 @@
         </button>
       </div>
 
-      <div class="modal-body overflow-y-auto flex-1 scrollbar px-6 py-4">
+      <div class="modal-body overflow-y-auto flex-1 scrollbar px-6 py-4 flex flex-col gap-3">
+        <input type="hidden" id="addPriceGoalId">
+        <div id="addPriceError" class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2"></div>
         <div class="relative">
-          <input type="number" placeholder="مبلغ " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <input type="number" id="addPriceAmount" placeholder="مبلغ " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
       </div>
 
       <!-- فوتر ثابت -->
       <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
         <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
-        <button class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+        <button class="main-btn px-4 py-2 rounded-lg" id="addPriceSubmitBtn" onclick="SavingsApp.submitDeposit()">ثبت</button>
       </div>
     </div>
   </div>
@@ -448,6 +272,8 @@
       document.body.classList.remove('overflow-hidden');
     }
   </script>
+
+  <script src="/JS/savings.js" defer></script>
 </body>
 
 </html>

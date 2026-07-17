@@ -42,3 +42,28 @@ export function currentJalaliMonthKey(date: Date = new Date()): string {
   const [jy, jm] = gregorianToJalali(date.getFullYear(), date.getMonth() + 1, date.getDate());
   return `${jy}/${String(jm).padStart(2, '0')}`;
 }
+
+// تاریخ شمسی جاری به صورت اجزای عددی { y, m, d }
+export function currentJalaliDate(date: Date = new Date()): { y: number; m: number; d: number } {
+  const [jy, jm, jd] = gregorianToJalali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  return { y: jy, m: jm, d: jd };
+}
+
+// تجزیه‌ی یک رشته‌ی تاریخ شمسی (با هر ترکیبی از ارقام فارسی/انگلیسی و جداکننده‌ی «/» یا «-»)
+// به اجزای عددی. اگر فرمت نامعتبر باشه null برمی‌گردونه.
+export function parseJalaliDate(input: string): { y: number; m: number; d: number } | null {
+  if (!input) return null;
+  const normalized = toEnglishDigits(input).trim();
+  const match = normalized.match(/^(\d{3,4})[/-](\d{1,2})[/-](\d{1,2})$/);
+  if (!match) return null;
+  const [, y, m, d] = match;
+  return { y: Number(y), m: Number(m), d: Number(d) };
+}
+
+// تعداد ماه‌های فاصله بین دو تاریخ شمسی (to منهای from)، فقط بر اساس سال/ماه
+export function monthsBetween(
+  from: { y: number; m: number },
+  to: { y: number; m: number },
+): number {
+  return (to.y - from.y) * 12 + (to.m - from.m);
+}
