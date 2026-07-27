@@ -73,7 +73,6 @@
     --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;
-    --container-xs: 20rem;
     --container-md: 28rem;
     --container-lg: 32rem;
     --container-2xl: 42rem;
@@ -571,6 +570,9 @@
   .max-h-\[90vh\] {
     max-height: 90vh;
   }
+  .min-h-0 {
+    min-height: 0;
+  }
   .min-h-\[100px\] {
     min-height: 100px;
   }
@@ -994,9 +996,6 @@
   .bg-gray-300 {
     background-color: var(--color-gray-300);
   }
-  .bg-green-50 {
-    background-color: var(--color-green-50);
-  }
   .bg-green-color {
     background-color: var(--color-green-color);
   }
@@ -1329,9 +1328,6 @@
   .text-green-600 {
     color: var(--color-green-600);
   }
-  .text-green-700 {
-    color: var(--color-green-700);
-  }
   .text-green-color {
     color: var(--color-green-color);
   }
@@ -1343,9 +1339,6 @@
   }
   .text-main-color {
     color: var(--color-main-color);
-  }
-  .text-orange-600 {
-    color: var(--color-orange-600);
   }
   .text-orange-700 {
     color: var(--color-orange-700);
