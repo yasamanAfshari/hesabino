@@ -1,5 +1,6 @@
 import {
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -20,6 +21,11 @@ export class CreateTransactionDto {
   @MaxLength(16)
   time?: string;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(150)
+  title?: string;
+
   @IsIn(['income', 'expense'], {
     message: 'نوع مالی باید درآمد (income) یا هزینه (expense) باشد',
   })
@@ -39,6 +45,12 @@ export class CreateTransactionDto {
   @IsString()
   @MaxLength(100)
   account?: string;
+
+  // شناسه‌ی حساب (از ماژول Accounts)؛ برای محاسبه‌ی موجودی لحظه‌ای حساب استفاده می‌شود
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'شناسه حساب نامعتبر است' })
+  accountId?: number;
 
   @IsNotEmpty({ message: 'مبلغ الزامی است' })
   @Type(() => Number)

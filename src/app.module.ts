@@ -19,6 +19,10 @@ import { ChequesModule } from './cheques/cheques.module';
 import { Cheque } from './cheques/cheque.entity';
 import { DebtsModule } from './debts/debts.module';
 import { DebtRecord } from './debts/debt-record.entity';
+import { AccountsModule } from './accounts/accounts.module';
+import { Account } from './accounts/accounts.entity';
+import { TransfersModule } from './transfers/transfers.module';
+import { Transfer } from './transfers/transfer.entity';
 
 @Module({
   imports: [
@@ -34,7 +38,7 @@ import { DebtRecord } from './debts/debt-record.entity';
         username: config.get<string>('DB_USERNAME', 'root'),
         password: config.get<string>('DB_PASSWORD', ''),
         database: config.get<string>('DB_NAME', 'hesabino'),
-        entities: [User, Transaction, Budget, BudgetCategory, SavingGoal, SavingDeposit, Cheque, DebtRecord],
+        entities: [User, Transaction, Budget, BudgetCategory, SavingGoal, SavingDeposit, Cheque, DebtRecord, Account, Transfer],
         synchronize: true,
       }),
     }),
@@ -45,6 +49,8 @@ import { DebtRecord } from './debts/debt-record.entity';
     SavingsModule,
     ChequesModule,
     DebtsModule,
+    AccountsModule,
+    TransfersModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

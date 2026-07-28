@@ -9,6 +9,7 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../users/users.entity';
+import { Account } from '../accounts/accounts.entity';
 
 export type TransactionType = 'income' | 'expense';
 
@@ -41,6 +42,10 @@ export class Transaction {
   @Column({ type: 'enum', enum: ['income', 'expense'] })
   type: TransactionType;
 
+  // عنوان کوتاه تراکنش (مثلاً «بنزین ماشین»، «حقوق تیر») — جدا از توضیحات/یادداشت
+  @Column({ type: 'varchar', length: 150, nullable: true })
+  title: string | null;
+
   // نوع تراکنش (مثلاً خرید اینترنتی، انتقال به کارت و ...)
   @Column({ type: 'varchar', length: 100, nullable: true })
   subtype: string | null;
@@ -49,9 +54,19 @@ export class Transaction {
   @Column({ type: 'varchar', length: 100, nullable: true })
   category: string | null;
 
-  // حساب مرتبط
+  // حساب مرتبط (نام آزاد؛ برای سازگاری با داده‌های قدیمی حفظ شده، اما فیلد اصلی از این پس accountId است)
   @Column({ type: 'varchar', length: 100, nullable: true })
   account: string | null;
+
+  // حساب مرتبط (ارجاع واقعی به ماژول Accounts). با حذف/آرشیو حساب، تراکنش از بین
+  // نمی‌رود؛ فقط ارجاعش خالی می‌شود تا موجودی حساب‌های دیگر خراب نشود.
+  @ManyToOne(() => Account, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'accountId' })
+  accountRef: Account | null;
+
+  @Index()
+  @Column({ nullable: true })
+  accountId: number | null;
 
   // مبلغ به تومان (در دیتابیس decimal ذخیره می‌شود؛ درایور mysql آن را به صورت رشته برمی‌گرداند
   // که در TransactionsService.serialize() به عدد تبدیل می‌شود)

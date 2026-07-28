@@ -5,6 +5,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><% title = 'تراکنش ها' %></title>
+  <style>
+    /* گزینه‌های «نوع تراکنش» و «دسته» که متعلق به نوع مالی انتخاب‌نشده هستن مخفی می‌شن */
+    #modalSubtypeSelect .option.fintype-hidden,
+    #modalCategorySelect .option.fintype-hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 
 <body class="bg-main-color overflow-hidden">
@@ -167,6 +174,12 @@
 
           <div class="grid grid-cols-2 gap-3.5">
 
+            <div class="col-span-2">
+              <div class="relative">
+                <input type="text" id="modalTitleInput" placeholder="عنوان (مثلاً بنزین ماشین)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+              </div>
+            </div>
+
             <div class="col-span-1">
               <div class="relative">
                 <input type="text" id="modalDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
@@ -190,30 +203,6 @@
             </div>
 
             <div class="col-span-1">
-              <div id="modalSubtypeSelect" class="custom-select relative">
-                <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
-                  <span class="selected-value text-gray-700" data-placeholder="نوع تراکنش">نوع تراکنش</span>
-                  <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="m6 9 6 6 6-6"></path>
-                  </svg>
-                </button>
-
-                <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
-                  <div class="p-2 border-b border-main-color-25">
-                    <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
-                  </div>
-                  <div class="options max-h-52 overflow-y-auto">
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید اینترنتی</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">خرید فروشگاه</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">انتقال به کارت</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">دریافت از کارت</div>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">کارمزد</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-span-1">
               <div id="modalFinancialTypeSelect" class="custom-select relative">
                 <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
                   <span class="selected-value text-gray-700" data-placeholder="نوع مالی">نوع مالی</span>
@@ -229,6 +218,42 @@
                   <div class="options max-h-52 overflow-y-auto">
                     <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="income">واریز (درآمد)</div>
                     <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="expense">برداشت (هزینه)</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="transfer" id="modalTransferOption">انتقال بین حساب‌ها</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-span-1" id="modalSubtypeWrapper">
+              <div id="modalSubtypeSelect" class="custom-select relative">
+                <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                  <span class="selected-value text-gray-700" data-placeholder="نوع تراکنش">نوع تراکنش</span>
+                  <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+                </button>
+
+                <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+                  <div class="p-2 border-b border-main-color-25">
+                    <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                  </div>
+                  <div class="options max-h-52 overflow-y-auto">
+                    <!-- گزینه‌های برداشت (هزینه) -->
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="expense">خرید اینترنتی</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="expense">خرید فروشگاه</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="expense">انتقال به کارت</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="expense">برداشت نقدی</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="expense">پرداخت قبض</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="expense">کارمزد</div>
+                    <!-- گزینه‌های واریز (درآمد) -->
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="income">دریافت از کارت</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="income">واریز نقدی</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="income">حقوق و دستمزد</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="income">پاداش و هدیه</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="income">بازگشت وجه</div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="income">سود سپرده/سرمایه‌گذاری</div>
+                    <!-- مشترک بین هر دو -->
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100">سایر</div>
                   </div>
                 </div>
               </div>
@@ -240,7 +265,7 @@
               </div>
             </div>
 
-            <div class="col-span-1">
+            <div class="col-span-1" id="modalCategoryWrapper">
               <div id="modalCategorySelect" class="custom-select relative">
                 <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
                   <span class="selected-value text-gray-700" data-placeholder="دسته">دسته</span>
@@ -255,22 +280,38 @@
                   </div>
                   <div class="options max-h-52 overflow-y-auto">
                     <% categories.forEach((cat) => { %>
-                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100"><%= cat %></div>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="expense"><%= cat %></div>
+                    <% }) %>
+                    <% incomeCategories.forEach((cat) => { %>
+                    <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-fintype="income"><%= cat %></div>
                     <% }) %>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="col-span-2">
+            <div class="col-span-2" id="modalAccountWrapper">
               <div class="relative">
-                <input type="text" id="modalAccountInput" placeholder="حساب " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                <select id="modalAccountInput" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white">
+                  <option value="">بدون حساب</option>
+                </select>
               </div>
+            </div>
+
+            <!-- فقط برای «انتقال بین حساب‌ها» -->
+            <div class="col-span-1 hidden" id="modalTransferFromWrapper">
+              <label class="text-xs text-zinc-500 mb-1 block">از حساب</label>
+              <select id="modalTransferFromAccount" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
+            </div>
+
+            <div class="col-span-1 hidden" id="modalTransferToWrapper">
+              <label class="text-xs text-zinc-500 mb-1 block">به حساب</label>
+              <select id="modalTransferToAccount" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
             </div>
 
             <div class="col-span-2">
               <div class="relative">
-                <textarea rows="6" id="modalDescriptionInput" class="w-full border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="توضیحات مربوطه را بنویسید"></textarea>
+                <textarea rows="6" id="modalDescriptionInput" class="w-full border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="یادداشت (اختیاری)"></textarea>
               </div>
             </div>
           </div>
@@ -342,6 +383,10 @@
 
         <div class="transaction-detail-list">
           <div class="transaction-detail-row flex items-center py-4 border-b border-gray-100 text-gray-500">
+            <span class="w-28 inline-block">عنوان :</span>
+            <span id="viewTitle" class="transaction-detail-value text-gray-800 font-semibold">-</span>
+          </div>
+          <div class="transaction-detail-row flex items-center py-4 border-b border-gray-100 text-gray-500">
             <span class="w-28 inline-block">دسته بندی :</span>
             <span id="viewCategory" class="transaction-detail-value text-gray-800 font-semibold">-</span>
           </div>
@@ -350,7 +395,7 @@
             <span id="viewSubtype" class="transaction-detail-value text-gray-800 font-semibold">-</span>
           </div>
           <div class="transaction-detail-row flex items-center py-4 border-b border-gray-100 text-gray-500">
-            <span class="w-28 inline-block">توضیحات :</span>
+            <span class="w-28 inline-block">یادداشت :</span>
             <span id="viewDescription" class="transaction-detail-value text-gray-800 font-semibold">-</span>
           </div>
           <div class="transaction-detail-row flex items-center py-4 border-b border-gray-100 text-gray-500">

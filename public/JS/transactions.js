@@ -6,6 +6,9 @@
   // لیست کامل تراکنش‌های کاربر که از سرور خونده شده (فیلترها روی همین آرایه اعمال می‌شن)
   let allTransactions = [];
 
+  // لیست حساب‌های فعال کاربر؛ برای پر کردن سلکت‌باکس «حساب» در فرم ثبت/ویرایش تراکنش
+  let userAccounts = [];
+
   function authHeaders(extra) {
     const token = localStorage.getItem('access_token');
     return Object.assign({ Authorization: `Bearer ${token}` }, extra || {});
@@ -117,7 +120,10 @@
     return `
       <tr class="transition-all duration-150" data-id="${tx.id}">
         <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">${escapeHtml(dateTime)}</td>
-        <td class="px-5 py-3.5 text-gray-700">${escapeHtml(tx.description || '-')}</td>
+        <td class="px-5 py-3.5 text-gray-700">
+          <div class="font-medium text-gray-800">${escapeHtml(tx.title || tx.description || '-')}</div>
+          ${tx.title && tx.description ? `<div class="text-xs text-gray-400 italic">${escapeHtml(tx.description)}</div>` : ''}
+        </td>
         <td class="px-5 py-3.5"><span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">${escapeHtml(tx.category || '-')}</span></td>
         <td class="px-5 py-3.5"><span class="${typeBadgeClasses(tx.type)} px-2.5 py-1 rounded-full text-xs font-medium">${typeLabel(tx.type)}</span></td>
         <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">${formatAmount(tx.amount)}</td>
@@ -179,6 +185,95 @@
     setCustomSelectValue(containerId, '');
   }
 
+  // ===== واکنش فرم به انتخاب «نوع مالی» (واریز / برداشت / انتقال بین حساب‌ها) =====
+  // ۱) گزینه‌های «نوع تراکنش» و «دسته» فقط گزینه‌های مرتبط با نوع انتخاب‌شده رو نشون می‌دن
+  //    (مثلاً وقتی «واریز» انتخاب شده، «خرید فروشگاه» که مخصوص هزینه‌هاست نشون داده نمی‌شه)
+  // ۲) برای «انتقال بین حساب‌ها» اصلاً نوع تراکنش/دسته/حساب تکی معنی نداره؛ به‌جاش
+  //    دو فیلد «از حساب» و «به حساب» نشون داده می‌شه (چون این حرکت نه درآمده نه هزینه)
+  const TITLE_PLACEHOLDERS = {
+    income: 'عنوان (مثلاً حقوق تیر)',
+    expense: 'عنوان (مثلاً بنزین ماشین)',
+    transfer: 'عنوان انتقال (مثلاً شارژ کیف پول)',
+    '': 'عنوان (مثلاً بنزین ماشین)',
+  };
+
+  function applyFinancialTypeUI(finType) {
+    const subtypeWrapper = document.getElementById('modalSubtypeWrapper');
+    const categoryWrapper = document.getElementById('modalCategoryWrapper');
+    const accountWrapper = document.getElementById('modalAccountWrapper');
+    const transferFromWrapper = document.getElementById('modalTransferFromWrapper');
+    const transferToWrapper = document.getElementById('modalTransferToWrapper');
+    const currentSubtype = getCustomSelectValue('modalSubtypeSelect');
+    const currentCategory = getCustomSelectValue('modalCategorySelect');
+    const isTransfer = finType === 'transfer';
+
+    // فیلتر گزینه‌های «نوع تراکنش» بر اساس واریز/برداشت بودن
+    const subtypeContainer = document.getElementById('modalSubtypeSelect');
+    if (subtypeContainer) {
+      let selectedStillVisible = !currentSubtype;
+      subtypeContainer.querySelectorAll('.option').forEach((opt) => {
+        const optFinType = opt.dataset.fintype;
+        const visible = !optFinType || !finType || optFinType === finType;
+        opt.classList.toggle('fintype-hidden', !visible);
+        if (visible && currentSubtype && opt.textContent.trim() === currentSubtype) {
+          selectedStillVisible = true;
+        }
+      });
+      if (!selectedStillVisible) resetCustomSelect('modalSubtypeSelect');
+    }
+
+    // فیلتر گزینه‌های «دسته» بر اساس واریز/برداشت بودن (برای انتقال کلاً مخفی می‌شه)
+    const categoryContainer = document.getElementById('modalCategorySelect');
+    if (categoryContainer) {
+      let selectedStillVisible = !currentCategory;
+      categoryContainer.querySelectorAll('.option').forEach((opt) => {
+        const optFinType = opt.dataset.fintype;
+        const visible = !optFinType || !finType || optFinType === finType;
+        opt.classList.toggle('fintype-hidden', !visible);
+        if (visible && currentCategory && opt.textContent.trim() === currentCategory) {
+          selectedStillVisible = true;
+        }
+      });
+      if (!selectedStillVisible) resetCustomSelect('modalCategorySelect');
+    }
+
+    if (subtypeWrapper) subtypeWrapper.classList.toggle('hidden', isTransfer);
+    if (categoryWrapper) categoryWrapper.classList.toggle('hidden', isTransfer);
+    if (accountWrapper) accountWrapper.classList.toggle('hidden', isTransfer);
+    if (transferFromWrapper) transferFromWrapper.classList.toggle('hidden', !isTransfer);
+    if (transferToWrapper) transferToWrapper.classList.toggle('hidden', !isTransfer);
+
+    if (isTransfer) {
+      populateTransferAccountSelects();
+    }
+
+    const titleInput = document.getElementById('modalTitleInput');
+    if (titleInput) {
+      titleInput.placeholder = TITLE_PLACEHOLDERS[finType] || TITLE_PLACEHOLDERS[''];
+    }
+  }
+
+  // پر کردن سلکت‌باکس‌های «از حساب»/«به حساب» با حساب‌های فعال کاربر (برای حالت انتقال)
+  function populateTransferAccountSelects() {
+    const active = userAccounts.filter((a) => !a.isArchived);
+    const optionsHtml = active
+      .map((a) => `<option value="${a.id}">${escapeHtml(a.name)}</option>`)
+      .join('');
+    const fromSelect = document.getElementById('modalTransferFromAccount');
+    const toSelect = document.getElementById('modalTransferToAccount');
+    if (fromSelect) {
+      const prev = fromSelect.value;
+      fromSelect.innerHTML = optionsHtml;
+      if (prev) fromSelect.value = prev;
+    }
+    if (toSelect) {
+      const prev = toSelect.value;
+      toSelect.innerHTML = optionsHtml;
+      if (prev) toSelect.value = prev;
+      else if (active.length > 1 && !prev) toSelect.value = String(active[1].id);
+    }
+  }
+
   // هر بار که یک گزینه از سلکت‌باکس سفارشی کلیک می‌شه، مقدارش رو روی خودِ کانتینر ذخیره می‌کنیم
   // (این جدا از منطق باز/بسته کردن دراپ‌داون در public.js هست)
   function setupSelectValueTracking() {
@@ -189,6 +284,30 @@
         });
       });
     });
+
+    // انتخاب نوع مالی (واریز/برداشت) روی گزینه‌های «نوع تراکنش» و فیلد «دسته» اثر می‌ذاره
+    document.querySelectorAll('#modalFinancialTypeSelect .option').forEach((opt) => {
+      opt.addEventListener('click', () => applyFinancialTypeUI(opt.dataset.value));
+    });
+  }
+
+  // ===== بارگذاری حساب‌های کاربر و پر کردن سلکت‌باکس «حساب» در فرم تراکنش =====
+  async function loadUserAccounts() {
+    const select = document.getElementById('modalAccountInput');
+    if (!select) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/accounts`, { headers: authHeaders() });
+      if (!res.ok) throw new Error('خطا در دریافت حساب‌ها');
+      userAccounts = await res.json();
+
+      const previousValue = select.value;
+      select.innerHTML = '<option value="">بدون حساب</option>' +
+        userAccounts.map((a) => `<option value="${a.id}">${escapeHtml(a.name)}</option>`).join('');
+      if (previousValue) select.value = previousValue;
+    } catch (err) {
+      console.error('خطا در دریافت حساب‌ها برای فرم تراکنش:', err);
+    }
   }
 
   // ===== فرم ثبت/ویرایش =====
@@ -211,6 +330,11 @@
     resetCustomSelect('modalSubtypeSelect');
     resetCustomSelect('modalFinancialTypeSelect');
     resetCustomSelect('modalCategorySelect');
+    applyFinancialTypeUI('');
+    const accountSelect = document.getElementById('modalAccountInput');
+    if (accountSelect) accountSelect.value = '';
+    const titleInput = document.getElementById('modalTitleInput');
+    if (titleInput) titleInput.value = '';
     hideFormError();
   }
 
@@ -218,6 +342,10 @@
     resetTransactionForm();
     document.getElementById('transactionModalTitle').textContent = 'ثبت تراکنش جدید';
     document.getElementById('transactionSubmitBtn').textContent = 'ثبت';
+    // ثبت جدید یعنی می‌تونه واریز/برداشت/انتقال باشه؛ پس گزینه‌ی انتقال فعاله
+    const transferOption = document.getElementById('modalTransferOption');
+    if (transferOption) transferOption.classList.remove('hidden');
+    loadUserAccounts();
     window.openModal('addTransactionModal');
   }
 
@@ -248,18 +376,29 @@
     document.getElementById('transactionModalTitle').textContent = 'ویرایش تراکنش';
     document.getElementById('transactionSubmitBtn').textContent = 'ذخیره تغییرات';
 
+    // یک تراکنش ثبت‌شده نمی‌تونه به انتقال بین حساب‌ها تبدیل بشه (این دو تا جدول جدا هستن)
+    const transferOption = document.getElementById('modalTransferOption');
+    if (transferOption) transferOption.classList.add('hidden');
+
     const dateInput = document.getElementById('modalDatePicker');
     const timeInput = document.getElementById('modalTimePicker');
     if (dateInput) dateInput.value = tx.date || '';
     if (timeInput) timeInput.value = tx.time || '';
 
+    const titleInput = document.getElementById('modalTitleInput');
+    if (titleInput) titleInput.value = tx.title || '';
+
     setCustomSelectValue('modalSubtypeSelect', tx.subtype || '');
     setCustomSelectValue('modalFinancialTypeSelect', tx.type || '');
     setCustomSelectValue('modalCategorySelect', tx.category || '');
+    applyFinancialTypeUI(tx.type || '');
 
     document.getElementById('modalAmountInput').value = tx.amount != null ? tx.amount : '';
-    document.getElementById('modalAccountInput').value = tx.account || '';
     document.getElementById('modalDescriptionInput').value = tx.description || '';
+
+    await loadUserAccounts();
+    const accountSelect = document.getElementById('modalAccountInput');
+    if (accountSelect) accountSelect.value = tx.accountId != null ? String(tx.accountId) : '';
 
     window.openModal('addTransactionModal');
   }
@@ -268,21 +407,29 @@
     e.preventDefault();
     hideFormError();
 
+    const type = getCustomSelectValue('modalFinancialTypeSelect');
+
+    if (!type) {
+      showFormError('لطفاً نوع مالی (واریز/برداشت/انتقال) را انتخاب کنید');
+      return;
+    }
+
+    if (type === 'transfer') {
+      await submitTransferFromModal();
+      return;
+    }
+
     const date = (document.getElementById('modalDatePicker').value || '').trim();
     const time = (document.getElementById('modalTimePicker').value || '').trim();
-    const type = getCustomSelectValue('modalFinancialTypeSelect');
+    const title = (document.getElementById('modalTitleInput').value || '').trim();
     const subtype = getCustomSelectValue('modalSubtypeSelect');
     const category = getCustomSelectValue('modalCategorySelect');
     const amountRaw = document.getElementById('modalAmountInput').value;
-    const account = (document.getElementById('modalAccountInput').value || '').trim();
+    const accountIdRaw = document.getElementById('modalAccountInput').value;
     const description = (document.getElementById('modalDescriptionInput').value || '').trim();
 
     if (!date) {
       showFormError('لطفاً تاریخ تراکنش را وارد کنید');
-      return;
-    }
-    if (!type) {
-      showFormError('لطفاً نوع مالی (واریز/برداشت) را انتخاب کنید');
       return;
     }
     if (amountRaw === '' || Number(amountRaw) <= 0 || Number.isNaN(Number(amountRaw))) {
@@ -293,10 +440,11 @@
     const payload = {
       date,
       time: time || undefined,
+      title: title || undefined,
       type,
-      subtype: subtype || undefined,
-      category: category || undefined,
-      account: account || undefined,
+      subtype: subtype || null,
+      category: category || null,
+      accountId: accountIdRaw ? Number(accountIdRaw) : null,
       description: description || undefined,
       amount: Number(amountRaw),
     };
@@ -330,6 +478,73 @@
       await loadTransactions();
     } catch (err) {
       console.error('Transaction save network error:', err);
+      showFormError('ارتباط با سرور برقرار نشد');
+      showToast('ارتباط با سرور برقرار نشد', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
+  // ===== ثبت انتقال بین حساب‌ها از همین مودال (وقتی نوع مالی «انتقال» انتخاب بشه) =====
+  async function submitTransferFromModal() {
+    const date = (document.getElementById('modalDatePicker').value || '').trim();
+    const title = (document.getElementById('modalTitleInput').value || '').trim();
+    const amountRaw = document.getElementById('modalAmountInput').value;
+    const description = (document.getElementById('modalDescriptionInput').value || '').trim();
+    const fromAccountId = document.getElementById('modalTransferFromAccount').value;
+    const toAccountId = document.getElementById('modalTransferToAccount').value;
+
+    if (!date) {
+      showFormError('لطفاً تاریخ انتقال را وارد کنید');
+      return;
+    }
+    if (!fromAccountId || !toAccountId) {
+      showFormError('لطفاً حساب مبدأ و مقصد را انتخاب کنید');
+      return;
+    }
+    if (fromAccountId === toAccountId) {
+      showFormError('حساب مبدأ و مقصد نمی‌توانند یکسان باشند');
+      return;
+    }
+    if (amountRaw === '' || Number(amountRaw) <= 0 || Number.isNaN(Number(amountRaw))) {
+      showFormError('لطفاً مبلغ معتبری وارد کنید');
+      return;
+    }
+
+    const btn = document.getElementById('transactionSubmitBtn');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'در حال ذخیره...';
+
+    try {
+      const res = await fetch(`${API_BASE}/transfers`, {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          title: title || undefined,
+          fromAccountId: Number(fromAccountId),
+          toAccountId: Number(toAccountId),
+          amount: Number(amountRaw),
+          date,
+          description: description || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const msg = data.message || `خطا در ثبت انتقال (کد ${res.status})`;
+        showFormError(msg);
+        showToast(msg, 'error');
+        console.error('Transfer save failed:', res.status, data);
+        return;
+      }
+
+      window.closeModal();
+      showToast('انتقال با موفقیت ثبت شد', 'success');
+      await loadTransactions();
+    } catch (err) {
+      console.error('Transfer save network error:', err);
       showFormError('ارتباط با سرور برقرار نشد');
       showToast('ارتباط با سرور برقرار نشد', 'error');
     } finally {
@@ -406,10 +621,11 @@
     amountEl.className = 'transaction-amount-value font-extrabold text-3xl mb-3 ' +
       (tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600');
 
+    document.getElementById('viewTitle').textContent = tx.title || '-';
     document.getElementById('viewCategory').textContent = tx.category || '-';
     document.getElementById('viewSubtype').textContent = tx.subtype || '-';
     document.getElementById('viewDescription').textContent = tx.description || '-';
-    document.getElementById('viewAccount').textContent = tx.account || '-';
+    document.getElementById('viewAccount').textContent = tx.accountName || '-';
 
     window.openModal('viewTransactionModal');
   }
@@ -425,7 +641,7 @@
 
     if (search) {
       list = list.filter((t) =>
-        [t.description, t.category, t.subtype, t.account].some((v) => (v || '').toLowerCase().includes(search)),
+        [t.title, t.description, t.category, t.subtype, t.accountName].some((v) => (v || '').toLowerCase().includes(search)),
       );
     }
     if (type) list = list.filter((t) => t.type === type);

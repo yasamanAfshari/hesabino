@@ -441,6 +441,9 @@
   .mt-6 {
     margin-top: calc(var(--spacing) * 6);
   }
+  .mb-0\.5 {
+    margin-bottom: calc(var(--spacing) * 0.5);
+  }
   .mb-1 {
     margin-bottom: var(--spacing);
   }
@@ -736,6 +739,9 @@
   .justify-start {
     justify-content: flex-start;
   }
+  .gap-0 {
+    gap: 0;
+  }
   .gap-1 {
     gap: var(--spacing);
   }
@@ -762,6 +768,13 @@
   }
   .gap-8 {
     gap: calc(var(--spacing) * 8);
+  }
+  .space-y-2 {
+    :where(& > :not(:last-child)) {
+      --tw-space-y-reverse: 0;
+      margin-block-start: calc(calc(var(--spacing) * 2) * var(--tw-space-y-reverse));
+      margin-block-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-y-reverse)));
+    }
   }
   .space-y-4 {
     :where(& > :not(:last-child)) {
@@ -1140,6 +1153,9 @@
   .py-1 {
     padding-block: var(--spacing);
   }
+  .py-1\.5 {
+    padding-block: calc(var(--spacing) * 1.5);
+  }
   .py-2 {
     padding-block: calc(var(--spacing) * 2);
   }
@@ -1187,6 +1203,9 @@
   }
   .pr-10 {
     padding-right: calc(var(--spacing) * 10);
+  }
+  .pb-0 {
+    padding-bottom: 0;
   }
   .pb-1 {
     padding-bottom: var(--spacing);
@@ -1495,6 +1514,10 @@
     --tw-outline-style: none;
     outline-style: none;
   }
+  .select-none {
+    -webkit-user-select: none;
+    user-select: none;
+  }
   .hover\:bg-black\/5 {
     &:hover {
       @media (hover: hover) {
@@ -1674,6 +1697,11 @@
   .lg\:w-\[25vw\] {
     @media (width >= 64rem) {
       width: 25vw;
+    }
+  }
+  .lg\:w-\[28vw\] {
+    @media (width >= 64rem) {
+      width: 28vw;
     }
   }
   .lg\:w-\[30vw\] {

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        <% title = 'حساب‌ها' %>
+    </title>
+    <style>
+        .main-box {
+            height: 60vh !important;
+        }
+
+        /* ========== استایل تب‌ها ========== */
+        .tab-btn {
+            position: relative;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2.5px;
+            background-color: var(--color-main-color, #3b82f6);
+            border-radius: 2px 2px 0 0;
+            transform: scaleX(0);
+            transition: transform 0.2s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--color-main-color, #3b82f6);
+            font-weight: 700;
+        }
+
+        .tab-btn.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab-btn:not(.active):hover {
+            color: #52525b;
+        }
+
+        .tab-panel {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .tab-panel.active {
+            display: flex;
+        }
+
+        /* برای اسکرول داخلی تب‌ها */
+        .tab-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-main-color overflow-hidden">
+
+    <%- include('partials/header', { pageTitle: 'مدیریت حساب‌ها' }) %>
+
+        <section class="scrollbar overflow-y-auto px-6 pb-1">
+
+            <h3 class="font-bold text-zinc-950 text-center">مدیریت حساب‌ها</h3>
+
+            <!-- کارت‌های آمار -->
+            <div class="overflow-x-auto scrollbar my-2">
+                <div class="grid grid-cols-3 gap-4 min-w-max">
+                    <div class="main-box-small dashboard-status">
+                        <div class="flex justify-start gap-4">
+                            <div
+                                class="w-16 h-16 bg-main-color-25 p-2 flex justify-center items-center rounded-lg border border-main-color">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2 8.5H22" stroke="var(--color-main-color)" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <path
+                                        d="M6.44 3.5H17.55C20.56 3.5 22 4.89 22 7.97V16.02C22 19.1 20.56 20.49 17.56 20.49H6.44C3.44 20.49 2 19.1 2 16.02V7.97C2 4.89 3.44 3.5 6.44 3.5Z"
+                                        stroke="var(--color-main-color)" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-zinc-700 font-bold !text-lg">تعداد حساب‌ها</div>
+                                <div class="text-zinc-500 !text-md text-center my-2.5" id="accountsCount">۰ عدد</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="main-box-small dashboard-status">
+                        <div class="flex justify-start gap-4">
+                            <div
+                                class="w-16 h-16 bg-green-color-25 p-2 flex justify-center items-center rounded-lg border border-green-color">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19.5 3.25V14.625L22.75 11.375" stroke="var(--color-green-color)"
+                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path
+                                        d="M3.21729 21.125H10.3835C11.001 21.125 11.5535 21.4663 11.8298 22.0188L13.731 25.8213C14.2835 26.9263 15.4048 27.625 16.6398 27.625H22.376C23.611 27.625 24.7323 26.9263 25.2848 25.8213L27.186 22.0188C27.4623 21.4663 28.031 21.125 28.6323 21.125H35.7173"
+                                        stroke="var(--color-green-color)" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-zinc-700 font-bold !text-lg">مجموع موجودی (تومان)</div>
+                                <div class="text-zinc-500 !text-md text-center my-2.5" id="accountsTotalBalance">۰ تومان
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="main-box-small dashboard-status">
+                        <div class="flex justify-start gap-4">
+                            <div
+                                class="w-16 h-16 bg-orange-color-25 p-2 flex justify-center items-center rounded-lg border border-orange-color">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
+                                        stroke="var(--color-orange-color)" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-zinc-700 font-bold !text-lg">حساب‌های آرشیوشده</div>
+                                <div class="text-zinc-500 !text-md text-center my-2.5" id="accountsArchivedCount">۰ عدد
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== باکس تب‌بندی شده (حساب‌ها + آخرین انتقال‌ها) ========== -->
+            <div class="grid grid-cols-1 my-2">
+                <div class="main-box flex flex-col">
+
+                    <!-- هدر باکس + تب‌ها -->
+                    <div
+                        class="flex items-center justify-between mb-1 border-b border-gray-200 pb-0 flex-wrap gap-2 flex-shrink-0">
+                        <div class="flex items-center gap-1 w-full justify-between">
+                            <!-- دکمه‌های تب -->
+                            <div class="flex items-center gap-0">
+                                <button class="tab-btn active px-4 py-2.5 text-sm text-zinc-400 transition-colors"
+                                    data-tab="accounts" onclick="switchTab('accounts')">
+                                    حساب‌ها
+                                </button>
+                                <button class="tab-btn px-4 py-2.5 text-sm text-zinc-400 transition-colors"
+                                    data-tab="transfers" onclick="switchTab('transfers')">
+                                    آخرین انتقال‌ها
+                                </button>
+                            </div>
+
+                            <!-- دکمه‌های عملیات (فقط در تب حساب‌ها نمایش داده می‌شوند) -->
+                            <div class="flex items-center gap-3" id="tabActionsAccounts">
+                                <label
+                                    class="flex items-center gap-2 text-sm text-zinc-600 cursor-pointer select-none whitespace-nowrap">
+                                    <input type="checkbox" id="showArchivedToggle"
+                                        onchange="AccountsApp.toggleShowArchived()">
+                                    نمایش آرشیوشده‌ها
+                                </label>
+                                <button
+                                    class="px-4 py-2 rounded-lg border border-main-color text-main-color text-sm whitespace-nowrap"
+                                    onclick="AccountsApp.openTransferModal()">انتقال بین حساب‌ها</button>
+                                <button class="main-btn text-sm whitespace-nowrap"
+                                    onclick="AccountsApp.openAddModal()">حساب جدید</button>
+                            </div>
+
+                            <!-- دکمه‌های عملیات (فقط در تب انتقال‌ها - فعلاً خالی) -->
+                            <div class="flex items-center gap-3 hidden" id="tabActionsTransfers">
+                                <!-- در صورت نیاز دکمه‌های مربوط به انتقال‌ها اینجا اضافه شود -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- محتوای تب‌ها -->
+                    <div class="flex-1 min-h-0">
+
+                        <!-- تب حساب‌ها -->
+                        <div class="tab-panel active" id="tabPanelAccounts">
+                            <div class="tab-scroll-area px-2">
+                                <div class="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 grc gap-4 mt-2"
+                                    id="accountsList">
+                                    <p class="text-center text-gray-400 mt-6 col-span-full">در حال بارگذاری حساب‌ها...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- تب آخرین انتقال‌ها -->
+                        <div class="tab-panel" id="tabPanelTransfers">
+                            <div class="tab-scroll-area px-2">
+                                <div class="space-y-2 mt-2" id="transfersList">
+                                    <p class="text-center text-gray-400 mt-6">در حال بارگذاری انتقال‌ها...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- مودال‌ها (بدون تغییر) -->
+        <div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 z-40" onclick="closeModal()"></div>
+
+        <!-- مودال افزودن حساب -->
+        <div id="addAccount" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl max-w-2xl max-h-[90vh] lg:w-[25vw] w-full flex flex-col relative">
+                <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+                    <h3 class="font-bold text-lg text-zinc-800">افزودن حساب جدید</h3>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+                    <div id="addAccountError"
+                        class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2">
+                    </div>
+
+                    <div class="relative">
+                        <input type="text" id="addAccountName" placeholder="نام حساب (مثلاً بانک ملت)"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                    </div>
+
+                    <div class="relative">
+                        <select id="addAccountType"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                            <option value="bank">بانک</option>
+                            <option value="cash">نقدی</option>
+                            <option value="card">کارت</option>
+                            <option value="digital_wallet">کیف پول دیجیتال</option>
+                            <option value="crypto">ارز دیجیتال</option>
+                            <option value="other">سایر</option>
+                        </select>
+                    </div>
+
+                    <div class="relative">
+                        <select id="addAccountCurrency"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                            <option value="IRR">تومان (IRR)</option>
+                            <option value="USD">دلار (USD)</option>
+                            <option value="EUR">یورو (EUR)</option>
+                            <option value="TRY">لیر ترکیه (TRY)</option>
+                            <option value="AED">درهم امارات (AED)</option>
+                        </select>
+                    </div>
+
+                    <div class="relative">
+                        <input type="number" id="addAccountOpeningBalance" placeholder="سرمایه اولیه (اختیاری)"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+                    <button onclick="closeModal()"
+                        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+                    <button class="main-btn px-4 py-2 rounded-lg" id="addAccountSubmitBtn"
+                        onclick="AccountsApp.submitCreate()">ثبت</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- مودال ویرایش حساب -->
+        <div id="editAccount" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl lg:w-[25vw] w-full max-w-2xl max-h-[90vh] flex flex-col relative">
+                <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+                    <h3 class="font-bold text-lg text-zinc-800">ویرایش حساب</h3>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+                    <input type="hidden" id="editAccountId">
+                    <div id="editAccountError"
+                        class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2">
+                    </div>
+
+                    <div class="relative">
+                        <input type="text" id="editAccountName" placeholder="نام حساب"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                    </div>
+
+                    <div class="relative">
+                        <select id="editAccountType"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                            <option value="bank">بانک</option>
+                            <option value="cash">نقدی</option>
+                            <option value="card">کارت</option>
+                            <option value="digital_wallet">کیف پول دیجیتال</option>
+                            <option value="crypto">ارز دیجیتال</option>
+                            <option value="other">سایر</option>
+                        </select>
+                    </div>
+
+                    <div class="relative">
+                        <select id="editAccountCurrency"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                            <option value="IRR">تومان (IRR)</option>
+                            <option value="USD">دلار (USD)</option>
+                            <option value="EUR">یورو (EUR)</option>
+                            <option value="TRY">لیر ترکیه (TRY)</option>
+                            <option value="AED">درهم امارات (AED)</option>
+                        </select>
+                    </div>
+
+                    <div class="relative">
+                        <input type="number" id="editAccountOpeningBalance" placeholder="سرمایه اولیه"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+                    <button onclick="AccountsApp.submitArchiveToggle()" id="editAccountArchiveBtn"
+                        class="px-4 py-2 rounded-lg border border-red-color text-red-color">آرشیو حساب</button>
+                    <button onclick="closeModal()"
+                        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+                    <button class="main-btn px-4 py-2 rounded-lg" id="editAccountSubmitBtn"
+                        onclick="AccountsApp.submitUpdate()">ثبت</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- مودال انتقال بین حساب‌ها -->
+        <div id="transferAccount" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl max-w-2xl max-h-[90vh] lg:w-[28vw] w-full flex flex-col relative">
+                <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+                    <h3 class="font-bold text-lg text-zinc-800">انتقال بین حساب‌ها</h3>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+                    <div id="transferError"
+                        class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2">
+                    </div>
+
+                    <div class="relative">
+                        <label class="text-xs text-zinc-500 mb-1 block">عنوان (اختیاری)</label>
+                        <input type="text" id="transferTitle" placeholder="مثلاً شارژ کیف پول"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                    </div>
+
+                    <div class="relative">
+                        <label class="text-xs text-zinc-500 mb-1 block">از حساب</label>
+                        <select id="transferFromAccount"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
+                    </div>
+
+                    <div class="relative">
+                        <label class="text-xs text-zinc-500 mb-1 block">به حساب</label>
+                        <select id="transferToAccount"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
+                    </div>
+
+                    <div class="relative">
+                        <label class="text-xs text-zinc-500 mb-1 block">مبلغ (تومان)</label>
+                        <input type="number" min="0" step="1" id="transferAmount" placeholder="مثلاً ۵۰۰۰۰۰۰"
+                            class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                    </div>
+
+                    <div class="relative">
+                        <label class="text-xs text-zinc-500 mb-1 block">تاریخ</label>
+                        <input type="text" id="transferDate"
+                            class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none"
+                            placeholder="تاریخ" autocomplete="off">
+                    </div>
+
+                    <div class="relative">
+                        <label class="text-xs text-zinc-500 mb-1 block">توضیحات (اختیاری)</label>
+                        <textarea rows="3" id="transferDescription"
+                            class="w-full border border-main-color rounded-lg pr-4 pl-4 outline-none"
+                            placeholder="مثلاً جابه‌جایی برای پرداخت قسط"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+                    <button onclick="closeModal()"
+                        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+                    <button class="main-btn px-4 py-2 rounded-lg" id="transferSubmitBtn"
+                        onclick="AccountsApp.submitTransfer()">ثبت انتقال</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function openModal(id) {
+                document.getElementById('modalOverlay').classList.remove('hidden');
+                document.getElementById(id).classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+
+            function closeModal() {
+                document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+                document.getElementById('modalOverlay').classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            // ========== تابع سویچ تب ==========
+            function switchTab(tabName) {
+                // حذف کلاس active از همه تب‌ها
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+                // افزودن کلاس active به تب انتخاب شده
+                const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+                const activePanel = document.getElementById(
+                    tabName === 'accounts' ? 'tabPanelAccounts' : 'tabPanelTransfers'
+                );
+
+                if (activeBtn) activeBtn.classList.add('active');
+                if (activePanel) activePanel.classList.add('active');
+
+                // نمایش/مخفی کردن دکمه‌های عملیات مربوط به هر تب
+                const actionsAccounts = document.getElementById('tabActionsAccounts');
+                const actionsTransfers = document.getElementById('tabActionsTransfers');
+
+                if (tabName === 'accounts') {
+                    if (actionsAccounts) actionsAccounts.classList.remove('hidden');
+                    if (actionsTransfers) actionsTransfers.classList.add('hidden');
+                } else {
+                    if (actionsAccounts) actionsAccounts.classList.add('hidden');
+                    if (actionsTransfers) actionsTransfers.classList.remove('hidden');
+                }
+            }
+        </script>
+
+        <script src="/JS/accounts.js" defer></script>
+</body>
+
+</html>

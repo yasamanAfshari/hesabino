@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transaction } from './transactions.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { AccountsService } from '../accounts/accounts.service';
 
 export interface TransactionQuery {
   search?: string;
@@ -17,30 +18,54 @@ export class TransactionsService {
   constructor(
     @InjectRepository(Transaction)
     private transactionsRepository: Repository<Transaction>,
+    private accountsService: AccountsService,
   ) {}
 
-  // ===== خروجی استاندارد: تبدیل amount (که از دیتابیس به صورت رشته می‌آید) به عدد =====
+  // ===== خروجی استاندارد: تبدیل amount (که از دیتابیس به صورت رشته می‌آید) به عدد
+  // و افزودن نام حساب مرتبط (از روی رابطه‌ی accountRef) برای نمایش در فرانت =====
   private serialize(transaction: Transaction) {
     return {
       ...transaction,
       amount: Number(transaction.amount),
+      accountName: transaction.accountRef ? transaction.accountRef.name : null,
     };
+  }
+
+  // ===== بررسی کافی‌بودن موجودی حساب قبل از ثبت یک برداشت (هزینه) =====
+  // چون هیچ اتصالی به بانک واقعی وجود ندارد و موجودی صرفاً از روی همین تراکنش‌ها
+  // محاسبه می‌شود، تنها راه جلوگیری از منفی‌شدن حساب همین اعتبارسنجی است.
+  private async ensureSufficientBalance(
+    userId: number,
+    accountId: number,
+    amount: number,
+  ) {
+    const balance = await this.accountsService.getBalance(userId, accountId);
+    if (amount > balance) {
+      throw new BadRequestException(
+        `موجودی حساب کافی نیست (موجودی فعلی: ${Math.round(balance).toLocaleString('en-US')} تومان)`,
+      );
+    }
   }
 
   // ===== ثبت تراکنش جدید =====
   async create(userId: number, dto: CreateTransactionDto) {
+    if (dto.accountId && dto.type === 'expense') {
+      await this.ensureSufficientBalance(userId, dto.accountId, dto.amount);
+    }
+
     const transaction = this.transactionsRepository.create({
       ...dto,
       userId,
     });
     const saved = await this.transactionsRepository.save(transaction);
-    return this.serialize(saved);
+    return this.findOne(userId, saved.id);
   }
 
   // ===== لیست تراکنش‌های کاربر (با فیلتر اختیاری) =====
   async findAll(userId: number, query: TransactionQuery = {}) {
     const qb = this.transactionsRepository
       .createQueryBuilder('t')
+      .leftJoinAndSelect('t.accountRef', 'accountRef')
       .where('t.userId = :userId', { userId });
 
     if (query.type) {
@@ -72,6 +97,7 @@ export class TransactionsService {
   async findOneOwned(userId: number, id: number): Promise<Transaction> {
     const transaction = await this.transactionsRepository.findOne({
       where: { id, userId },
+      relations: { accountRef: true },
     });
     if (!transaction) {
       throw new NotFoundException('تراکنش یافت نشد');
@@ -87,9 +113,38 @@ export class TransactionsService {
   // ===== ویرایش تراکنش =====
   async update(userId: number, id: number, dto: UpdateTransactionDto) {
     const transaction = await this.findOneOwned(userId, id);
+
+    const finalAccountId =
+      dto.accountId !== undefined ? dto.accountId : transaction.accountId;
+    const finalType = dto.type || transaction.type;
+    const finalAmount =
+      dto.amount !== undefined ? dto.amount : Number(transaction.amount);
+
+    if (finalAccountId && finalType === 'expense') {
+      // موجودی فعلی حساب مقصد را می‌گیریم؛ اگر همین تراکنش قبلاً روی همین حساب
+      // اثر داشته، آن اثر را برمی‌گردانیم تا موجودی «بدون این تراکنش» به دست بیاید
+      let balance = await this.accountsService.getBalance(
+        userId,
+        finalAccountId,
+      );
+      if (transaction.accountId === finalAccountId) {
+        if (transaction.type === 'income') {
+          balance -= Number(transaction.amount);
+        } else if (transaction.type === 'expense') {
+          balance += Number(transaction.amount);
+        }
+      }
+
+      if (finalAmount > balance) {
+        throw new BadRequestException(
+          `موجودی حساب کافی نیست (موجودی فعلی: ${Math.round(balance).toLocaleString('en-US')} تومان)`,
+        );
+      }
+    }
+
     Object.assign(transaction, dto);
     const saved = await this.transactionsRepository.save(transaction);
-    return this.serialize(saved);
+    return this.findOne(userId, saved.id);
   }
 
   // ===== حذف تراکنش =====
