@@ -113,7 +113,7 @@
             : '—';
 
       return `
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md" data-goal-id="${g.id}">
+        <div class="bg-white mb-0 rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md" data-goal-id="${g.id}">
           <div class="cursor-pointer" onclick="SavingsApp.openEditModal(${g.id})" title="ویرایش">
             <!-- Title & Date -->
             <div class="flex justify-between items-center mb-2">
@@ -199,7 +199,7 @@
     document.getElementById('addSavingTarget').value = '';
     document.getElementById('addSavingCurrent').value = '';
     document.getElementById('addSavingDeadline').value = '';
-    document.getElementById('addSavingReminder').checked = false;
+
     hideError('addSavingError');
     window.openModal('addSaving');
   }
@@ -210,7 +210,6 @@
     const targetAmount = Number(document.getElementById('addSavingTarget').value);
     const currentAmount = Number(document.getElementById('addSavingCurrent').value) || 0;
     const deadline = document.getElementById('addSavingDeadline').value.trim();
-    const reminder = document.getElementById('addSavingReminder').checked;
 
     if (!title) return showError('addSavingError', 'نام هدف را وارد کنید');
     if (!targetAmount || targetAmount <= 0) return showError('addSavingError', 'مبلغ هدف را به‌درستی وارد کنید');
@@ -220,7 +219,13 @@
       const res = await fetch(`${API_BASE}/savings`, {
         method: 'POST',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ title, targetAmount, currentAmount, deadline: deadline || undefined, reminder }),
+        body: JSON.stringify({
+          title,
+          targetAmount,
+          currentAmount,
+          deadline: deadline || undefined,
+          reminder: false, // چک‌باکس یادآور حذف شده، همیشه false
+        }),
       });
       const data = await res.json().catch(() => ({}));
 
@@ -246,7 +251,7 @@
     document.getElementById('editSavingTarget').value = goal.targetAmount;
     document.getElementById('editSavingCurrent').value = goal.currentAmount;
     document.getElementById('editSavingDeadline').value = goal.deadline || '';
-    document.getElementById('editSavingReminder').checked = !!goal.reminder;
+
     hideError('editSavingError');
     window.openModal('editSaving');
   }
@@ -258,7 +263,6 @@
     const targetAmount = Number(document.getElementById('editSavingTarget').value);
     const currentAmount = Number(document.getElementById('editSavingCurrent').value) || 0;
     const deadline = document.getElementById('editSavingDeadline').value.trim();
-    const reminder = document.getElementById('editSavingReminder').checked;
 
     if (!title) return showError('editSavingError', 'نام هدف را وارد کنید');
     if (!targetAmount || targetAmount <= 0) return showError('editSavingError', 'مبلغ هدف را به‌درستی وارد کنید');
@@ -268,7 +272,13 @@
       const res = await fetch(`${API_BASE}/savings/${id}`, {
         method: 'PUT',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ title, targetAmount, currentAmount, deadline: deadline || null, reminder }),
+        body: JSON.stringify({
+          title,
+          targetAmount,
+          currentAmount,
+          deadline: deadline || null,
+          reminder: false, // چک‌باکس یادآور حذف شده، همیشه false
+        }),
       });
       const data = await res.json().catch(() => ({}));
 
@@ -386,8 +396,6 @@
     success: { bg: 'bg-green-color-25', border: 'border-green-color', text: 'text-green-color', icon: '✅' },
   };
 
-  // بر اساس آخرین لیست اهداف پس‌انداز، لیست هشدار/یادآوری/تحلیل رو می‌سازه.
-  // هیچ درخواستی به سرور نمی‌زنه، همه‌چیز از latestGoals محاسبه می‌شه.
   function buildAlerts(goals) {
     const alerts = [];
 
