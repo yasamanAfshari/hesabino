@@ -125,7 +125,7 @@
       : '';
 
     return `
-      <div class="main-box-small border border-gray-100 rounded-xl p-4 flex flex-col gap-2">
+      <div class="main-box-small mb-0 border border-gray-100 rounded-xl p-4 flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <div class="font-bold text-zinc-800">${escapeHtml(account.name)}</div>
           ${archivedBadge}
@@ -406,7 +406,7 @@
           ${transfer.title ? `<div class="font-bold mb-0.5">${escapeHtml(transfer.title)}</div>` : ''}
           <div class="flex items-center gap-2">
             <span class="${transfer.title ? '' : 'font-bold'}">${escapeHtml(transfer.fromAccountName || 'حساب حذف‌شده')}</span>
-            <span class="text-zinc-400">➜</span>
+            <span class="text-zinc-400 inline-block" style="transform: scaleX(-1);">➜</span>
             <span class="${transfer.title ? '' : 'font-bold'}">${escapeHtml(transfer.toAccountName || 'حساب حذف‌شده')}</span>
           </div>
         </div>
