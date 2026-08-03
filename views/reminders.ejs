@@ -5,19 +5,67 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><% title = 'یادآوری‌ها' %></title>
+  <style>
+    /* ========== استایل تب‌ها ========== */
+    .tab-btn {
+      position: relative;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background-color: var(--color-main-color, #3b82f6);
+      border-radius: 2px 2px 0 0;
+      transform: scaleX(0);
+      transition: transform 0.2s ease;
+    }
+
+    .tab-btn.active {
+      color: var(--color-main-color, #3b82f6);
+      font-weight: 700;
+    }
+
+    .tab-btn.active::after {
+      transform: scaleX(1);
+    }
+
+    .tab-btn:not(.active):hover {
+      color: #52525b;
+    }
+
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* برای اسکرول داخلی تب‌ها */
+    .tab-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+  </style>
 </head>
 
 <body class="bg-main-color overflow-hidden">
 
-  <%- include('partials/header') %>
+  <%- include('partials/header' , { pageTitle: 'یادآوری ها' } ) %>
 
   <section class="scrollbar overflow-y-auto px-6 pb-6">
 
-    <h3 class="font-bold text-zinc-950 text-center mt-2">یادآوری‌ها</h3>
-    <p class="text-zinc-400 !text-sm text-center mb-3">هر جا که تیک «یادآور» را روشن کرده باشید، اینجا نمایش داده می‌شود</p>
-
     <!-- خلاصه‌ی آماری -->
-    <div class="overflow-x-auto scrollbar my-2">
+    <div class="overflow-x-auto scrollbar">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 min-w-max">
         <div class="main-box-small dashboard-status">
           <div class="flex justify-start gap-4">
@@ -81,29 +129,56 @@
       </div>
     </div>
 
-    <!-- یادآورهای دستی (چک/بدهی/پس‌انداز‌ی که کاربر تیک یادآور را زده) -->
-    <div class="main-box-small mt-3">
-      <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
-        <h2 class="font-bold text-lg text-zinc-800">یادآورهای فعال‌شده توسط شما</h2>
-        <span class="text-zinc-400 !text-xs">از چک‌ها، بدهی‌ها و اهداف پس‌انداز که برایشان یادآور را روشن کرده‌اید</span>
+    <!-- ===================== باکس تب‌بندی شده یادآورها ===================== -->
+    <div class="main-box-small mt-3 flex flex-col">
+      <!-- هدر با تب‌ها -->
+      <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-0 flex-shrink-0">
+        <div class="flex items-center gap-0">
+          <button class="tab-btn active px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="manual" onclick="switchReminderTab('manual')">
+            یادآورهای فعال‌شده
+          </button>
+          <button class="tab-btn px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="automatic" onclick="switchReminderTab('automatic')">
+            یادآورهای خودکار
+          </button>
+        </div>
       </div>
-      <div id="manualRemindersList" class="space-y-3">
-        <p class="text-zinc-400 !text-sm text-center py-6">در حال بارگذاری...</p>
-      </div>
-    </div>
 
-    <!-- یادآورهای خودکار (اشتراک/قسط نزدیک به سررسید) -->
-    <div class="main-box-small mt-3 mb-4">
-      <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
-        <h2 class="font-bold text-lg text-zinc-800">یادآورهای خودکار سررسید نزدیک</h2>
-        <span class="text-zinc-400 !text-xs">اشتراک‌ها و اقساطی که نزدیک به سررسید هستند (بدون نیاز به تنظیم دستی)</span>
-      </div>
-      <div id="automaticRemindersList" class="space-y-3">
-        <p class="text-zinc-400 !text-sm text-center py-6">در حال بارگذاری...</p>
+      <!-- محتوای تب‌ها -->
+      <div class="flex-1 min-h-0">
+        <!-- تب یادآورهای دستی -->
+        <div class="tab-panel active" id="tabPanelManual">
+          <div id="manualRemindersList" class="space-y-3 overflow-y-auto max-h-[50vh] scrollbar mt-2">
+            <p class="text-zinc-400 !text-sm text-center py-6">در حال بارگذاری...</p>
+          </div>
+        </div>
+
+        <!-- تب یادآورهای خودکار -->
+        <div class="tab-panel" id="tabPanelAutomatic">
+          <div id="automaticRemindersList" class="space-y-3 overflow-y-auto max-h-[50vh] scrollbar mt-2">
+            <p class="text-zinc-400 !text-sm text-center py-6">در حال بارگذاری...</p>
+          </div>
+        </div>
       </div>
     </div>
 
   </section>
+
+  <script>
+    function switchReminderTab(tabName) {
+      // حذف کلاس active از همه تب‌ها
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      // فعال‌سازی تب و پنل مربوطه
+      const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+      const activePanel = document.getElementById(
+        tabName === 'manual' ? 'tabPanelManual' : 'tabPanelAutomatic'
+      );
+
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activePanel) activePanel.classList.add('active');
+    }
+  </script>
 
   <script src="/JS/reminders.js" defer></script>
 </body>
