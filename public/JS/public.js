@@ -8,6 +8,7 @@
       if (!loader) return;
       const visibleDelay = 800;
       const fadeDuration = 600;
+
       setTimeout(() => {
         loader.classList.add('hidden');
         setTimeout(() => loader.remove(), fadeDuration);
@@ -224,79 +225,145 @@ function initTimePickers() {
 }
 
   // ===== ۸. سلکت باکس سفارشی =====
-  function initCustomSelects() {
-    const selects = document.querySelectorAll('.custom-select');
-    selects.forEach((select) => {
+  // دراپ‌داون هر سلکت موقع باز شدن از داخل کانتینرش به انتهای body منتقل می‌شه
+  // و با position:fixed نسبت به دکمه‌ی سلکت جای‌گذاری می‌شه. این‌طوری دراپ‌داون
+  // کاملاً از جریان صفحه (و مهم‌تر از همه از overflow-y مودال‌ها) خارج می‌مونه
+  // و باز شدنش باعث اسکرول خوردن مودال نمی‌شه؛ دقیقاً شبیه سلکت‌باکس معمولی.
+
+  // select => { close } — برای بستن/ری‌پوزیشن کردن از بیرون (کلیک بیرون، اسکرول، resize)
+  // بیرون از تابع نگه داشته می‌شه چون initCustomSelects ممکنه چند بار صدا زده بشه
+  // (مثلاً وقتی مودالی به‌صورت داینامیک بعد از لود اولیه‌ی صفحه ساخته می‌شه)
+  const openSelects = new Map();
+  let customSelectGlobalListenersBound = false;
+
+  function initCustomSelects(root) {
+    const scope = root || document;
+
+    scope.querySelectorAll('.custom-select:not([data-hb-select-wired])').forEach((select) => {
+      select.setAttribute('data-hb-select-wired', '1');
+
       const btn = select.querySelector('.select-btn');
       const dropdown = select.querySelector('.dropdown');
       const search = select.querySelector('.search-input');
       const options = select.querySelectorAll('.option');
       const value = select.querySelector('.selected-value');
       const icon = btn.querySelector('svg');
+      const dropdownHeight = 260;
+
+      // نکته‌ی مهم: بعد از این‌که dropdown به body منتقل می‌شه، دیگه داخل select
+      // نیست؛ پس همه‌جا از همین رفرنس‌های بسته‌شده (closure) استفاده می‌کنیم، نه
+      // select.querySelector('.dropdown') که بعد از جابه‌جایی چیزی پیدا نمی‌کنه.
+      let placeholder = null;
+
+      function positionDropdown() {
+        const rect = btn.getBoundingClientRect();
+        const estimatedHeight = dropdown.offsetHeight || dropdownHeight;
+
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.width = rect.width + 'px';
+        dropdown.style.top = '';
+        dropdown.style.bottom = '';
+
+        if ((window.innerHeight - rect.bottom) < estimatedHeight && rect.top > estimatedHeight) {
+          dropdown.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+        } else {
+          dropdown.style.top = (rect.bottom + 8) + 'px';
+        }
+      }
+
+      function openDropdown() {
+        openSelects.forEach((entry, s) => {
+          if (s !== select) entry.close();
+        });
+
+        // یه کامنت جای خالیِ دراپ‌داون رو نگه می‌داره تا موقع بسته شدن سرجاش برگرده
+        if (!placeholder) {
+          placeholder = document.createComment('dropdown-placeholder');
+          dropdown.after(placeholder);
+        }
+
+        dropdown.style.position = 'fixed';
+        dropdown.style.zIndex = '9999';
+        document.body.appendChild(dropdown);
+        dropdown.classList.remove('hidden');
+        positionDropdown();
+
+        if (search) search.focus();
+        if (icon) icon.classList.add('rotate-180');
+        openSelects.set(select, { close: closeDropdown, reposition: positionDropdown, dropdown });
+      }
+
+      function closeDropdown() {
+        dropdown.classList.add('hidden');
+        dropdown.style.position = '';
+        dropdown.style.top = '';
+        dropdown.style.bottom = '';
+        dropdown.style.left = '';
+        dropdown.style.width = '';
+        dropdown.style.zIndex = '';
+
+        if (placeholder && placeholder.parentNode) {
+          placeholder.parentNode.insertBefore(dropdown, placeholder);
+        }
+
+        if (icon) icon.classList.remove('rotate-180');
+        openSelects.delete(select);
+      }
 
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        document.querySelectorAll('.dropdown').forEach(d => {
-          if (d !== dropdown) d.classList.add('hidden');
-        });
-        dropdown.classList.toggle('hidden');
-        if (!dropdown.classList.contains('hidden')) {
-          setPosition();
-          search.focus();
+        if (dropdown.classList.contains('hidden')) {
+          openDropdown();
+        } else {
+          closeDropdown();
         }
-        icon.classList.toggle('rotate-180');
       });
 
       options.forEach(item => {
         item.addEventListener('click', () => {
           value.innerText = item.innerText;
-          dropdown.classList.add('hidden');
-          search.value = '';
+          closeDropdown();
+          if (search) search.value = '';
           options.forEach(opt => opt.style.display = 'block');
         });
       });
 
-      search.addEventListener('input', () => {
-        const text = search.value.toLowerCase();
-        options.forEach(item => {
-          item.style.display = item.innerText.toLowerCase().includes(text) ? 'block' : 'none';
+      if (search) {
+        search.addEventListener('input', () => {
+          const text = search.value.toLowerCase();
+          options.forEach(item => {
+            item.style.display = item.innerText.toLowerCase().includes(text) ? 'block' : 'none';
+          });
         });
-      });
-
-      function setPosition() {
-        dropdown.style.top = '';
-        dropdown.style.bottom = '';
-        const rect = btn.getBoundingClientRect();
-        const dropdownHeight = 260;
-        if ((window.innerHeight - rect.bottom) < dropdownHeight && rect.top > dropdownHeight) {
-          dropdown.style.bottom = 'calc(100% + 8px)';
-        } else {
-          dropdown.style.top = 'calc(100% + 8px)';
-        }
       }
     });
 
+    if (customSelectGlobalListenersBound) return;
+    customSelectGlobalListenersBound = true;
+
     document.addEventListener('click', () => {
-      document.querySelectorAll('.dropdown').forEach(d => d.classList.add('hidden'));
+      openSelects.forEach((entry) => entry.close());
     });
 
-    window.addEventListener('resize', () => {
-      document.querySelectorAll('.custom-select').forEach(select => {
-        const dropdown = select.querySelector('.dropdown');
-        if (!dropdown.classList.contains('hidden')) {
-          const btn = select.querySelector('.select-btn');
-          dropdown.style.top = '';
-          dropdown.style.bottom = '';
-          const rect = btn.getBoundingClientRect();
-          if (window.innerHeight - rect.bottom < 260 && rect.top > 260) {
-            dropdown.style.bottom = 'calc(100% + 8px)';
-          } else {
-            dropdown.style.top = 'calc(100% + 8px)';
-          }
-        }
+    // اسکرول شدن صفحه یا هر کانتینر داخلی (مثل بدنه‌ی مودال) => دراپ‌داون‌های باز بسته بشن،
+    // مگر این‌که خودِ اسکرول داخل لیست آپشن‌های همون دراپ‌داون اتفاق افتاده باشه
+    // (چون از capture:true استفاده شده، اسکرول هر عنصر داخلی هم که رویدادش bubble نمی‌شه گرفته می‌شه)
+    document.addEventListener('scroll', (e) => {
+      openSelects.forEach((entry) => {
+        if (entry.dropdown.contains(e.target)) return;
+        entry.close();
       });
+    }, true);
+
+    window.addEventListener('resize', () => {
+      openSelects.forEach((entry) => entry.reposition());
     });
   }
+
+  // امکان صدا زدن دوباره‌ی این تابع برای مودال‌هایی که بعد از لود اولیه‌ی صفحه
+  // به‌صورت داینامیک با جاوااسکریپت ساخته می‌شن (مثل مودال «افزودن اولین حساب»)
+  window.HesabinoUI = window.HesabinoUI || {};
+  window.HesabinoUI.initCustomSelects = initCustomSelects;
 
   // ===== ۹. اجرای همه توابع بعد از آماده شدن DOM =====
   function onReady() {
