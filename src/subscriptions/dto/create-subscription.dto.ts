@@ -1,0 +1,41 @@
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CreateSubscriptionDto {
+  @IsNotEmpty({ message: 'نام اشتراک الزامی است' })
+  @IsString({ message: 'نام اشتراک نامعتبر است' })
+  @MaxLength(100)
+  title: string;
+
+  @IsNotEmpty({ message: 'مبلغ الزامی است' })
+  @Type(() => Number)
+  @IsNumber({}, { message: 'مبلغ باید عدد باشد' })
+  @Min(0, { message: 'مبلغ نمی‌تواند منفی باشد' })
+  amount: number;
+
+  @IsNotEmpty({ message: 'روز تمدید الزامی است' })
+  @Type(() => Number)
+  @IsInt({ message: 'روز تمدید باید عدد صحیح باشد' })
+  @Min(1, { message: 'روز تمدید باید بین ۱ تا ۳۱ باشد' })
+  @Max(31, { message: 'روز تمدید باید بین ۱ تا ۳۱ باشد' })
+  billingDay: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  category?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
