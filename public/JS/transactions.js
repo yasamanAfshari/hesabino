@@ -104,11 +104,15 @@
     </svg>`;
 
   function typeLabel(type) {
-    return type === 'income' ? 'درآمد' : 'هزینه';
+    if (type === 'income') return 'درآمد';
+    if (type === 'transfer') return 'انتقال';
+    return 'هزینه';
   }
 
   function typeBadgeClasses(type) {
-    return type === 'income' ? 'text-emerald-700 bg-emerald-50' : 'text-rose-600 bg-rose-50';
+    if (type === 'income') return 'text-emerald-700 bg-emerald-50';
+    if (type === 'transfer') return 'text-blue-700 bg-blue-50';
+    return 'text-rose-600 bg-rose-50';
   }
 
   // ===== ساخت یک سطر جدول برای یک تراکنش (داینامیک) =====
@@ -130,8 +134,8 @@
         <td>
           <div class="flex justify-center gap-2.5">
             <button type="button" class="bg-main-color p-1 rounded-md" title="جزئیات" onclick="TransactionsApp.openView(${tx.id})">${EYE_ICON}</button>
-            <button type="button" class="bg-main-color p-1 rounded-md" title="ویرایش" onclick="TransactionsApp.openEdit(${tx.id})">${PENCIL_ICON}</button>
-            <button type="button" class="bg-main-color p-1 rounded-md" title="حذف" onclick="TransactionsApp.openDelete(${tx.id})">${TRASH_ICON}</button>
+            ${tx.type === 'transfer' ? '' : `<button type="button" class="bg-main-color p-1 rounded-md" title="ویرایش" onclick="TransactionsApp.openEdit(${tx.id})">${PENCIL_ICON}</button>`}
+            <button type="button" class="bg-main-color p-1 rounded-md" title="${tx.type === 'transfer' ? 'حذف انتقال' : 'حذف'}" onclick="TransactionsApp.openDelete(${tx.id})">${TRASH_ICON}</button>
           </div>
         </td>
       </tr>`;
@@ -244,7 +248,7 @@
     if (transferToWrapper) transferToWrapper.classList.toggle('hidden', !isTransfer);
 
     if (isTransfer) {
-      populateTransferAccountSelects();
+      refreshTransferAccountSelects();
     }
 
     const titleInput = document.getElementById('modalTitleInput');
@@ -274,6 +278,17 @@
     }
   }
 
+  // اگه حساب‌ها هنوز لود نشده باشن (مثلاً چون کاربر سریع «انتقال» رو زده و
+  // fetch مربوط به لود اولیه‌ی حساب‌ها هنوز تموم نشده)، اول حساب‌ها رو می‌گیریم
+  // و بعد سلکت‌های «از حساب»/«به حساب» رو پر می‌کنیم؛ این‌طوری هیچ‌وقت این دوتا
+  // خالی نمی‌مونن و انتقال بی‌دلیل رد نمی‌شه
+  async function refreshTransferAccountSelects() {
+    if (!userAccounts.length) {
+      await loadUserAccounts();
+    }
+    populateTransferAccountSelects();
+  }
+
   // هر بار که یک گزینه از سلکت‌باکس سفارشی کلیک می‌شه، مقدارش رو روی خودِ کانتینر ذخیره می‌کنیم
   // (این جدا از منطق باز/بسته کردن دراپ‌داون در public.js هست)
   function setupSelectValueTracking() {
@@ -289,6 +304,38 @@
     document.querySelectorAll('#modalFinancialTypeSelect .option').forEach((opt) => {
       opt.addEventListener('click', () => applyFinancialTypeUI(opt.dataset.value));
     });
+
+    setupSmartCategorize();
+  }
+
+  // ===== دسته‌بندی خودکار با هوش مصنوعی: با تایپ عنوان تراکنش، دسته‌ی مناسب پیشنهاد می‌شه =====
+  function setupSmartCategorize() {
+    const titleInput = document.getElementById('modalTitleInput');
+    if (!titleInput) return;
+
+    const suggestCategory = debounce(async () => {
+      const title = titleInput.value.trim();
+      const finType = getCustomSelectValue('modalFinancialTypeSelect');
+      const alreadyChosen = getCustomSelectValue('modalCategorySelect');
+
+      if (title.length < 2 || finType === 'transfer' || alreadyChosen) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/ai/categorize`, {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ title, type: finType === 'income' ? 'income' : 'expense' }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.category && !getCustomSelectValue('modalCategorySelect')) {
+          setCustomSelectValue('modalCategorySelect', data.category);
+        }
+      } catch (err) {
+        // شکست خاموش: پیشنهاد خودکار دسته صرفاً یک کمک است، نیازی به نمایش خطا به کاربر نیست
+      }
+    }, 600);
+
+    titleInput.addEventListener('input', suggestCategory);
   }
 
   // ===== بارگذاری حساب‌های کاربر و پر کردن سلکت‌باکس «حساب» در فرم تراکنش =====
@@ -607,9 +654,14 @@
     }
 
     const badge = document.getElementById('viewTypeBadge');
-    badge.textContent = tx.type === 'income' ? 'واریز' : 'برداشت';
-    badge.className = 'transaction-type-badge inline-block font-bold px-6 py-2 rounded-full text-sm ' +
-      (tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600');
+    const typeText = tx.type === 'income' ? 'واریز' : tx.type === 'transfer' ? 'انتقال' : 'برداشت';
+    const typeBadgeClass = tx.type === 'income'
+      ? 'bg-emerald-100 text-emerald-600'
+      : tx.type === 'transfer'
+        ? 'bg-blue-100 text-blue-600'
+        : 'bg-rose-100 text-rose-600';
+    badge.textContent = typeText;
+    badge.className = 'transaction-type-badge inline-block font-bold px-6 py-2 rounded-full text-sm ' + typeBadgeClass;
 
     // document.getElementById('viewDate').textContent = tx.time ? `${tx.date} - ${tx.time}` : tx.date;
      document.getElementById('viewDate').textContent = tx.time 
@@ -617,9 +669,14 @@
     : toPersianDigits(tx.date);
 
     const amountEl = document.getElementById('viewAmount');
-    amountEl.textContent = (tx.type === 'income' ? '+' : '-') + formatAmount(tx.amount);
-    amountEl.className = 'transaction-amount-value font-extrabold text-3xl mb-3 ' +
-      (tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600');
+    const amountSign = tx.type === 'income' ? '+' : tx.type === 'transfer' ? '' : '-';
+    const amountColorClass = tx.type === 'income'
+      ? 'text-emerald-600'
+      : tx.type === 'transfer'
+        ? 'text-blue-600'
+        : 'text-rose-600';
+    amountEl.textContent = amountSign + formatAmount(tx.amount);
+    amountEl.className = 'transaction-amount-value font-extrabold text-3xl mb-3 ' + amountColorClass;
 
     document.getElementById('viewTitle').textContent = tx.title || '-';
     document.getElementById('viewCategory').textContent = tx.category || '-';

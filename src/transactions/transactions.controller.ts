@@ -32,7 +32,7 @@ export class TransactionsController {
   async findAll(
     @Req() req: any,
     @Query('search') search?: string,
-    @Query('type') type?: 'income' | 'expense',
+    @Query('type') type?: 'income' | 'expense' | 'transfer',
     @Query('category') category?: string,
     @Query('date') date?: string,
   ) {

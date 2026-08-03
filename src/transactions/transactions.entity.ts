@@ -10,8 +10,9 @@ import {
 } from 'typeorm';
 import { User } from '../users/users.entity';
 import { Account } from '../accounts/accounts.entity';
+import { Transfer } from '../transfers/transfer.entity';
 
-export type TransactionType = 'income' | 'expense';
+export type TransactionType = 'income' | 'expense' | 'transfer';
 
 @Entity('transactions')
 // این ایندکس ترکیبی مخصوص کوئری‌ای هست که BudgetService برای جمع هزینه‌های
@@ -38,8 +39,11 @@ export class Transaction {
   @Column({ type: 'varchar', length: 16, nullable: true })
   time: string | null;
 
-  // نوع مالی: درآمد (واریز) یا هزینه (برداشت)
-  @Column({ type: 'enum', enum: ['income', 'expense'] })
+  // نوع مالی: درآمد (واریز)، هزینه (برداشت)، یا انتقال بین حساب‌ها (که فقط یک
+  // رکورد نمایشی/آینه‌ای از یک رکورد Transfer واقعیه؛ در محاسبه‌ی موجودی حساب‌ها
+  // شرکت نمی‌کنه چون AccountsService فقط income/expense رو جمع می‌زنه و اثر
+  // انتقال از جدول transfers خونده می‌شه)
+  @Column({ type: 'enum', enum: ['income', 'expense', 'transfer'] })
   type: TransactionType;
 
   // عنوان کوتاه تراکنش (مثلاً «بنزین ماشین»، «حقوق تیر») — جدا از توضیحات/یادداشت
@@ -67,6 +71,16 @@ export class Transaction {
   @Index()
   @Column({ nullable: true })
   accountId: number | null;
+
+  // اگر این رکورد آینه‌ی یک انتقال بین حساب‌ها باشه (type = 'transfer')، به همون
+  // رکورد Transfer اشاره می‌کنه؛ با حذف انتقال، این رکورد نمایشی هم خودکار حذف می‌شه
+  @ManyToOne(() => Transfer, { onDelete: 'CASCADE', nullable: true })
+  @JoinColumn({ name: 'transferId' })
+  transfer: Transfer | null;
+
+  @Index()
+  @Column({ nullable: true })
+  transferId: number | null;
 
   // مبلغ به تومان (در دیتابیس decimal ذخیره می‌شود؛ درایور mysql آن را به صورت رشته برمی‌گرداند
   // که در TransactionsService.serialize() به عدد تبدیل می‌شود)
