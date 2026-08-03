@@ -124,7 +124,7 @@
       '      <span class="selected-value text-gray-700" data-placeholder="' + cfg.placeholder + '">' + (selected ? selected.label : cfg.placeholder) + '</span>' +
       '      <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>' +
       '    </button>' +
-      '    <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">' +
+      '    <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">' +
       '      <div class="p-2 border-b border-main-color-25">' +
       '        <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">' +
       '      </div>' +
