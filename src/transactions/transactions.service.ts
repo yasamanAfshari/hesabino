@@ -2,13 +2,14 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transaction } from './transactions.entity';
+import { Transfer } from '../transfers/transfer.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { AccountsService } from '../accounts/accounts.service';
 
 export interface TransactionQuery {
   search?: string;
-  type?: 'income' | 'expense';
+  type?: 'income' | 'expense' | 'transfer';
   category?: string;
   date?: string;
 }
@@ -18,6 +19,8 @@ export class TransactionsService {
   constructor(
     @InjectRepository(Transaction)
     private transactionsRepository: Repository<Transaction>,
+    @InjectRepository(Transfer)
+    private transfersRepository: Repository<Transfer>,
     private accountsService: AccountsService,
   ) {}
 
@@ -114,6 +117,14 @@ export class TransactionsService {
   async update(userId: number, id: number, dto: UpdateTransactionDto) {
     const transaction = await this.findOneOwned(userId, id);
 
+    // این رکورد فقط آینه‌ی یک انتقال بین حساب‌هاست؛ ویرایشش از همین‌جا معنی نداره
+    // (چون خودِ مبلغ/تاریخ واقعی توی رکورد Transfer نگه‌داری می‌شه)
+    if (transaction.transferId) {
+      throw new BadRequestException(
+        'این رکورد مربوط به یک انتقال بین حساب‌هاست؛ برای ویرایش یا حذف آن به صفحه‌ی حساب‌ها بروید',
+      );
+    }
+
     const finalAccountId =
       dto.accountId !== undefined ? dto.accountId : transaction.accountId;
     const finalType = dto.type || transaction.type;
@@ -150,6 +161,14 @@ export class TransactionsService {
   // ===== حذف تراکنش =====
   async remove(userId: number, id: number): Promise<void> {
     const transaction = await this.findOneOwned(userId, id);
+
+    // این رکورد آینه‌ی یک انتقال بین حساب‌هاست؛ برای حذف درست، خودِ رکورد Transfer
+    // حذف می‌شود (که با CASCADE همین رکورد نمایشی رو هم خودکار پاک می‌کنه)
+    if (transaction.transferId) {
+      await this.transfersRepository.delete({ id: transaction.transferId, userId });
+      return;
+    }
+
     await this.transactionsRepository.remove(transaction);
   }
 }
