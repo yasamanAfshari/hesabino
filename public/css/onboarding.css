@@ -1,0 +1,843 @@
+/* ==========================================================================
+   Onboarding Modal — راهنمای افزودن اولین حساب
+   وقتی کاربر هنوز هیچ حسابی نساخته، این مودال روی همه‌ی صفحات (قبل از هر
+   محتوای دیگه) نمایش داده می‌شه و تا تکمیل نشه بسته نمی‌شه.
+   استایل کاملاً مستقل نوشته شده (نه Tailwind) تا نیازی به build مجدد
+   output.css نداشته باشه.
+   ========================================================================== */
+
+.hb-ob-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  overflow-y: auto;
+}
+
+.hb-ob-overlay.is-open {
+  opacity: 1;
+}
+
+.hb-ob-card {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: min(94vh, 760px);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-color);
+  color: var(--color-text-color);
+  border-radius: 28px;
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.3), 0 6px 18px rgba(15, 23, 42, 0.14);
+  transform: translateY(20px) scale(0.96);
+  opacity: 0;
+  overflow: hidden;
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.34s ease;
+}
+
+.hb-ob-overlay.is-open .hb-ob-card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.hb-ob-card.is-shake {
+  animation: hbObShake 0.4s ease;
+}
+
+@keyframes hbObShake {
+
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translateX(-7px);
+  }
+
+  40%,
+  60% {
+    transform: translateX(7px);
+  }
+}
+
+/* glow decoration behind the header */
+.hb-ob-glow {
+  position: absolute;
+  top: -80px;
+  inset-inline-end: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-main-color-25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ---------- Header ---------- */
+.hb-ob-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 26px 26px 20px;
+  border-bottom: 1px solid var(--color-border-color);
+  flex-shrink: 0;
+}
+
+.hb-ob-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hb-ob-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-text-color);
+}
+
+.hb-ob-subtitle {
+  font-size: 0.8rem;
+  line-height: 1.8;
+  color: var(--color-text2-color);
+  max-width: 380px;
+}
+
+.hb-ob-close {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-surface2-color);
+  color: var(--color-text2-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.hb-ob-close:hover {
+  background: var(--color-red-color-25);
+  color: var(--color-red-color);
+}
+
+.hb-ob-close svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+}
+
+/* ---------- Step indicator ---------- */
+.hb-ob-steps {
+  display: flex;
+  align-items: flex-start;
+  padding: 22px 26px 4px;
+  flex-shrink: 0;
+}
+
+.hb-ob-step-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  width: 96px;
+}
+
+.hb-ob-step-line {
+  flex: 1;
+  height: 2px;
+  margin-top: 25px;
+  border-radius: 2px;
+  background: var(--color-border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.hb-ob-step-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-main-color);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.35s ease;
+}
+
+html[dir='ltr'] .hb-ob-step-line::after {
+  transform-origin: left center;
+}
+
+.hb-ob-step-line.is-done::after {
+  transform: scaleX(1);
+}
+
+.hb-ob-step-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface2-color);
+  color: var(--color-text2-color);
+  border: 1.5px solid var(--color-border-color);
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.hb-ob-step-circle svg {
+  width: 21px;
+  height: 21px;
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+
+.hb-ob-step-circle .hb-ob-step-check {
+  display: none;
+}
+
+.hb-ob-step-col.is-active .hb-ob-step-circle {
+  color: var(--color-main-color);
+  background: var(--color-surface-color);
+  border: 1.5px dashed var(--color-main-color);
+  box-shadow: 0 0 0 5px var(--color-main-color-25);
+}
+
+.hb-ob-step-col.is-done .hb-ob-step-circle {
+  color: #fff;
+  background: var(--color-main-color);
+  border-color: var(--color-main-color);
+}
+
+.hb-ob-step-col.is-done .hb-ob-step-circle .hb-ob-step-icon {
+  display: none;
+}
+
+.hb-ob-step-col.is-done .hb-ob-step-circle .hb-ob-step-check {
+  display: block;
+}
+
+.hb-ob-step-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--color-text2-color);
+  text-transform: uppercase;
+}
+
+.hb-ob-step-col.is-active .hb-ob-step-eyebrow {
+  color: var(--color-main-color);
+}
+
+.hb-ob-step-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--color-text2-color);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.hb-ob-step-col.is-active .hb-ob-step-label,
+.hb-ob-step-col.is-done .hb-ob-step-label {
+  color: var(--color-text-color);
+}
+
+/* ---------- Body / panels ---------- */
+.hb-ob-body {
+  padding: 22px 26px 6px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.hb-ob-panel {
+  display: none;
+}
+
+.hb-ob-panel.is-active {
+  display: block;
+  animation: hbObFadeUp 0.32s ease both;
+}
+
+@keyframes hbObFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hb-ob-error {
+  display: none;
+  font-size: 0.78rem;
+  color: var(--color-red-color);
+  background: var(--color-red-color-25);
+  border: 1px solid var(--color-red-color);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+
+.hb-ob-error.is-visible {
+  display: block;
+}
+
+.hb-ob-field {
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.hb-ob-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-color);
+  margin-bottom: 9px;
+}
+
+.hb-ob-label .hb-ob-label-hint {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text2-color);
+}
+
+/* --- custom select / dropdown (à la "Select Treatment") --- */
+.hb-ob-select-trigger {
+  width: 100%;
+  height: 52px;
+  border-radius: 15px;
+  border: 1.5px solid var(--color-border-color);
+  background: var(--color-surface2-color);
+  color: var(--color-text-color);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hb-ob-select-trigger .hb-ob-select-placeholder {
+  color: var(--color-text2-color);
+}
+
+.hb-ob-select-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.hb-ob-select-trigger-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-main-color-25);
+  color: var(--color-main-color);
+}
+
+.hb-ob-select-trigger-icon svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.hb-ob-select-trigger span.hb-ob-select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.hb-ob-select-chevron {
+  width: 17px;
+  height: 17px;
+  color: var(--color-text2-color);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.hb-ob-field.is-open .hb-ob-select-trigger {
+  border-color: var(--color-main-color);
+  box-shadow: 0 0 0 4px var(--color-main-color-25);
+}
+
+.hb-ob-field.is-open .hb-ob-select-chevron {
+  transform: rotate(180deg);
+}
+
+.hb-ob-select-panel {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--color-surface-color);
+  border: 1px solid var(--color-border-color);
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  padding: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  display: none;
+}
+
+.hb-ob-field.is-open .hb-ob-select-panel {
+  display: block;
+  animation: hbObFadeUp 0.18s ease both;
+}
+
+.hb-ob-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+
+.hb-ob-option:hover {
+  background: var(--color-surface2-color);
+}
+
+.hb-ob-option.is-selected {
+  background: var(--color-main-color-25);
+}
+
+.hb-ob-option-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-main-color-25);
+  color: var(--color-main-color);
+}
+
+.hb-ob-option.is-selected .hb-ob-option-icon {
+  background: var(--color-main-color);
+  color: #fff;
+}
+
+.hb-ob-option-icon svg {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.hb-ob-option-text {
+  min-width: 0;
+}
+
+.hb-ob-option-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-color);
+}
+
+.hb-ob-option-desc {
+  font-size: 0.72rem;
+  color: var(--color-text2-color);
+  margin-top: 1px;
+}
+
+/* preview card once something is picked */
+.hb-ob-preview-card {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-inline-start: 3px solid var(--color-main-color);
+  background: var(--color-surface2-color);
+  border-radius: 13px;
+  padding: 12px 14px;
+}
+
+.hb-ob-preview-card .hb-ob-option-icon {
+  background: var(--color-main-color);
+  color: #fff;
+}
+
+/* --- plain text input --- */
+.hb-ob-input {
+  width: 100%;
+  height: 52px;
+  border-radius: 15px;
+  border: 1.5px solid var(--color-border-color);
+  background: var(--color-surface2-color);
+  color: var(--color-text-color);
+  padding: 0 16px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  font-family: inherit;
+}
+
+.hb-ob-input::placeholder {
+  color: var(--color-text2-color);
+}
+
+.hb-ob-input:focus {
+  border-color: var(--color-main-color);
+  box-shadow: 0 0 0 4px var(--color-main-color-25);
+}
+
+.hb-ob-hint {
+  margin-top: 8px;
+  font-size: 0.74rem;
+  color: var(--color-text2-color);
+  line-height: 1.7;
+}
+
+/* --- hero amount field (step 3) --- */
+.hb-ob-amount-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 18px;
+  border: 1.5px solid var(--color-border-color);
+  background: var(--color-surface2-color);
+  padding: 6px 8px 6px 16px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hb-ob-amount-wrap:focus-within {
+  border-color: var(--color-main-color);
+  box-shadow: 0 0 0 4px var(--color-main-color-25);
+}
+
+.hb-ob-amount-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-text-color);
+  padding: 10px 0;
+  font-family: inherit;
+  min-width: 0;
+  direction: ltr;
+  text-align: right;
+}
+
+.hb-ob-amount-input::placeholder {
+  color: var(--color-text2-color);
+  font-weight: 700;
+}
+
+.hb-ob-amount-currency {
+  flex-shrink: 0;
+  background: var(--color-main-color-25);
+  color: var(--color-main-color);
+  font-size: 0.78rem;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: 9px 14px;
+  white-space: nowrap;
+}
+
+/* --- quick note textarea --- */
+.hb-ob-textarea {
+  width: 100%;
+  min-height: 84px;
+  border-radius: 15px;
+  border: 1.5px solid var(--color-border-color);
+  background: var(--color-surface2-color);
+  color: var(--color-text-color);
+  padding: 13px 16px;
+  font-size: 0.85rem;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.7;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hb-ob-textarea::placeholder {
+  color: var(--color-text2-color);
+}
+
+.hb-ob-textarea:focus {
+  border-color: var(--color-main-color);
+  box-shadow: 0 0 0 4px var(--color-main-color-25);
+}
+
+.hb-ob-counter {
+  font-size: 0.7rem;
+  color: var(--color-text2-color);
+  font-weight: 600;
+}
+
+/* ---------- Success ---------- */
+.hb-ob-success {
+  text-align: center;
+  padding: 18px 0 10px;
+}
+
+.hb-ob-success-icon {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--color-green-color-25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hb-ob-success-icon svg {
+  width: 42px;
+  height: 42px;
+}
+
+.hb-ob-success-icon circle {
+  stroke: var(--color-green-color);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 76;
+  stroke-dashoffset: 76;
+  animation: hbObDrawCircle 0.5s ease forwards;
+}
+
+.hb-ob-success-icon path {
+  stroke: var(--color-green-color);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: hbObDrawCheck 0.35s ease 0.45s forwards;
+}
+
+@keyframes hbObDrawCircle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes hbObDrawCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.hb-ob-success-title {
+  margin-top: 20px;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--color-text-color);
+}
+
+.hb-ob-success-desc {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--color-text2-color);
+  line-height: 1.8;
+  padding: 0 12px;
+}
+
+.hb-ob-summary {
+  margin-top: 20px;
+  background: var(--color-surface2-color);
+  border: 1px solid var(--color-border-color);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: right;
+}
+
+.hb-ob-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hb-ob-summary-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-color);
+}
+
+.hb-ob-summary-type {
+  font-size: 0.74rem;
+  color: var(--color-text2-color);
+  margin-top: 2px;
+}
+
+.hb-ob-summary-balance {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--color-green-color);
+  white-space: nowrap;
+}
+
+/* ---------- Footer ---------- */
+.hb-ob-footer {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  padding: 20px 26px 26px;
+  border-top: 1px solid var(--color-border-color);
+}
+
+.hb-ob-btn {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 15px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, opacity 0.18s ease, transform 0.12s ease;
+}
+
+.hb-ob-btn:active {
+  transform: scale(0.98);
+}
+
+.hb-ob-btn-primary {
+  flex: 1;
+  background: var(--color-main-color);
+  color: #fff;
+  box-shadow: 0 10px 22px var(--color-main-color-25);
+}
+
+.hb-ob-btn-primary:hover {
+  background: var(--color-main-color-hover);
+}
+
+.hb-ob-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.hb-ob-btn-secondary {
+  min-width: 112px;
+  background: transparent;
+  color: var(--color-text-color);
+  border: 1.5px solid var(--color-border-color);
+}
+
+.hb-ob-btn-secondary:hover {
+  border-color: var(--color-main-color);
+  color: var(--color-main-color);
+}
+
+.hb-ob-spinner {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  animation: hbObSpin 0.7s linear infinite;
+  display: none;
+}
+
+.hb-ob-btn-primary.is-loading .hb-ob-spinner {
+  display: inline-block;
+}
+
+.hb-ob-btn-primary.is-loading .hb-ob-btn-text {
+  display: none;
+}
+
+@keyframes hbObSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 560px) {
+
+  .hb-ob-header,
+  .hb-ob-body,
+  .hb-ob-footer {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .hb-ob-steps {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .hb-ob-step-col {
+    width: auto;
+    flex: 1;
+  }
+
+  .hb-ob-step-circle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .hb-ob-step-circle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .hb-ob-step-label {
+    font-size: 0.68rem;
+  }
+
+  .hb-ob-amount-input {
+    font-size: 1.3rem;
+  }
+}
+
+html.dark-theme .hb-ob-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+html.hb-ob-lock-scroll,
+html.hb-ob-lock-scroll body {
+  overflow: hidden !important;
+}
