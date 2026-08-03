@@ -8,13 +8,70 @@
     <% title = 'مدیریت بدهی و طلب' %>
   </title>
   <style>
-    .scrollable-table-container {
-      overflow: auto;
-      height: 53%;
+    .main-box {
+      height: 60vh !important;
     }
 
-    .main-box {
-      height: 45vh !important;
+    /* ========== استایل تب‌ها (هم‌شکل با صفحه‌ی حساب‌ها) ========== */
+    .tab-btn {
+      position: relative;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background-color: var(--color-main-color, #3b82f6);
+      border-radius: 2px 2px 0 0;
+      transform: scaleX(0);
+      transition: transform 0.2s ease;
+    }
+
+    .tab-btn.active {
+      color: var(--color-main-color, #3b82f6);
+      font-weight: 700;
+    }
+
+    .tab-btn.active::after {
+      transform: scaleX(1);
+    }
+
+    .tab-btn:not(.active):hover {
+      color: #52525b;
+    }
+
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* برای اسکرول داخلی تب‌ها */
+    .tab-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .scrollable-table-container {
+      overflow: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 768px) {
+      .scrollable-table-container {
+        height: 45%;
+      }
     }
   </style>
 </head>
@@ -86,214 +143,341 @@
       </div>
     </div>
 
-    <!-- ===================== لیست بدهی‌ها ===================== -->
+    <!-- ========== باکس تب‌بندی‌شده (بدهی‌ها + طلب‌ها + اقساط) ========== -->
     <div class="grid grid-cols-1 my-2">
-      <div class="main-box">
-        <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3 flex-wrap gap-2">
-          <div class="flex items-center gap-3 w-full justify-between">
-            <h2 class="font-bold text-lg text-zinc-800">لیست بدهی ها</h2>
-            <div class="flex items-center gap-3">
+      <div class="main-box flex flex-col">
+
+        <!-- هدر باکس + تب‌ها -->
+        <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-0 flex-wrap gap-2 flex-shrink-0">
+          <div class="flex items-center gap-1 w-full justify-between mb-2 flex-wrap">
+            <!-- دکمه‌های تب -->
+            <div class="flex items-center gap-0">
+              <button class="tab-btn active px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="debts" onclick="switchTab('debts')">
+                بدهی‌ها
+              </button>
+              <button class="tab-btn px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="receivables" onclick="switchTab('receivables')">
+                طلب‌ها
+              </button>
+              <button class="tab-btn px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="loans" onclick="switchTab('loans')">
+                اقساط و وام‌ها
+              </button>
+            </div>
+
+            <!-- دکمه‌های عملیات تب بدهی‌ها -->
+            <div class="flex items-center gap-3" id="tabActionsDebts">
               <button class="main-btn" onclick="DebtsApp.openAddModal('debt')">ثبت بدهی جدید</button>
+              <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center" onclick="DebtsApp.openAlertsModal('debt')">
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.0216 3.1525C9.43581 3.1525 6.52164 6.06666 6.52164 9.6525V12.7833C6.52164 13.4442 6.23997 14.4517 5.90414 15.015L4.65831 17.0842C3.88914 18.3625 4.41997 19.7817 5.82831 20.2583C10.4975 21.8183 15.535 21.8183 20.2041 20.2583C21.515 19.825 22.0891 18.2758 21.3741 17.0842L20.1283 15.015C19.8033 14.4517 19.5216 13.4442 19.5216 12.7833V9.6525C19.5216 6.0775 16.5966 3.1525 13.0216 3.1525Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
+                  <path d="M15.0259 3.46665C14.6901 3.36915 14.3434 3.29332 13.9859 3.24999C12.9459 3.11999 11.9492 3.19582 11.0176 3.46665C11.3317 2.66499 12.1117 2.10165 13.0217 2.10165C13.9317 2.10165 14.7117 2.66499 15.0259 3.46665Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M16.2715 20.6483C16.2715 22.4358 14.809 23.8983 13.0215 23.8983C12.1332 23.8983 11.3098 23.53 10.7248 22.945C10.1398 22.36 9.77148 21.5367 9.77148 20.6483" stroke="white" stroke-width="1.5" stroke-miterlimit="10" />
+                </svg>
+              </button>
             </div>
-          </div>
-        </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4 bg-white">
-          <!-- Search -->
-          <div class="relative">
-            <input type="text" id="debtSearchInput" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
-            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m20 20-3.5-3.5"></path>
-            </svg>
-          </div>
-
-          <!-- وضعیت -->
-          <div id="debtStatusFilter" class="custom-select relative">
-            <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
-              <span class="selected-value text-gray-700" data-placeholder="وضعیت">وضعیت</span>
-              <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="m6 9 6 6 6-6"></path>
-              </svg>
-            </button>
-            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
-              <div class="p-2 border-b border-main-color-25">
-                <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
-              </div>
-              <div class="options max-h-52 overflow-y-auto">
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="">همه</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="unpaid">پرداخت نشده</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="paid">پرداخت شده</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="overdue">سررسید گذشته</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- تاریخ -->
-          <div class="relative">
-            <input type="text" id="debtDateFromPicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none pwt-datepicker-input-element" placeholder="از تاریخ" autocomplete="off">
-            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-              <path d="M16 2v4M8 2v4M3 10h18"></path>
-            </svg>
-          </div>
-
-          <div class="relative">
-            <input type="text" id="debtDateToPicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none pwt-datepicker-input-element" placeholder="تا تاریخ" autocomplete="off">
-            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-              <path d="M16 2v4M8 2v4M3 10h18"></path>
-            </svg>
-          </div>
-
-          <div class="col-span-2">
-            <div class="flex w-full justify-end">
-              <button type="button" onclick="DebtsApp.resetFilter('debt')" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">بازنشانی</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="debtFormError" class="hidden mb-3 rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
-
-        <div class="scrollable-table-container relative scrollbar border-gray-200 border rounded-md">
-          <table class="w-full text-sm md:text-base">
-            <thead class="bg-blue-50 shadow-sm">
-              <tr>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center justify-between gap-2"><span> طرف حساب</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center gap-1.5"><span> مبلغ</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center gap-1.5"><span> تاریخ سررسید</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center gap-1.5"><span> روز های باقی مانده</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center justify-between gap-2"><span>وضعیت</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center justify-between gap-2"><span> عملیات</span></div>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="debtsTableBody" class="bg-white divide-y divide-gray-100">
-              <tr>
-                <td colspan="6" class="px-5 py-6 text-center text-gray-400">در حال بارگذاری بدهی‌ها...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================== لیست طلب‌ها ===================== -->
-    <div class="grid grid-cols-1 my-2">
-      <div class="main-box">
-        <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3 flex-wrap gap-2">
-          <div class="flex items-center gap-3 w-full justify-between">
-            <h2 class="font-bold text-lg text-zinc-800">لیست طلب ها</h2>
-            <div class="flex items-center gap-3">
+            <!-- دکمه‌های عملیات تب طلب‌ها -->
+            <div class="flex items-center gap-3 hidden" id="tabActionsReceivables">
               <button class="main-btn" onclick="DebtsApp.openAddModal('receivable')">ثبت طلب جدید</button>
+              <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center" onclick="DebtsApp.openAlertsModal('receivable')">
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.0216 3.1525C9.43581 3.1525 6.52164 6.06666 6.52164 9.6525V12.7833C6.52164 13.4442 6.23997 14.4517 5.90414 15.015L4.65831 17.0842C3.88914 18.3625 4.41997 19.7817 5.82831 20.2583C10.4975 21.8183 15.535 21.8183 20.2041 20.2583C21.515 19.825 22.0891 18.2758 21.3741 17.0842L20.1283 15.015C19.8033 14.4517 19.5216 13.4442 19.5216 12.7833V9.6525C19.5216 6.0775 16.5966 3.1525 13.0216 3.1525Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
+                  <path d="M15.0259 3.46665C14.6901 3.36915 14.3434 3.29332 13.9859 3.24999C12.9459 3.11999 11.9492 3.19582 11.0176 3.46665C11.3317 2.66499 12.1117 2.10165 13.0217 2.10165C13.9317 2.10165 14.7117 2.66499 15.0259 3.46665Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M16.2715 20.6483C16.2715 22.4358 14.809 23.8983 13.0215 23.8983C12.1332 23.8983 11.3098 23.53 10.7248 22.945C10.1398 22.36 9.77148 21.5367 9.77148 20.6483" stroke="white" stroke-width="1.5" stroke-miterlimit="10" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- دکمه‌های عملیات تب اقساط -->
+            <div class="flex items-center gap-3 hidden" id="tabActionsLoans">
+              <button class="main-btn" onclick="DebtsApp.openLoanAddModal()">ثبت قسط جدید</button>
+              <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center" onclick="DebtsApp.openAlertsModal('loan')">
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.0216 3.1525C9.43581 3.1525 6.52164 6.06666 6.52164 9.6525V12.7833C6.52164 13.4442 6.23997 14.4517 5.90414 15.015L4.65831 17.0842C3.88914 18.3625 4.41997 19.7817 5.82831 20.2583C10.4975 21.8183 15.535 21.8183 20.2041 20.2583C21.515 19.825 22.0891 18.2758 21.3741 17.0842L20.1283 15.015C19.8033 14.4517 19.5216 13.4442 19.5216 12.7833V9.6525C19.5216 6.0775 16.5966 3.1525 13.0216 3.1525Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
+                  <path d="M15.0259 3.46665C14.6901 3.36915 14.3434 3.29332 13.9859 3.24999C12.9459 3.11999 11.9492 3.19582 11.0176 3.46665C11.3317 2.66499 12.1117 2.10165 13.0217 2.10165C13.9317 2.10165 14.7117 2.66499 15.0259 3.46665Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M16.2715 20.6483C16.2715 22.4358 14.809 23.8983 13.0215 23.8983C12.1332 23.8983 11.3098 23.53 10.7248 22.945C10.1398 22.36 9.77148 21.5367 9.77148 20.6483" stroke="white" stroke-width="1.5" stroke-miterlimit="10" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4 bg-white">
-          <!-- Search -->
-          <div class="relative">
-            <input type="text" id="demandSearchInput" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
-            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m20 20-3.5-3.5"></path>
-            </svg>
-          </div>
+        <!-- محتوای تب‌ها -->
+        <div class="flex-1 min-h-0">
 
-          <!-- وضعیت -->
-          <div id="demandStatusFilter" class="custom-select relative">
-            <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
-              <span class="selected-value text-gray-700" data-placeholder="وضعیت">وضعیت</span>
-              <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="m6 9 6 6 6-6"></path>
-              </svg>
-            </button>
-            <div class="dropdown absolute left-0 w-full bg-white rounded-lg shadow-lg z-50 hidden">
-              <div class="p-2 border-b border-main-color-25">
-                <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
+          <!-- ===== تب بدهی‌ها ===== -->
+          <div class="tab-panel active" id="tabPanelDebts">
+            <div class="tab-scroll-area px-2">
+
+              <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4 bg-white">
+                <!-- Search -->
+                <div class="relative">
+                  <input type="text" id="debtSearchInput" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                  <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-3.5-3.5"></path>
+                  </svg>
+                </div>
+
+                <!-- وضعیت -->
+                <div id="debtStatusFilter" class="custom-select relative">
+                  <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                    <span class="selected-value text-gray-700" data-placeholder="وضعیت">وضعیت</span>
+                    <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                  </button>
+                  <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+                    <div class="p-2 border-b border-main-color-25">
+                      <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
+                    </div>
+                    <div class="options max-h-52 overflow-y-auto">
+                      <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="">همه</div>
+                      <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="unpaid">پرداخت نشده</div>
+                      <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="paid">پرداخت شده</div>
+                      <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="overdue">سررسید گذشته</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- تاریخ -->
+                <div class="relative">
+                  <input type="text" id="debtDateFromPicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none pwt-datepicker-input-element" placeholder="از تاریخ" autocomplete="off">
+                  <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                    <path d="M16 2v4M8 2v4M3 10h18"></path>
+                  </svg>
+                </div>
+
+                <div class="relative">
+                  <input type="text" id="debtDateToPicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none pwt-datepicker-input-element" placeholder="تا تاریخ" autocomplete="off">
+                  <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                    <path d="M16 2v4M8 2v4M3 10h18"></path>
+                  </svg>
+                </div>
+
+                <div class="col-span-2">
+                  <div class="flex w-full justify-end">
+                    <button type="button" onclick="DebtsApp.resetFilter('debt')" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">بازنشانی</button>
+                  </div>
+                </div>
               </div>
-              <div class="options max-h-52 overflow-y-auto">
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="">همه</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="unpaid">وصول نشده</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="paid">پرداخت شده</div>
-                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="overdue">سررسید گذشته</div>
+
+              <div id="debtFormError" class="hidden mb-3 rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
+
+              <div class="scrollable-table-container relative scrollbar border-gray-200 border rounded-md">
+                <table class="w-full text-sm md:text-base">
+                  <thead class="bg-blue-50 shadow-sm">
+                    <tr>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center justify-between gap-2"><span> طرف حساب</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center gap-1.5"><span> مبلغ</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center gap-1.5"><span> تاریخ سررسید</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center gap-1.5"><span> روز های باقی مانده</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center justify-between gap-2"><span>وضعیت</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center justify-between gap-2"><span> عملیات</span></div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="debtsTableBody" class="bg-white divide-y divide-gray-100">
+                    <tr>
+                      <td colspan="6" class="px-5 py-6 text-center text-gray-400">در حال بارگذاری بدهی‌ها...</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
 
-          <!-- تاریخ -->
-          <div class="relative">
-            <input type="text" id="demandDateFromPicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none pwt-datepicker-input-element" placeholder="از تاریخ" autocomplete="off">
-            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-              <path d="M16 2v4M8 2v4M3 10h18"></path>
-            </svg>
-          </div>
+          <!-- ===== تب طلب‌ها ===== -->
+          <div class="tab-panel" id="tabPanelReceivables">
+            <div class="tab-scroll-area px-2">
 
-          <div class="relative">
-            <input type="text" id="demandDateToPicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none pwt-datepicker-input-element" placeholder="تا تاریخ" autocomplete="off">
-            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-              <path d="M16 2v4M8 2v4M3 10h18"></path>
-            </svg>
-          </div>
+              <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4 bg-white">
+                <!-- Search -->
+                <div class="relative">
+                  <input type="text" id="demandSearchInput" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                  <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-3.5-3.5"></path>
+                  </svg>
+                </div>
 
-          <div class="col-span-2">
-            <div class="flex w-full justify-end">
-              <button type="button" onclick="DebtsApp.resetFilter('receivable')" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">بازنشانی</button>
+                <!-- وضعیت -->
+                <div id="demandStatusFilter" class="custom-select relative">
+                  <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                    <span class="selected-value text-gray-700" data-placeholder="وضعیت">وضعیت</span>
+                    <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                  </button>
+                  <div class="dropdown absolute left-0 w-full bg-white rounded-lg shadow-lg z-50 hidden">
+                    <div class="p-2 border-b border-main-color-25">
+                      <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
+                    </div>
+                    <div class="options max-h-52 overflow-y-auto">
+                      <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="">همه</div>
+                      <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="unpaid">وصول نشده</div>
+                      <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="paid">پرداخت شده</div>
+                      <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="overdue">سررسید گذشته</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- تاریخ -->
+                <div class="relative">
+                  <input type="text" id="demandDateFromPicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none pwt-datepicker-input-element" placeholder="از تاریخ" autocomplete="off">
+                  <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                    <path d="M16 2v4M8 2v4M3 10h18"></path>
+                  </svg>
+                </div>
+
+                <div class="relative">
+                  <input type="text" id="demandDateToPicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none pwt-datepicker-input-element" placeholder="تا تاریخ" autocomplete="off">
+                  <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                    <path d="M16 2v4M8 2v4M3 10h18"></path>
+                  </svg>
+                </div>
+
+                <div class="col-span-2">
+                  <div class="flex w-full justify-end">
+                    <button type="button" onclick="DebtsApp.resetFilter('receivable')" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">بازنشانی</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="demandFormError" class="hidden mb-3 rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
+
+              <div class="scrollable-table-container relative scrollbar border-gray-200 border rounded-md">
+                <table class="w-full text-sm md:text-base">
+                  <thead class="bg-blue-50 shadow-sm">
+                    <tr>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center justify-between gap-2"><span> طرف حساب</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center gap-1.5"><span> مبلغ</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center gap-1.5"><span> تاریخ سررسید</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center gap-1.5"><span> روز های باقی مانده</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center justify-between gap-2"><span>وضعیت</span></div>
+                      </th>
+                      <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
+                        <div class="flex items-center justify-between gap-2"><span> عملیات</span></div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="demandsTableBody" class="bg-white divide-y divide-gray-100">
+                    <tr>
+                      <td colspan="6" class="px-5 py-6 text-center text-gray-400">در حال بارگذاری طلب‌ها...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div id="demandFormError" class="hidden mb-3 rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
+          <!-- ===== تب اقساط و وام‌ها ===== -->
+          <div class="tab-panel" id="tabPanelLoans">
+            <div class="tab-scroll-area px-2">
+              <div class="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 grc gap-4 mt-2" id="loansList">
+                <p class="text-center text-gray-400 mt-6 col-span-full">در حال بارگذاری اقساط...</p>
+              </div>
+            </div>
+          </div>
 
-        <div class="scrollable-table-container relative scrollbar border-gray-200 border rounded-md">
-          <table class="w-full text-sm md:text-base">
-            <thead class="bg-blue-50 shadow-sm">
-              <tr>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center justify-between gap-2"><span> طرف حساب</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center gap-1.5"><span> مبلغ</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center gap-1.5"><span> تاریخ سررسید</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center gap-1.5"><span> روز های باقی مانده</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center justify-between gap-2"><span>وضعیت</span></div>
-                </th>
-                <th scope="col" class="sticky top-0 z-20 font-semibold text-gray-700 text-sm md:text-base bg-blue-50 backdrop-blur-sm">
-                  <div class="flex items-center justify-between gap-2"><span> عملیات</span></div>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="demandsTableBody" class="bg-white divide-y divide-gray-100">
-              <tr>
-                <td colspan="6" class="px-5 py-6 text-center text-gray-400">در حال بارگذاری طلب‌ها...</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
   </section>
 
-  <div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 z-40" onclick="closeModal()"></div>
+
+  <!-- مودال ثبت قسط/وام جدید -->
+  <div id="loanModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-2xl max-h-[90vh] lg:w-[30vw] w-full flex flex-col relative">
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-lg text-zinc-800">ثبت قسط/وام جدید</h3>
+        <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="loanForm" class="flex flex-col flex-1 min-h-0">
+        <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+          <div id="loanModalFormError" class="hidden rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
+
+          <div class="relative">
+            <input type="text" id="loanTitleInput" placeholder="عنوان وام (مثلاً وام خرید خودرو)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="relative">
+              <input type="number" min="1" id="loanTotalAmountInput" placeholder="مبلغ کل وام (تومان)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            </div>
+            <div class="relative">
+              <input type="number" min="1" id="loanInstallmentsCountInput" placeholder="تعداد کل اقساط" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            </div>
+            <div class="relative">
+              <input type="number" min="0" id="loanAlreadyPaidInput" value="0" placeholder="اقساط پرداخت‌شده‌ی قبلی" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            </div>
+            <div class="relative">
+              <input type="text" id="loanFirstDueDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="سررسید قسط بعدی (اختیاری)" autocomplete="off">
+              <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                <path d="M16 2v4M8 2v4M3 10h18"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+          <button type="submit" id="loanSubmitBtn" class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- مودال یادآوری‌ها، هشدارها و تحلیل بدهی/طلب/اقساط -->
+  <div id="debtsAlertsModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-lg max-h-[85vh] flex flex-col relative">
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 id="debtsAlertsModalTitle" class="font-bold text-lg text-zinc-800">یادآوری‌ها و تحلیل</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 scrollbar px-6 py-4" id="debtsAlertsList">
+        <p class="text-center text-gray-400 mt-6">در حال بررسی وضعیت...</p>
+      </div>
+
+      <div class="flex justify-end px-6 pb-6 pt-4 border-t border-gray-200">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">بستن</button>
+      </div>
+    </div>
+  </div>
 
   <!-- مودال ثبت/ویرایش بدهی (مشترک) -->
   <div id="debtModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -439,15 +623,41 @@
 
   <script>
     function openModal(id) {
-      document.getElementById('modalOverlay').classList.remove('hidden');
-      document.getElementById(id).classList.remove('hidden');
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => modal.classList.add('is-open'));
+      });
       document.body.classList.add('overflow-hidden');
     }
 
     function closeModal() {
-      document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
-      document.getElementById('modalOverlay').classList.add('hidden');
+      document.querySelectorAll('.modal.is-open').forEach((modal) => {
+        modal.classList.remove('is-open');
+        setTimeout(() => modal.classList.add('hidden'), 250);
+      });
       document.body.classList.remove('overflow-hidden');
+    }
+
+    // ========== تابع سویچ تب ==========
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach((btn) => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach((panel) => panel.classList.remove('active'));
+
+      const panelIds = { debts: 'tabPanelDebts', receivables: 'tabPanelReceivables', loans: 'tabPanelLoans' };
+      const actionIds = { debts: 'tabActionsDebts', receivables: 'tabActionsReceivables', loans: 'tabActionsLoans' };
+
+      const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+      const activePanel = document.getElementById(panelIds[tabName]);
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activePanel) activePanel.classList.add('active');
+
+      Object.keys(actionIds).forEach((key) => {
+        const el = document.getElementById(actionIds[key]);
+        if (!el) return;
+        el.classList.toggle('hidden', key !== tabName);
+      });
     }
   </script>
   <script src="/JS/debts.js" defer></script>
