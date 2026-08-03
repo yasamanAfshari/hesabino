@@ -58,6 +58,12 @@ export class AppController {
     return { title: 'بدهی‌ها' };
   }
 
+  @Get('reminders')
+  @Render('reminders')
+  reminders() {
+    return { title: 'یادآوری‌ها' };
+  }
+
   @Get('reports')
   @Render('reports')
   reports() {

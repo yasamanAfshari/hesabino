@@ -23,6 +23,18 @@ import { AccountsModule } from './accounts/accounts.module';
 import { Account } from './accounts/accounts.entity';
 import { TransfersModule } from './transfers/transfers.module';
 import { Transfer } from './transfers/transfer.entity';
+import { AssetsModule } from './assets/assets.module';
+import { Asset } from './assets/asset.entity';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { Subscription } from './subscriptions/subscription.entity';
+import { InstallmentsModule } from './installments/installments.module';
+import { Loan } from './installments/loan.entity';
+import { ChallengesModule } from './challenges/challenges.module';
+import { Challenge } from './challenges/challenge.entity';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { AiModule } from './ai/ai.module';
+import { RemindersModule } from './reminders/reminders.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -38,7 +50,7 @@ import { Transfer } from './transfers/transfer.entity';
         username: config.get<string>('DB_USERNAME', 'root'),
         password: config.get<string>('DB_PASSWORD', ''),
         database: config.get<string>('DB_NAME', 'hesabino'),
-        entities: [User, Transaction, Budget, BudgetCategory, SavingGoal, SavingDeposit, Cheque, DebtRecord, Account, Transfer],
+        entities: [User, Transaction, Budget, BudgetCategory, SavingGoal, SavingDeposit, Cheque, DebtRecord, Account, Transfer, Asset, Subscription, Loan, Challenge],
         synchronize: true,
       }),
     }),
@@ -51,6 +63,14 @@ import { Transfer } from './transfers/transfer.entity';
     DebtsModule,
     AccountsModule,
     TransfersModule,
+    AssetsModule,
+    SubscriptionsModule,
+    InstallmentsModule,
+    ChallengesModule,
+    DashboardModule,
+    AiModule,
+    RemindersModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
