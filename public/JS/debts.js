@@ -520,7 +520,7 @@
 
   function renderLoanCard(l) {
     const nextDueBox = l.isCompleted ? '' : `
-      <div class="flex items-center justify-between gap-1 text-sm ${l.isOverdue ? 'bg-red-color-25 border-red-color' : 'bg-zinc-100 border-zinc-300'} rounded-xl m-3 p-2 border">
+      <div class="flex items-center mb-0 justify-between gap-1 text-sm ${l.isOverdue ? 'bg-red-color-25 border-red-color' : 'bg-zinc-100 border-zinc-300'} rounded-xl m-3 p-2 border">
         <div>
           <div>قسط بعدی</div>
           <div class="text-xs text-gray-500">${l.nextDueDate ? escapeHtml(toPersianDigits(l.nextDueDate)) : '—'}</div>
@@ -537,7 +537,7 @@
       </button>`;
 
     return `
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md" data-loan-id="${l.id}">
+      <div class="bg-white mb-0 rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md" data-loan-id="${l.id}">
         <div class="flex justify-between items-center mb-2">
           <span class="font-bold text-zinc-800 text-base">${escapeHtml(l.title)}</span>
           <span class="text-xs ${l.isCompleted ? 'text-green-color bg-green-color-25' : 'text-gray-400 bg-gray-50'} px-2 py-0.5 rounded-md">${l.isCompleted ? 'تکمیل شده' : `${toPersianDigits(l.paidCount)} از ${toPersianDigits(l.installmentsCount)} قسط`}</span>
