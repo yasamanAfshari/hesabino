@@ -122,6 +122,10 @@ button:hover {
     font-size: 0.875rem;
 }
 
+input::placeholder{
+    color: var(--color-gray-700);
+}
+
 /* -------sidebar------- */
 /* سایدبار همیشه پس‌زمینه‌ی آبی برند داره، پس متنش صرف‌نظر از تم روشن/تیره همیشه سفید می‌مونه */
 #sidebar {
@@ -132,7 +136,7 @@ button:hover {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 14px 30px;
+    padding: 12px 30px;
     margin: 10px 0;
     color: #fff;
     cursor: pointer;
@@ -339,6 +343,10 @@ th div {
 
 td {
     text-align: center;
+}
+
+.scrollable-table-container td{
+    padding: 8px !important;
 }
 
 /* تنظیم حداقل عرض برای جدول تا اسکرول افقی فعال بماند */
@@ -779,6 +787,20 @@ html.dark-theme[data-accent="green"] {
     .scrollable-table-container {
         height: 45%;
     }
+
+    .menu-item {
+        border-right: 5px solid var(--color-main-color);
+        border-left: 5px solid var(--color-main-color);
+        border-radius: 40px !important;
+    }
+
+    .menu-item.active::before {
+        display: none;
+    }
+
+    .menu-item.active::after {
+        display: none;
+    }
 }
 
 /* ===== بک‌دراپ یکسان برای همه‌ی مودال‌های اپ ===== */
@@ -799,6 +821,14 @@ html.dark-theme[data-accent="green"] {
     opacity: 0;
     transition: opacity 0.25s ease;
     overflow-y: auto;
+}
+
+.modal>div{
+    min-width: 34vw !important;
+}
+
+.modal-body{
+    height: 55vh !important;
 }
 
 .modal.hidden {
