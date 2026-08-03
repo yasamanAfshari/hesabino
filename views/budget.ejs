@@ -98,7 +98,7 @@
 
             <div class="flex items-center gap-3">
               <small class="text-zinc-500 text-xs">مصرف هر دسته بر اساس بودجه تعیین شده است.</small>
-              <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center">
+              <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center" onclick="BudgetApp.openAlertsModal()">
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M13.0216 3.1525C9.43581 3.1525 6.52164 6.06666 6.52164 9.6525V12.7833C6.52164 13.4442 6.23997 14.4517 5.90414 15.015L4.65831 17.0842C3.88914 18.3625 4.41997 19.7817 5.82831 20.2583C10.4975 21.8183 15.535 21.8183 20.2041 20.2583C21.515 19.825 22.0891 18.2758 21.3741 17.0842L20.1283 15.015C19.8033 14.4517 19.5216 13.4442 19.5216 12.7833V9.6525C19.5216 6.0775 16.5966 3.1525 13.0216 3.1525Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" />
                   <path d="M15.0259 3.46665C14.6901 3.36915 14.3434 3.29332 13.9859 3.24999C12.9459 3.11999 11.9492 3.19582 11.0176 3.46665C11.3317 2.66499 12.1117 2.10165 13.0217 2.10165C13.9317 2.10165 14.7117 2.66499 15.0259 3.46665Z" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
@@ -117,7 +117,6 @@
     </div>
   </section>
 
-  <div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 z-40" onclick="closeModal()"></div>
 
   <!-- مودال ویرایش دستی -->
   <div id="editBudgetManual" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -175,16 +174,44 @@
     </div>
   </div>
 
+  <!-- مودال یادآوری‌ها، هشدارها و تحلیل بودجه -->
+  <div id="budgetAlertsModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-lg max-h-[85vh] flex flex-col relative">
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-lg text-zinc-800">یادآوری‌ها و تحلیل بودجه</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 scrollbar px-6 py-4" id="budgetAlertsList">
+        <p class="text-center text-gray-400 mt-6">در حال بررسی وضعیت بودجه...</p>
+      </div>
+
+      <div class="flex justify-end px-6 pb-6 pt-4 border-t border-gray-200">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">بستن</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     function openModal(id) {
-      document.getElementById('modalOverlay').classList.remove('hidden');
-      document.getElementById(id).classList.remove('hidden');
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => modal.classList.add('is-open'));
+      });
       document.body.classList.add('overflow-hidden');
     }
 
     function closeModal() {
-      document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
-      document.getElementById('modalOverlay').classList.add('hidden');
+      document.querySelectorAll('.modal.is-open').forEach((modal) => {
+        modal.classList.remove('is-open');
+        setTimeout(() => modal.classList.add('hidden'), 250);
+      });
       document.body.classList.remove('overflow-hidden');
     }
   </script>
