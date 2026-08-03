@@ -22,7 +22,7 @@
         .tab-btn::after {
             content: '';
             position: absolute;
-            bottom: -1px;
+            bottom: -8px;
             left: 0;
             right: 0;
             height: 2.5px;
@@ -69,8 +69,6 @@
     <%- include('partials/header', { pageTitle: 'مدیریت حساب‌ها' }) %>
 
         <section class="scrollbar overflow-y-auto px-6 pb-1">
-
-            <h3 class="font-bold text-zinc-950 text-center">مدیریت حساب‌ها</h3>
 
             <!-- کارت‌های آمار -->
             <div class="overflow-x-auto scrollbar my-2">
@@ -146,7 +144,7 @@
                     <!-- هدر باکس + تب‌ها -->
                     <div
                         class="flex items-center justify-between mb-1 border-b border-gray-200 pb-0 flex-wrap gap-2 flex-shrink-0">
-                        <div class="flex items-center gap-1 w-full justify-between">
+                        <div class="flex items-center gap-1 w-full justify-between mb-2">
                             <!-- دکمه‌های تب -->
                             <div class="flex items-center gap-0">
                                 <button class="tab-btn active px-4 py-2.5 text-sm text-zinc-400 transition-colors"
@@ -187,7 +185,7 @@
                         <!-- تب حساب‌ها -->
                         <div class="tab-panel active" id="tabPanelAccounts">
                             <div class="tab-scroll-area px-2">
-                                <div class="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 grc gap-4 mt-2"
+                                <div class="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 grc gap-4 mt-2"
                                     id="accountsList">
                                     <p class="text-center text-gray-400 mt-6 col-span-full">در حال بارگذاری حساب‌ها...</p>
                                 </div>
@@ -209,7 +207,6 @@
         </section>
 
         <!-- مودال‌ها (بدون تغییر) -->
-        <div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 z-40" onclick="closeModal()"></div>
 
         <!-- مودال افزودن حساب -->
         <div id="addAccount" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -239,7 +236,6 @@
                             class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
                             <option value="bank">بانک</option>
                             <option value="cash">نقدی</option>
-                            <option value="card">کارت</option>
                             <option value="digital_wallet">کیف پول دیجیتال</option>
                             <option value="crypto">ارز دیجیتال</option>
                             <option value="other">سایر</option>
@@ -301,7 +297,6 @@
                             class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
                             <option value="bank">بانک</option>
                             <option value="cash">نقدی</option>
-                            <option value="card">کارت</option>
                             <option value="digital_wallet">کیف پول دیجیتال</option>
                             <option value="crypto">ارز دیجیتال</option>
                             <option value="other">سایر</option>
@@ -404,14 +399,20 @@
 
         <script>
             function openModal(id) {
-                document.getElementById('modalOverlay').classList.remove('hidden');
-                document.getElementById(id).classList.remove('hidden');
+                const modal = document.getElementById(id);
+                if (!modal) return;
+                modal.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => modal.classList.add('is-open'));
+                });
                 document.body.classList.add('overflow-hidden');
             }
 
             function closeModal() {
-                document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
-                document.getElementById('modalOverlay').classList.add('hidden');
+                document.querySelectorAll('.modal.is-open').forEach((modal) => {
+                    modal.classList.remove('is-open');
+                    setTimeout(() => modal.classList.add('hidden'), 250);
+                });
                 document.body.classList.remove('overflow-hidden');
             }
 
