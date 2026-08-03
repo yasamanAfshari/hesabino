@@ -14,15 +14,11 @@
 
 <body class="bg-main-color overflow-hidden">
 
-  <%- include('partials/header') %>
-
-
+    <%- include('partials/header' , { pageTitle: 'مدیریت پس انداز' } ) %>
 
   <section class="scrollbar overflow-y-auto px-6 pb-1">
 
-    <h3 class="font-bold text-zinc-950 text-center">مدیریت پس انداز </h3>
-
-    <div class="overflow-x-auto scrollbar my-2">
+    <div class="overflow-x-auto scrollbar">
       <div class="grid grid-cols-4 gap-4 min-w-max">
         <div class="main-box-small dashboard-status">
           <div class="flex justify-start gap-4">
@@ -134,7 +130,7 @@
         </button>
       </div>
 
-      <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+      <div class="modal-body overflow-y-auto flex flex-col gap-3 scrollbar px-6 py-4">
         <div id="addSavingError" class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2"></div>
 
         <div class="relative">
@@ -155,14 +151,6 @@
             <rect x="3" y="4" width="18" height="18" rx="2"></rect>
             <path d="M16 2v4M8 2v4M3 10h18"></path>
           </svg>
-        </div>
-
-        <div>
-          <label class="reminder-toggle">
-            <input type="checkbox" id="addSavingReminder">
-            <span class="slider-track"></span>
-            <span class="toggle-label"> یادآور</span>
-          </label>
         </div>
       </div>
 
@@ -187,7 +175,7 @@
         </button>
       </div>
 
-      <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+      <div class="modal-body overflow-y-auto flex flex-col gap-3 scrollbar px-6 py-4">
         <input type="hidden" id="editSavingId">
         <div id="editSavingError" class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2"></div>
 
@@ -211,13 +199,6 @@
           </svg>
         </div>
 
-        <div>
-          <label class="reminder-toggle">
-            <input type="checkbox" id="editSavingReminder">
-            <span class="slider-track"></span>
-            <span class="toggle-label"> یادآور</span>
-          </label>
-        </div>
       </div>
 
       <!-- فوتر ثابت -->
@@ -242,7 +223,7 @@
         </button>
       </div>
 
-      <div class="modal-body overflow-y-auto flex-1 scrollbar px-6 py-4 flex flex-col gap-3">
+      <div class="modal-body overflow-y-auto scrollbar px-6 py-4 flex flex-col gap-3">
         <input type="hidden" id="addPriceGoalId">
         <div id="addPriceError" class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2"></div>
         <div class="relative">
