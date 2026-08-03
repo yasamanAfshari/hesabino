@@ -780,3 +780,31 @@ html.dark-theme[data-accent="green"] {
         height: 45%;
     }
 }
+
+/* ===== بک‌دراپ یکسان برای همه‌ی مودال‌های اپ ===== */
+/* هر عنصری که کلاس modal رو داره (والدِ مستقیم کارت مودال) خودش هم backdrop
+   تیره‌ی بلوردار می‌کشه و هم کارت داخلیش رو وسط صفحه نگه می‌داره؛ دیگه نیازی
+   به لایه‌ی جدای #modalOverlay نیست. */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    overflow-y: auto;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal.is-open {
+    opacity: 1;
+}
