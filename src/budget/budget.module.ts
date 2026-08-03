@@ -15,5 +15,6 @@ import { AuthModule } from '../auth/auth.module';
   ],
   providers: [BudgetService],
   controllers: [BudgetController],
+  exports: [BudgetService],
 })
 export class BudgetModule {}
