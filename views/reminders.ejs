@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><% title = 'یادآوری‌ها' %></title>
+</head>
+
+<body class="bg-main-color overflow-hidden">
+
+  <%- include('partials/header') %>
+
+  <section class="scrollbar overflow-y-auto px-6 pb-6">
+
+    <h3 class="font-bold text-zinc-950 text-center mt-2">یادآوری‌ها</h3>
+    <p class="text-zinc-400 !text-sm text-center mb-3">هر جا که تیک «یادآور» را روشن کرده باشید، اینجا نمایش داده می‌شود</p>
+
+    <!-- خلاصه‌ی آماری -->
+    <div class="overflow-x-auto scrollbar my-2">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 min-w-max">
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-14 h-14 bg-red-color-25 flex justify-center items-center rounded-lg border border-red-color shrink-0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 8V12L14.5 14.5" stroke="var(--color-red-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="var(--color-red-color)" stroke-width="1.5" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">سررسید گذشته</div>
+              <div id="reminderCountOverdue" class="text-zinc-500 !text-md text-start my-2.5">۰</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-14 h-14 bg-orange-color-25 flex justify-center items-center rounded-lg border border-orange-color shrink-0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 8V12L14.5 14.5" stroke="var(--color-orange-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="var(--color-orange-color)" stroke-width="1.5" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">امروز</div>
+              <div id="reminderCountToday" class="text-zinc-500 !text-md text-start my-2.5">۰</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-14 h-14 bg-main-color-25 flex justify-center items-center rounded-lg border border-main-color shrink-0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 8V12L14.5 14.5" stroke="var(--color-main-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="var(--color-main-color)" stroke-width="1.5" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">به‌زودی (تا ۳ روز)</div>
+              <div id="reminderCountSoon" class="text-zinc-500 !text-md text-start my-2.5">۰</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-14 h-14 bg-green-color-25 flex justify-center items-center rounded-lg border border-green-color shrink-0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 12L11 14L15 10" stroke="var(--color-green-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="var(--color-green-color)" stroke-width="1.5" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">مجموع یادآورها</div>
+              <div id="reminderCountTotal" class="text-zinc-500 !text-md text-start my-2.5">۰</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- یادآورهای دستی (چک/بدهی/پس‌انداز‌ی که کاربر تیک یادآور را زده) -->
+    <div class="main-box-small mt-3">
+      <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
+        <h2 class="font-bold text-lg text-zinc-800">یادآورهای فعال‌شده توسط شما</h2>
+        <span class="text-zinc-400 !text-xs">از چک‌ها، بدهی‌ها و اهداف پس‌انداز که برایشان یادآور را روشن کرده‌اید</span>
+      </div>
+      <div id="manualRemindersList" class="space-y-3">
+        <p class="text-zinc-400 !text-sm text-center py-6">در حال بارگذاری...</p>
+      </div>
+    </div>
+
+    <!-- یادآورهای خودکار (اشتراک/قسط نزدیک به سررسید) -->
+    <div class="main-box-small mt-3 mb-4">
+      <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
+        <h2 class="font-bold text-lg text-zinc-800">یادآورهای خودکار سررسید نزدیک</h2>
+        <span class="text-zinc-400 !text-xs">اشتراک‌ها و اقساطی که نزدیک به سررسید هستند (بدون نیاز به تنظیم دستی)</span>
+      </div>
+      <div id="automaticRemindersList" class="space-y-3">
+        <p class="text-zinc-400 !text-sm text-center py-6">در حال بارگذاری...</p>
+      </div>
+    </div>
+
+  </section>
+
+  <script src="/JS/reminders.js" defer></script>
+</body>
+
+</html>
