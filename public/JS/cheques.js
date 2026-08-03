@@ -458,6 +458,161 @@
     }
   }
 
+  // ===== ابزارهای تاریخ شمسی برای تشخیص چک‌های نزدیک به سررسید/گذشته =====
+  function toEnglishDigitsLocal(str) {
+    const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+    return String(str || '').replace(/[۰-۹]/g, (ch) => String(persianDigits.indexOf(ch)));
+  }
+
+  function parseJalaliParts(str) {
+    const clean = toEnglishDigitsLocal(str).trim();
+    const m = clean.match(/^(\d{3,4})\/(\d{1,2})\/(\d{1,2})$/);
+    if (!m) return null;
+    return { y: Number(m[1]), m: Number(m[2]), d: Number(m[3]) };
+  }
+
+  function todayJalaliParts() {
+    try {
+      if (typeof persianDate === 'function') {
+        return parseJalaliParts(new persianDate().format('YYYY/MM/DD'));
+      }
+    } catch (e) { /* کتابخانه در دسترس نبود */ }
+    return null;
+  }
+
+  // اختلاف تقریبی روز بین دو تاریخ شمسی (با فرض ماه‌های ۳۰روزه)؛ برای دسته‌بندی
+  // «گذشته / به‌زودی / بعداً» کافیه و نیازی به تقویم دقیق نداره.
+  function approxDaysDiff(fromParts, toParts) {
+    const toLinear = (p) => p.y * 360 + (p.m - 1) * 30 + p.d;
+    return toLinear(toParts) - toLinear(fromParts);
+  }
+
+  // ===== مودال یادآوری‌ها، هشدارها و تحلیل چک‌ها =====
+  const ALERT_STYLES = {
+    danger: { bg: 'bg-red-color-25', border: 'border-red-color', text: 'text-red-color', icon: '⚠️' },
+    warning: { bg: 'bg-orange-color-25', border: 'border-orange-color', text: 'text-orange-color', icon: '⚠️' },
+    info: { bg: 'bg-main-color-25', border: 'border-main-color', text: 'text-main-color', icon: 'ℹ️' },
+    success: { bg: 'bg-green-color-25', border: 'border-green-color', text: 'text-green-color', icon: '✅' },
+  };
+
+  // بر اساس آخرین لیست چک‌ها (allCheques)، لیست هشدار/یادآوری/تحلیل رو می‌سازه.
+  // هیچ درخواستی به سرور نمی‌زنه.
+  function buildAlerts(cheques) {
+    const alerts = [];
+
+    if (!cheques || !cheques.length) {
+      alerts.push({
+        level: 'info',
+        title: 'هنوز چکی ثبت نکردی',
+        message: 'با زدن دکمه‌ی «ثبت چک جدید» می‌تونی چک‌های دریافتی و پرداختی‌ات رو با تاریخ سررسید ثبت کنی.',
+      });
+      return alerts;
+    }
+
+    const today = todayJalaliParts();
+    const pending = cheques.filter((c) => c.status === 'pending');
+    const bounced = cheques.filter((c) => c.status === 'bounced');
+
+    const overdue = [];
+    const dueSoon = [];
+    if (today) {
+      pending.forEach((c) => {
+        const parts = parseJalaliParts(c.date);
+        if (!parts) return;
+        const diff = approxDaysDiff(today, parts);
+        if (diff < 0) overdue.push(c);
+        else if (diff <= 7) dueSoon.push(c);
+      });
+    }
+
+    bounced.forEach((c) => {
+      alerts.push({
+        level: 'danger',
+        title: `چک شماره «${c.number}»${c.counterparty ? ' نزد ' + c.counterparty : ''} برگشت خورده`,
+        message: `مبلغ ${formatAmount(c.amount)} ریال، ${typeLabel(c.type)}.`,
+      });
+    });
+
+    overdue.forEach((c) => {
+      alerts.push({
+        level: 'danger',
+        title: `چک شماره «${c.number}» سررسیدش گذشته`,
+        message: `${typeLabel(c.type)} به مبلغ ${formatAmount(c.amount)} ریال؛ وضعیتش هنوز «در انتظار» ثبت شده، بهتره به‌روز بشه.`,
+      });
+    });
+
+    dueSoon.forEach((c) => {
+      const reminderNote = c.reminder ? ' (یادآور این چک فعاله)' : '';
+      alerts.push({
+        level: 'warning',
+        title: `چک شماره «${c.number}» به‌زودی سررسید می‌شه${reminderNote}`,
+        message: `${typeLabel(c.type)} به مبلغ ${formatAmount(c.amount)} ریال، سررسید ${toPersianDigits(c.date)}.`,
+      });
+    });
+
+    const pendingReceived = pending.filter((c) => c.type === 'received');
+    const pendingPaid = pending.filter((c) => c.type === 'paid');
+    const pendingReceivedTotal = pendingReceived.reduce((sum, c) => sum + Number(c.amount || 0), 0);
+    const pendingPaidTotal = pendingPaid.reduce((sum, c) => sum + Number(c.amount || 0), 0);
+
+    if (pendingPaidTotal > 0) {
+      alerts.push({
+        level: 'info',
+        title: 'تعهدات پرداختی در انتظار',
+        message: `${formatAmount(pendingPaidTotal)} ریال چک پرداختی هنوز وصول نشده؛ مطمئن شو حساب مربوطه موجودی کافی داره.`,
+      });
+    }
+
+    if (pendingReceivedTotal > 0) {
+      alerts.push({
+        level: 'info',
+        title: 'چک‌های دریافتی در انتظار وصول',
+        message: `${formatAmount(pendingReceivedTotal)} ریال چک دریافتی هنوز وصول نشده.`,
+      });
+    }
+
+    if (cheques.length >= 5 && bounced.length / cheques.length > 0.2) {
+      alerts.push({
+        level: 'warning',
+        title: 'نرخ برگشت خوردن چک‌هات بالاست',
+        message: `${toPersianDigits(bounced.length)} از ${toPersianDigits(cheques.length)} چک ثبت‌شده برگشت خورده؛ بهتره طرف‌حساب‌ها رو دقیق‌تر بررسی کنی.`,
+      });
+    }
+
+    if (!bounced.length && !overdue.length && !dueSoon.length) {
+      alerts.push({
+        level: 'success',
+        title: 'وضعیت چک‌هات مرتبه',
+        message: 'هیچ چک برگشتی یا سررسید نزدیکی وجود نداره.',
+      });
+    }
+
+    return alerts;
+  }
+
+  function renderAlertsList(cheques) {
+    const container = document.getElementById('chequesAlertsList');
+    if (!container) return;
+
+    const alerts = buildAlerts(cheques);
+    container.innerHTML = alerts.map((a) => {
+      const style = ALERT_STYLES[a.level] || ALERT_STYLES.info;
+      return `
+        <div class="flex items-start gap-3 ${style.bg} border ${style.border} rounded-lg px-4 py-3 mb-3">
+          <span class="text-lg leading-none mt-0.5">${style.icon}</span>
+          <div class="flex-1">
+            <div class="font-bold text-sm ${style.text}">${escapeHtml(a.title)}</div>
+            <div class="text-xs text-zinc-600 mt-1">${escapeHtml(a.message)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function openAlertsModal() {
+    renderAlertsList(allCheques);
+    window.openModal('chequesAlertsModal');
+  }
+
   function onReady() {
     setupSelectValueTracking();
 
@@ -482,6 +637,7 @@
     openEdit: openEditModal,
     deleteCheque,
     resetFilter,
+    openAlertsModal,
   };
 
   if (document.readyState === 'loading') {
