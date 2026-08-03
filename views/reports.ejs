@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><% title = 'گزارش' %></title>
+</head>
+
+<body class="bg-main-color overflow-hidden">
+
+  <%- include('partials/header') %>
+
+  <section class="scrollbar overflow-y-auto px-6 pb-6">
+
+    <div class="flex items-center justify-between flex-wrap gap-2 mt-2 mb-3">
+      <h3 class="font-bold text-zinc-950">گزارش</h3>
+      <select id="reportRangeSelect" class="border border-gray-200 rounded-lg px-3 py-1.5 !text-sm bg-white">
+        <option value="month">این ماه</option>
+        <option value="3m">۳ ماه اخیر</option>
+        <option value="6m">۶ ماه اخیر</option>
+        <option value="year" selected>سال جاری</option>
+        <option value="all">کل تاریخچه</option>
+      </select>
+    </div>
+
+    <!-- کارت‌های خلاصه‌ی کل بازه -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+      <div class="main-box-small border !border-main-color text-center">
+        <h2 class="font-bold text-main-color mb-2">کل پس‌انداز</h2>
+        <p id="report-total-savings" class="text-zinc-700 font-bold !text-lg">—</p>
+      </div>
+      <div class="main-box-small border !border-red-color text-center">
+        <h2 class="font-bold text-red-color mb-2">کل هزینه</h2>
+        <p id="report-total-expense" class="text-zinc-700 font-bold !text-lg">—</p>
+      </div>
+      <div class="main-box-small border !border-green-color text-center">
+        <h2 class="font-bold text-green-color mb-2">کل درآمد</h2>
+        <p id="report-total-income" class="text-zinc-700 font-bold !text-lg">—</p>
+      </div>
+    </div>
+
+    <!-- جریان مالی (میله‌ای) + هزینه به تفکیک دسته -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-3">
+      <div class="main-box-small">
+        <h2 class="font-bold text-lg text-zinc-800 mb-3 border-b border-gray-200 pb-3">جریان مالی</h2>
+        <div class="relative h-[260px]">
+          <canvas id="reportCashFlowChart"></canvas>
+        </div>
+      </div>
+      <div class="main-box-small">
+        <h2 class="font-bold text-lg text-zinc-800 mb-3 border-b border-gray-200 pb-3">هزینه به تفکیک دسته</h2>
+        <div class="grid grid-cols-2 gap-4 items-center">
+          <div id="report-category-legend" class="space-y-2">
+            <p class="text-zinc-400 !text-sm">در حال بارگذاری...</p>
+          </div>
+          <div class="flex justify-center">
+            <div class="w-[180px] h-[180px]">
+              <canvas id="reportDonutChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ۵ دسته پرهزینه + نسبت هزینه به درآمد -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-3">
+      <div class="main-box-small">
+        <h2 class="font-bold text-lg text-zinc-800 mb-3 border-b border-gray-200 pb-3">۵ دسته پرهزینه</h2>
+        <div class="relative h-[220px]">
+          <canvas id="reportTop5Chart"></canvas>
+        </div>
+      </div>
+      <div class="main-box-small">
+        <h2 class="font-bold text-lg text-zinc-800 mb-3 border-b border-gray-200 pb-3">نسبت هزینه به درآمد</h2>
+        <div class="overflow-x-auto scrollbar min-h-[140px] flex items-center">
+          <div id="report-ratio-rings" class="flex gap-4 justify-between min-w-max w-full">
+            <p class="text-zinc-400 !text-sm">در حال بارگذاری...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- روند تجمعی جریان مالی + تحلیل هوشمند -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-3">
+      <div class="main-box-small">
+        <h2 class="font-bold text-lg text-zinc-800 mb-3 border-b border-gray-200 pb-3">روند تجمعی جریان مالی</h2>
+        <div class="relative h-[220px]">
+          <canvas id="reportTrendChart"></canvas>
+        </div>
+      </div>
+      <div class="main-box-small">
+        <div class="flex items-center justify-between mb-3 border-b border-gray-200 pb-3">
+          <h2 class="font-bold text-lg text-zinc-800">تحلیل هوشمند و پیشنهادات</h2>
+          <span id="report-ai-badge" class="!text-xs text-zinc-400"></span>
+        </div>
+        <div id="report-insights" class="space-y-3">
+          <p class="text-zinc-400 !text-sm">در حال بارگذاری...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- کارت‌های وضعیت لحظه‌ای چک/بدهی -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+      <div class="main-box-small border !border-main-color text-center">
+        <h2 class="font-bold text-main-color !text-sm mb-2">چک در انتظار</h2>
+        <p id="report-pending-cheques" class="text-zinc-700 font-bold">—</p>
+      </div>
+      <div class="main-box-small border !border-orange-color text-center">
+        <h2 class="font-bold text-orange-color !text-sm mb-2">بدهی سررسیدگذشته</h2>
+        <p id="report-overdue-debts" class="text-zinc-700 font-bold">—</p>
+      </div>
+      <div class="main-box-small border !border-green-color text-center">
+        <h2 class="font-bold text-green-color !text-sm mb-2">طلب از دیگران</h2>
+        <p id="report-receivable" class="text-zinc-700 font-bold">—</p>
+      </div>
+      <div class="main-box-small border !border-red-color text-center">
+        <h2 class="font-bold text-red-color !text-sm mb-2">بدهی من</h2>
+        <p id="report-my-debt" class="text-zinc-700 font-bold">—</p>
+      </div>
+    </div>
+
+    <!-- جدول میانگین هزینه‌ها -->
+    <div class="main-box-small mb-4">
+      <h2 class="font-bold text-lg text-zinc-800 mb-3 border-b border-gray-200 pb-3">میانگین هزینه‌ها</h2>
+      <div class="overflow-x-auto scrollbar">
+        <table class="w-full text-right !text-sm">
+          <thead>
+            <tr class="text-zinc-500 border-b border-gray-100">
+              <th class="py-2 px-2 font-medium">دسته</th>
+              <th class="py-2 px-2 font-medium">میانگین ماهانه</th>
+              <th class="py-2 px-2 font-medium">هزینه در بازه انتخابی</th>
+              <th class="py-2 px-2 font-medium">مقایسه</th>
+            </tr>
+          </thead>
+          <tbody id="report-category-table">
+            <tr><td colspan="4" class="text-zinc-400 !text-sm text-center py-6">در حال بارگذاری...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <script src="/JS/reports.js" defer></script>
+</body>
+
+</html>
