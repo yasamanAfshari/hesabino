@@ -32,6 +32,24 @@
     return toPersianDigits(Math.round(Number(value || 0) * 100) / 100) + '٪';
   }
 
+  // همون رنگ‌بندیِ دقیق دسته‌ها که توی نمودار «هزینه به تفکیک دسته» در داشبورد
+  // استفاده می‌شه، تا رنگ هر دسته توی همه‌جای اپ یکی باشه.
+  const CATEGORY_COLORS = {
+    'خوراک': '#FF9B44',
+    'خرید و پوشاک': '#FF9EE7',
+    'حمل و نقل': '#C8AC4E',
+    'تفریح و سرگرمی': '#55B5B1',
+    'سلامت و تناسب اندام': '#9DE18B',
+    'آموزش و توسعه': '#9D5C8F',
+    'سرمایه‌گذاری': '#E5DC44',
+    'بدهی': '#B9403C',
+    'مسکن و خدمات': '#745C52',
+    'سایر': '#DADADA',
+  };
+  function colorFor(category) {
+    return CATEGORY_COLORS[category] || '#94A3B8';
+  }
+
   // ===== توست ساده برای پیام موفقیت/خطا =====
   function ensureToastContainer() {
     let el = document.getElementById('hesabinoToastContainer');
@@ -104,18 +122,21 @@
 
     container.innerHTML = categories.map((c) => {
       const percentDisplay = Math.max(0, Math.min(100, c.progressPercent));
-      const barColor = c.isOverBudget ? 'bg-red-color' : 'bg-orange-color';
-      const spentColor = c.isOverBudget ? 'text-red-color' : 'text-orange-color';
+      const spentColor = c.isOverBudget ? 'text-red-color' : 'text-zinc-600';
+      const trackClasses = c.isOverBudget ? 'bg-gray-200 ring-2 ring-red-color/70' : 'bg-gray-200';
       return `
         <div class="budgetStatItem">
           <div class="border-b-zinc-200">
             <div class="mt-3">
               <div class="flex justify-between text-sm mb-1">
-                <span>${escapeHtml(c.category)}</span>
+                <span class="flex items-center gap-2">
+                  <span class="inline-block w-2.5 h-2.5 rounded-full" style="background-color: ${colorFor(c.category)}"></span>
+                  ${escapeHtml(c.category)}
+                </span>
                 <span>${toPersianDigits(Math.round(c.progressPercent))}٪</span>
               </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="${barColor} h-2.5 rounded-full progress-bar" style="width: ${percentDisplay}%"></div>
+              <div class="w-full ${trackClasses} rounded-full h-2.5">
+                <div class="h-2.5 rounded-full progress-bar" style="width: ${percentDisplay}%; background-color: ${colorFor(c.category)}"></div>
               </div>
               <div class="flex justify-between text-sm mt-1">
                 <span class="${spentColor}">مصرف شده: ${formatAmount(c.spent)}</span>
@@ -348,10 +369,131 @@
     }
   }
 
+  // ===== مودال یادآوری‌ها، هشدارها و تحلیل بودجه =====
+  const ALERT_STYLES = {
+    danger: { bg: 'bg-red-color-25', border: 'border-red-color', text: 'text-red-color', icon: '⚠️' },
+    warning: { bg: 'bg-orange-color-25', border: 'border-orange-color', text: 'text-orange-color', icon: '⚠️' },
+    info: { bg: 'bg-main-color-25', border: 'border-main-color', text: 'text-main-color', icon: 'ℹ️' },
+    success: { bg: 'bg-green-color-25', border: 'border-green-color', text: 'text-green-color', icon: '✅' },
+  };
+
+  // بر اساس آخرین وضعیت بودجه، لیست هشدار/یادآوری/تحلیل رو می‌سازه. هیچ درخواستی
+  // به سرور نمی‌زنه؛ همه‌چیز از همون داده‌ی صفحه‌ی بودجه (latestBudget) محاسبه می‌شه.
+  function buildAlerts(data) {
+    const alerts = [];
+
+    if (!data || !data.hasBudget || !data.income) {
+      alerts.push({
+        level: 'warning',
+        title: 'هنوز بودجه‌ای برای این ماه تنظیم نکردی',
+        message: 'درآمد این ماه رو وارد کن و «محاسبه خودکار» یا «ویرایش دستی» رو بزن تا بودجه‌ی هر دسته مشخص بشه.',
+      });
+      return alerts;
+    }
+
+    const categories = data.categories || [];
+    const overBudget = categories.filter((c) => c.isOverBudget);
+    const nearLimit = categories.filter((c) => !c.isOverBudget && c.amount > 0 && c.progressPercent >= 80);
+    const unallocatedSpending = categories.filter((c) => c.amount <= 0 && c.spent > 0);
+
+    overBudget.forEach((c) => {
+      alerts.push({
+        level: 'danger',
+        category: c.category,
+        title: `دسته‌ی «${c.category}» از بودجه‌اش عبور کرده`,
+        message: `${formatAmount(c.spent)} خرج شده در برابر ${formatAmount(c.amount)} بودجه‌ی تعیین‌شده؛ یعنی ${formatAmount(Math.abs(c.remaining))} بیشتر از حد مجاز.`,
+      });
+    });
+
+    nearLimit.forEach((c) => {
+      alerts.push({
+        level: 'warning',
+        category: c.category,
+        title: `دسته‌ی «${c.category}» داره به سقف بودجه‌اش نزدیک می‌شه`,
+        message: `تا الان ${toPersianDigits(Math.round(c.progressPercent))}٪ از بودجه‌ی این دسته مصرف شده، ${formatAmount(c.remaining)} باقی مونده.`,
+      });
+    });
+
+    unallocatedSpending.forEach((c) => {
+      alerts.push({
+        level: 'warning',
+        category: c.category,
+        title: `هزینه در دسته‌ی بدون بودجه‌ی «${c.category}»`,
+        message: `${formatAmount(c.spent)} توی این دسته خرج شده ولی هنوز بودجه‌ای براش تعیین نکردی.`,
+      });
+    });
+
+    if (data.income > 0) {
+      const allocatedPercent = Math.round((data.totalBudget / data.income) * 100);
+      if (allocatedPercent > 100) {
+        alerts.push({
+          level: 'danger',
+          title: 'مجموع بودجه‌ها از درآمدت بیشتره',
+          message: `${toPersianDigits(allocatedPercent)}٪ از درآمد این ماه بین دسته‌ها تقسیم شده؛ یعنی ${formatAmount(data.totalBudget - data.income)} بیشتر از درآمدته.`,
+        });
+      } else if (allocatedPercent < 90) {
+        alerts.push({
+          level: 'info',
+          title: 'بخشی از درآمدت هنوز بودجه‌بندی نشده',
+          message: `فقط ${toPersianDigits(allocatedPercent)}٪ از درآمد این ماه بین دسته‌ها تقسیم شده؛ بقیه رو می‌تونی برای پس‌انداز یا دسته‌های دیگه در نظر بگیری.`,
+        });
+      }
+    }
+
+    if (data.remaining < 0) {
+      alerts.push({
+        level: 'danger',
+        title: 'مجموع هزینه‌های این ماه از کل بودجه گذشته',
+        message: `${formatAmount(Math.abs(data.remaining))} بیشتر از کل بودجه‌ی این ماه خرج شده.`,
+      });
+    }
+
+    if (!overBudget.length && !nearLimit.length && !unallocatedSpending.length && data.remaining >= 0) {
+      alerts.push({
+        level: 'success',
+        title: 'وضعیت بودجه‌ات عالیه!',
+        message: 'هیچ دسته‌ای از حد بودجه‌اش عبور نکرده و هزینه‌های این ماه توی چارچوب برنامه‌ریزی‌شده‌ست.',
+      });
+    }
+
+    return alerts;
+  }
+
+  function renderAlertsList(data) {
+    const container = document.getElementById('budgetAlertsList');
+    if (!container) return;
+
+    const alerts = buildAlerts(data);
+    container.innerHTML = alerts.map((a) => {
+      const style = ALERT_STYLES[a.level] || ALERT_STYLES.info;
+      const dot = a.category
+        ? `<span class="inline-block w-2 h-2 rounded-full ml-1.5" style="background-color: ${colorFor(a.category)}"></span>`
+        : '';
+      return `
+        <div class="flex items-start gap-3 ${style.bg} border ${style.border} rounded-lg px-4 py-3 mb-3">
+          <span class="text-lg leading-none mt-0.5">${style.icon}</span>
+          <div class="flex-1">
+            <div class="font-bold text-sm ${style.text} flex items-center">${dot}${escapeHtml(a.title)}</div>
+            <div class="text-xs text-zinc-600 mt-1">${escapeHtml(a.message)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function openAlertsModal() {
+    if (!latestBudget) {
+      showToast('داده‌ی بودجه هنوز بارگذاری نشده، کمی صبر کنید', 'error');
+      return;
+    }
+    renderAlertsList(latestBudget);
+    window.openModal('budgetAlertsModal');
+  }
+
   window.BudgetApp = {
     autoCalculate,
     openManualModal,
     submitManual,
+    openAlertsModal,
   };
 
   function onReady() {
