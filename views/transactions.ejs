@@ -55,7 +55,7 @@
                 <path d="m6 9 6 6 6-6"></path>
               </svg>
             </button>
-            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+            <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
               <div class="p-2 border-b border-main-color-25">
                 <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
               </div>
@@ -74,7 +74,7 @@
                 <path d="m6 9 6 6 6-6"></path>
               </svg>
             </button>
-            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+            <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
               <div class="p-2 border-b border-main-color-25">
                 <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
               </div>
@@ -168,7 +168,7 @@
         <input type="hidden" id="transactionId" value="">
 
         <!-- بدنه اسکرول‌شونده -->
-        <div class="modal-body overflow-y-auto flex-1 scrollbar px-6 py-4">
+        <div class="modal-body overflow-y-auto scrollbar px-6 py-4">
           <div id="transactionFormError" class="hidden mb-3 rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
 
           <div class="grid grid-cols-2 gap-3.5">
@@ -210,7 +210,7 @@
                   </svg>
                 </button>
 
-                <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+                <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
                   <div class="p-2 border-b border-main-color-25">
                     <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
                   </div>
@@ -232,7 +232,7 @@
                   </svg>
                 </button>
 
-                <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+                <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
                   <div class="p-2 border-b border-main-color-25">
                     <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
                   </div>
@@ -273,7 +273,7 @@
                   </svg>
                 </button>
 
-                <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+                <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
                   <div class="p-2 border-b border-main-color-25">
                     <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
                   </div>
@@ -290,10 +290,25 @@
             </div>
 
             <div class="col-span-2" id="modalAccountWrapper">
-              <div class="relative">
-                <select id="modalAccountInput" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white">
-                  <option value="">بدون حساب</option>
-                </select>
+              <div class="custom-select relative" id="modalAccountCustomSelect">
+                <!-- hidden input برای حفظ سازگاری با کدهای قدیمی -->
+                <input type="hidden" id="modalAccountInput" value="" />
+
+                <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                  <span class="selected-value text-gray-700" data-placeholder="بدون حساب">بدون حساب</span>
+                  <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+                </button>
+
+                <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
+                  <div class="p-2 border-b border-main-color-25">
+                    <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجوی حساب..." />
+                  </div>
+                  <div class="options max-h-52 overflow-y-auto">
+                    <!-- گزینه‌ها توسط جاوااسکریپت پر می‌شوند -->
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -365,7 +380,7 @@
       </div>
 
       <!-- بدنه اسکرول‌شونده -->
-      <div class="modal-body overflow-y-auto flex-1 scrollbar px-6 py-4">
+      <div class="modal-body overflow-y-auto scrollbar px-6 py-4">
         <div class="flex items-center justify-between py-4">
           <span id="viewTypeBadge" class="transaction-type-badge inline-block bg-emerald-100 text-emerald-600 font-bold px-6 py-2 rounded-full text-sm">
             واریز
