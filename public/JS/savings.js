@@ -378,6 +378,120 @@
     }
   }
 
+  // ===== مودال یادآوری‌ها، هشدارها و تحلیل پس‌انداز =====
+  const ALERT_STYLES = {
+    danger: { bg: 'bg-red-color-25', border: 'border-red-color', text: 'text-red-color', icon: '⚠️' },
+    warning: { bg: 'bg-orange-color-25', border: 'border-orange-color', text: 'text-orange-color', icon: '⚠️' },
+    info: { bg: 'bg-main-color-25', border: 'border-main-color', text: 'text-main-color', icon: 'ℹ️' },
+    success: { bg: 'bg-green-color-25', border: 'border-green-color', text: 'text-green-color', icon: '✅' },
+  };
+
+  // بر اساس آخرین لیست اهداف پس‌انداز، لیست هشدار/یادآوری/تحلیل رو می‌سازه.
+  // هیچ درخواستی به سرور نمی‌زنه، همه‌چیز از latestGoals محاسبه می‌شه.
+  function buildAlerts(goals) {
+    const alerts = [];
+
+    if (!goals || !goals.length) {
+      alerts.push({
+        level: 'info',
+        title: 'هنوز هدف پس‌اندازی ثبت نکردی',
+        message: 'با زدن دکمه‌ی «پس انداز جدید» می‌تونی اولین هدفت رو با مبلغ و مهلت مشخص تعریف کنی.',
+      });
+      return alerts;
+    }
+
+    const active = goals.filter((g) => !g.isAchieved);
+    const expired = active.filter((g) => g.isExpired);
+    const behindPace = active.filter((g) => !g.isExpired && g.status === 'red');
+    const cautionPace = active.filter((g) => !g.isExpired && g.status === 'orange');
+    const noDeadline = active.filter((g) => !g.deadline);
+    const almostDone = active.filter((g) => !g.isExpired && g.progressPercent >= 90);
+    const achieved = goals.filter((g) => g.isAchieved);
+
+    expired.forEach((g) => {
+      alerts.push({
+        level: 'danger',
+        title: `مهلت هدف «${g.title}» تموم شده`,
+        message: `تا الان ${formatAmount(g.currentAmount)} از ${formatAmount(g.targetAmount)} پس‌انداز شده (${toPersianDigits(g.progressPercent)}٪)؛ بهتره مهلت رو تمدید کنی یا مبلغ هدف رو بازبینی کنی.`,
+      });
+    });
+
+    behindPace.forEach((g) => {
+      const need = g.monthlyNeed !== null ? `، حدود ${formatAmount(g.monthlyNeed)} در ماه باید کنار بذاری` : '';
+      alerts.push({
+        level: 'danger',
+        title: `هدف «${g.title}» عقب‌تر از برنامه‌ست`,
+        message: `فقط ${toPersianDigits(g.progressPercent)}٪ از این هدف پیش رفتی${need}.`,
+      });
+    });
+
+    cautionPace.forEach((g) => {
+      const need = g.monthlyNeed !== null ? `؛ برای رسیدن به‌موقع، حدود ${formatAmount(g.monthlyNeed)} در ماه لازمه` : '';
+      alerts.push({
+        level: 'warning',
+        title: `هدف «${g.title}» به توجه بیشتری نیاز داره`,
+        message: `${toPersianDigits(g.progressPercent)}٪ پیش رفتی${need}.`,
+      });
+    });
+
+    almostDone.forEach((g) => {
+      alerts.push({
+        level: 'success',
+        title: `هدف «${g.title}» نزدیک به تکمیله`,
+        message: `${toPersianDigits(g.progressPercent)}٪ پیش رفتی، فقط ${formatAmount(g.remaining)} تا رسیدن به هدف باقی مونده.`,
+      });
+    });
+
+    noDeadline.forEach((g) => {
+      alerts.push({
+        level: 'info',
+        title: `هدف «${g.title}» مهلت مشخصی نداره`,
+        message: 'بدون تعیین مهلت، نمی‌شه نیاز ماهانه رو محاسبه کرد؛ از مودال ویرایش می‌تونی مهلت براش تعیین کنی.',
+      });
+    });
+
+    if (achieved.length) {
+      alerts.push({
+        level: 'success',
+        title: `${toPersianDigits(achieved.length)} هدف محقق شده`,
+        message: 'به‌خاطر پس‌اندازت به این اهداف رسیدی؛ می‌تونی همین‌جا یه هدف جدید تعریف کنی.',
+      });
+    }
+
+    if (!behindPace.length && !expired.length && !cautionPace.length && active.length) {
+      alerts.push({
+        level: 'success',
+        title: 'روند پس‌اندازت خوبه!',
+        message: 'همه‌ی اهداف فعالت طبق برنامه پیش می‌رن.',
+      });
+    }
+
+    return alerts;
+  }
+
+  function renderAlertsList(goals) {
+    const container = document.getElementById('savingsAlertsList');
+    if (!container) return;
+
+    const alerts = buildAlerts(goals);
+    container.innerHTML = alerts.map((a) => {
+      const style = ALERT_STYLES[a.level] || ALERT_STYLES.info;
+      return `
+        <div class="flex items-start gap-3 ${style.bg} border ${style.border} rounded-lg px-4 py-3 mb-3">
+          <span class="text-lg leading-none mt-0.5">${style.icon}</span>
+          <div class="flex-1">
+            <div class="font-bold text-sm ${style.text}">${escapeHtml(a.title)}</div>
+            <div class="text-xs text-zinc-600 mt-1">${escapeHtml(a.message)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function openAlertsModal() {
+    renderAlertsList(latestGoals);
+    window.openModal('savingsAlertsModal');
+  }
+
   window.SavingsApp = {
     openAddModal,
     submitCreate,
@@ -387,6 +501,7 @@
     deleteGoal,
     openDepositModal,
     submitDeposit,
+    openAlertsModal,
   };
 
   function onReady() {
