@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Account } from './accounts.entity';
@@ -79,8 +79,31 @@ export class AccountsService {
     return openingBalance + (await this.computeBalance(accountId));
   }
 
+  // ===== بررسی تکراری‌نبودن نام حساب برای همین کاربر (چه آرشیوشده چه فعال) =====
+  private async ensureNameNotTaken(
+    userId: number,
+    name: string,
+    excludeId?: number,
+  ) {
+    const qb = this.accountsRepository
+      .createQueryBuilder('a')
+      .where('a.userId = :userId', { userId })
+      .andWhere('LOWER(a.name) = LOWER(:name)', { name: name.trim() });
+
+    if (excludeId) {
+      qb.andWhere('a.id != :excludeId', { excludeId });
+    }
+
+    const existing = await qb.getOne();
+    if (existing) {
+      throw new BadRequestException('حسابی با این نام قبلاً ثبت شده است');
+    }
+  }
+
   // ===== ایجاد حساب جدید =====
   async create(userId: number, dto: CreateAccountDto) {
+    await this.ensureNameNotTaken(userId, dto.name);
+
     const account = this.accountsRepository.create({
       ...dto,
       userId,
@@ -124,6 +147,11 @@ export class AccountsService {
   // ===== ویرایش حساب =====
   async update(userId: number, id: number, dto: UpdateAccountDto) {
     const account = await this.findOneOwned(userId, id);
+
+    if (dto.name && dto.name.trim().toLowerCase() !== account.name.trim().toLowerCase()) {
+      await this.ensureNameNotTaken(userId, dto.name, id);
+    }
+
     Object.assign(account, dto);
     const saved = await this.accountsRepository.save(account);
     return this.serialize(saved);

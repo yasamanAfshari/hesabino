@@ -13,7 +13,6 @@ import type { AccountType } from '../accounts.entity';
 const ACCOUNT_TYPES: AccountType[] = [
   'cash',
   'bank',
-  'card',
   'digital_wallet',
   'crypto',
   'other',

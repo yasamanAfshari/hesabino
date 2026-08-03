@@ -13,7 +13,6 @@ import { User } from '../users/users.entity';
 export type AccountType =
   | 'cash'
   | 'bank'
-  | 'card'
   | 'digital_wallet'
   | 'crypto'
   | 'other';
@@ -38,7 +37,7 @@ export class Account {
 
   @Column({
     type: 'enum',
-    enum: ['cash', 'bank', 'card', 'digital_wallet', 'crypto', 'other'],
+    enum: ['cash', 'bank', 'digital_wallet', 'crypto', 'other'],
     default: 'bank',
   })
   type: AccountType;
