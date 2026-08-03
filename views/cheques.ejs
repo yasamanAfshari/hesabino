@@ -16,13 +16,11 @@
 
 <body class="bg-main-color overflow-hidden">
 
-  <%- include('partials/header') %>
+    <%- include('partials/header' , { pageTitle: 'مدیریت چک ها' } ) %>
 
   <section class="scrollbar overflow-y-auto px-6 pb-1">
 
-    <h3 class="font-bold text-zinc-950 text-center">مدیریت چک ها</h3>
-
-    <div class="overflow-x-auto scrollbar my-2">
+    <div class="overflow-x-auto scrollbar">
       <div class="grid grid-cols-4 gap-4 min-w-max">
         <div class="main-box-small dashboard-status">
           <div class="flex justify-start gap-4">
@@ -122,7 +120,7 @@
                 <path d="m6 9 6 6 6-6"></path>
               </svg>
             </button>
-            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+            <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
               <div class="p-2 border-b border-main-color-25">
                 <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
               </div>
@@ -142,7 +140,7 @@
                 <path d="m6 9 6 6 6-6"></path>
               </svg>
             </button>
-            <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+            <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
               <div class="p-2 border-b border-main-color-25">
                 <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
               </div>
@@ -245,7 +243,7 @@
       </div>
 
       <form id="chequeForm" class="flex flex-col flex-1 min-h-0">
-        <div class="modal-body overflow-y-auto flex-1 flex flex-col gap-3 scrollbar px-6 py-4">
+        <div class="modal-body overflow-y-auto flex flex-col gap-3 scrollbar px-6 py-4">
           <input type="hidden" id="chequeId" value="">
 
           <div id="chequeFormError" class="hidden rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
@@ -262,7 +260,7 @@
                   <path d="m6 9 6 6 6-6"></path>
                 </svg>
               </button>
-              <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+              <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
                 <div class="p-2 border-b border-main-color-25">
                   <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
                 </div>
@@ -300,7 +298,7 @@
                   <path d="m6 9 6 6 6-6"></path>
                 </svg>
               </button>
-              <div class="dropdown hidden absolute left-0 w-full bg-white rounded-lg shadow-lg z-50">
+              <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
                 <div class="p-2 border-b border-main-color-25">
                   <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">
                 </div>
