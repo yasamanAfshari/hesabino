@@ -13,6 +13,69 @@
   <%- include('partials/header') %>
 
   <section class="scrollbar overflow-y-auto px-6 pb-6">
+
+    <!-- دستیار هوشمند مالی -->
+    <div class="rounded-2xl p-5 md:p-6 mb-3 mt-2 relative overflow-hidden" style="background: linear-gradient(135deg, var(--color-main-color), var(--color-main-color-hover));">
+      <div class="relative z-10">
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L14.39 8.26L21 9.27L16.5 13.97L17.77 20.5L12 17.27L6.23 20.5L7.5 13.97L3 9.27L9.61 8.26L12 2Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-white font-bold text-lg">دستیار هوشمند مالی</h2>
+              <p class="text-white/70 !text-xs">خلاصه و تحلیل وضعیت مالی شما در این ماه</p>
+            </div>
+          </div>
+          <span class="text-white/80 !text-xs bg-white/10 px-3 py-1 rounded-full">به‌روزرسانی: امروز</span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+          <div class="bg-white/10 rounded-xl p-3 text-center">
+            <p class="text-white/70 !text-xs mb-1">درآمد ماه</p>
+            <p class="text-white font-bold">۴۲ میلیون</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-3 text-center">
+            <p class="text-white/70 !text-xs mb-1">هزینه ماه</p>
+            <p class="text-white font-bold">۳۱ میلیون</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-3 text-center">
+            <p class="text-white/70 !text-xs mb-1">پس‌انداز</p>
+            <p class="text-white font-bold">۱۱ میلیون</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-3 text-center">
+            <p class="text-white/70 !text-xs mb-1">بیشترین خرج</p>
+            <p class="text-white font-bold">رستوران</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-3 text-center col-span-2 md:col-span-1">
+            <p class="text-white/70 !text-xs mb-1">پرخرج‌ترین روز</p>
+            <p class="text-white font-bold">پنجشنبه‌ها</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-3">
+          <div class="flex-1 bg-white/95 rounded-xl p-3 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18H15M10 21H14M12 3C8.5 3 6 5.6 6 9C6 11.2 7 12.6 8 13.6C8.6 14.2 9 14.9 9 15.7V16H15V15.7C15 14.9 15.4 14.2 16 13.6C17 12.6 18 11.2 18 9C18 5.6 15.5 3 12 3Z" stroke="#D97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <p class="text-zinc-700 !text-sm leading-relaxed">تحلیل رفتار خرج: هزینه‌ی <strong class="text-orange-color">«رستوران»</strong> نسبت به ماه قبل ۴۰٪ افزایش داشته و شنبه‌ها بیشترین هزینه ثبت شده است.</p>
+          </div>
+          <div class="flex-1 bg-white/95 rounded-xl p-3 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 17L9 11L13 15L21 7M21 7H15M21 7V13" stroke="#1D4ED8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <p class="text-zinc-700 !text-sm leading-relaxed">پیش‌بینی پایان ماه: با روند فعلی، هزینه‌ها به حدود <strong class="text-main-color">۴۸ میلیون تومان</strong> می‌رسد؛ یعنی <strong class="text-red-color">۶ میلیون</strong> بیشتر از بودجه تعیین‌شده.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- row 1 -->
     <div class="overflow-x-auto scrollbar py-2">
       <div class="grid grid-cols-6 gap-4 min-w-max">
@@ -482,6 +545,206 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- row دارایی‌ها / اشتراک‌ها / اقساط -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 mt-3 gap-4">
+
+      <!-- دارایی‌ها -->
+      <div class="main-box-small">
+        <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
+          <h2 class="font-bold text-lg text-zinc-800">دارایی‌ها</h2>
+          <a href="/" class="flex items-center text-main-color !text-sm">همه
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.1775 4.44751L2.625 9.00001L7.1775 13.5525" stroke="var(--color-main-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M15.3749 9H2.75244" stroke="var(--color-main-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+        </div>
+        <p class="text-zinc-400 !text-xs mb-1">ارزش کل دارایی‌ها</p>
+        <p class="text-zinc-800 font-bold !text-xl mb-4">۱,۴۰۰,۰۰۰,۰۰۰ تومان</p>
+
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 !text-sm text-zinc-700">
+              <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5" /></svg>
+              </span>
+              طلا
+            </span>
+            <span class="!text-sm font-medium text-zinc-800">۳۵۰,۰۰۰,۰۰۰</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 !text-sm text-zinc-700">
+              <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2V22M17 5H9.5C7.6 5 6 6.6 6 8.5C6 10.4 7.6 12 9.5 12H14.5C16.4 12 18 13.6 18 15.5C18 17.4 16.4 19 14.5 19H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+              </span>
+              دلار
+            </span>
+            <span class="!text-sm font-medium text-zinc-800">۲۸۰,۰۰۰,۰۰۰</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 !text-sm text-zinc-700">
+              <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 16L5.5 10.5C5.8 9.6 6.6 9 7.6 9H16.4C17.4 9 18.2 9.6 18.5 10.5L20 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /><path d="M5 16H19V18.5C19 19.3 18.3 20 17.5 20C16.7 20 16 19.3 16 18.5V18H8V18.5C8 19.3 7.3 20 6.5 20C5.7 20 5 19.3 5 18.5V16Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
+              </span>
+              ماشین
+            </span>
+            <span class="!text-sm font-medium text-zinc-800">۶۵۰,۰۰۰,۰۰۰</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 !text-sm text-zinc-700">
+              <span class="w-8 h-8 rounded-lg bg-purple-color-25 text-purple-color flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 17L9 11L13 15L21 7M21 7H15M21 7V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </span>
+              سهام و رمزارز
+            </span>
+            <span class="!text-sm font-medium text-zinc-800">۱۲۰,۰۰۰,۰۰۰</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- اشتراک‌ها -->
+      <div class="main-box-small">
+        <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
+          <h2 class="font-bold text-lg text-zinc-800">اشتراک‌های فعال</h2>
+          <span class="bg-main-color-25 text-main-color !text-xs font-semibold px-2.5 py-1 rounded-full">۴ فعال</span>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between bg-yellow-color-20 rounded-lg p-2.5">
+            <span class="!text-sm font-medium text-zinc-800">Spotify</span>
+            <div class="text-left">
+              <p class="!text-sm font-medium text-zinc-800">۹۹,۰۰۰ تومان</p>
+              <p class="!text-xs text-amber-600">۳ روز دیگر</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between rounded-lg p-2.5">
+            <span class="!text-sm font-medium text-zinc-800">Netflix</span>
+            <div class="text-left">
+              <p class="!text-sm font-medium text-zinc-800">۲۵۰,۰۰۰ تومان</p>
+              <p class="!text-xs text-zinc-400">۱۲ روز دیگر</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between rounded-lg p-2.5">
+            <span class="!text-sm font-medium text-zinc-800">نماوا</span>
+            <div class="text-left">
+              <p class="!text-sm font-medium text-zinc-800">۸۰,۰۰۰ تومان</p>
+              <p class="!text-xs text-zinc-400">۱۸ روز دیگر</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between rounded-lg p-2.5">
+            <span class="!text-sm font-medium text-zinc-800">باشگاه بدنسازی</span>
+            <div class="text-left">
+              <p class="!text-sm font-medium text-zinc-800">۶۰۰,۰۰۰ تومان</p>
+              <p class="!text-xs text-zinc-400">۲۵ روز دیگر</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- اقساط -->
+      <div class="main-box-small">
+        <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
+          <h2 class="font-bold text-lg text-zinc-800">اقساط</h2>
+          <span class="bg-orange-color-25 text-orange-color !text-xs font-semibold px-2.5 py-1 rounded-full">۱۲ از ۳۶ پرداخت شده</span>
+        </div>
+        <p class="!text-sm text-zinc-700 mb-1">وام خرید خودرو</p>
+        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-3">
+          <div class="bg-orange-color h-2.5 rounded-full progress-bar" style="width: 33%"></div>
+        </div>
+        <div class="flex items-center justify-between bg-orange-color-25 rounded-lg p-2.5 mb-3">
+          <div>
+            <p class="!text-xs text-zinc-500">قسط بعدی · ۱۲ مرداد</p>
+            <p class="!text-sm font-bold text-zinc-800">۴,۳۰۰,۰۰۰ تومان</p>
+          </div>
+          <button class="bg-main-color text-white !text-xs px-3 py-1.5 rounded-lg">پرداخت شد</button>
+        </div>
+        <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+          <span class="!text-sm text-zinc-700">وام دانشجویی</span>
+          <span class="!text-xs text-zinc-400">۵ از ۲۴ پرداخت شده</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- row سلامت مالی تفصیلی / چالش هفتگی -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 mt-3 gap-4">
+
+      <!-- سلامت مالی تفصیلی -->
+      <div class="lg:col-span-2 col-span-1">
+        <div class="main-box-small h-[stretch]">
+          <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-3 flex-wrap gap-2">
+            <h2 class="font-bold text-lg text-zinc-800">سلامت مالی به تفکیک عوامل</h2>
+            <span class="bg-green2-color-25 text-green2-color !text-xs font-semibold px-3 py-1 rounded-full">امتیاز کل: ۸۲ از ۱۰۰ · خوب</span>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between !text-sm mb-1">
+                <span class="text-zinc-700">نسبت پس‌انداز به درآمد</span>
+                <span class="text-zinc-500">۸۸٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-green-color h-2 rounded-full" style="width: 88%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between !text-sm mb-1">
+                <span class="text-zinc-700">نسبت هزینه به درآمد</span>
+                <span class="text-zinc-500">۷۵٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-main-color h-2 rounded-full" style="width: 75%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between !text-sm mb-1">
+                <span class="text-zinc-700">مدیریت بدهی</span>
+                <span class="text-zinc-500">۷۰٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-purple-color h-2 rounded-full" style="width: 70%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between !text-sm mb-1">
+                <span class="text-zinc-700">پایبندی به بودجه</span>
+                <span class="text-zinc-500">۶۵٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-orange-color h-2 rounded-full" style="width: 65%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between !text-sm mb-1">
+                <span class="text-zinc-700">پرداخت به‌موقع اقساط</span>
+                <span class="text-zinc-500">۹۵٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-green-color h-2 rounded-full" style="width: 95%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between !text-sm mb-1">
+                <span class="text-zinc-700">پیشرفت اهداف مالی</span>
+                <span class="text-zinc-500">۶۰٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-green2-color h-2 rounded-full" style="width: 60%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- چالش هفتگی -->
+      <div class="col-span-1">
+        <div class="main-box-small h-[stretch] flex flex-col">
+          <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
+            <h2 class="font-bold text-lg text-zinc-800">چالش این هفته</h2>
+            <span class="!text-lg">🏆</span>
+          </div>
+          <p class="!text-sm font-medium text-zinc-800 mb-1">۷ روز بدون هزینه‌ی «رستوران»</p>
+          <p class="!text-xs text-zinc-400 mb-4">با کاهش خرج‌های غیرضروری، سریع‌تر به اهدافتان برسید</p>
+          <div class="flex justify-between !text-xs text-zinc-500 mb-1">
+            <span>پیشرفت</span>
+            <span>۴ از ۷ روز</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+            <div class="bg-green2-color h-2.5 rounded-full" style="width: 57%"></div>
+          </div>
+          <div class="mt-auto flex items-center justify-between bg-green2-color-25 rounded-lg p-2.5">
+            <span class="!text-xs text-zinc-700">جایزه در صورت تکمیل</span>
+            <span class="!text-sm font-bold text-green2-color">۲۰۰+ امتیاز</span>
           </div>
         </div>
       </div>
