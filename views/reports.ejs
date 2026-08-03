@@ -9,12 +9,11 @@
 
 <body class="bg-main-color overflow-hidden">
 
-  <%- include('partials/header') %>
+  <%- include('partials/header' , { pageTitle: 'گزارش حساب ها' } ) %>
 
   <section class="scrollbar overflow-y-auto px-6 pb-6">
 
     <div class="flex items-center justify-between flex-wrap gap-2 mt-2 mb-3">
-      <h3 class="font-bold text-zinc-950">گزارش</h3>
       <select id="reportRangeSelect" class="border border-gray-200 rounded-lg px-3 py-1.5 !text-sm bg-white">
         <option value="month">این ماه</option>
         <option value="3m">۳ ماه اخیر</option>
