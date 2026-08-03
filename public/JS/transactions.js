@@ -118,9 +118,9 @@
   // ===== ساخت یک سطر جدول برای یک تراکنش (داینامیک) =====
   function renderRow(tx) {
     // const dateTime = tx.time ? `${tx.date} - ${tx.time}` : tx.date;
-     const dateTime = tx.time 
-    ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}` 
-    : toPersianDigits(tx.date);
+    const dateTime = tx.time
+      ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}`
+      : toPersianDigits(tx.date);
     return `
       <tr class="transition-all duration-150" data-id="${tx.id}">
         <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">${escapeHtml(dateTime)}</td>
@@ -340,20 +340,51 @@
 
   // ===== بارگذاری حساب‌های کاربر و پر کردن سلکت‌باکس «حساب» در فرم تراکنش =====
   async function loadUserAccounts() {
-    const select = document.getElementById('modalAccountInput');
-    if (!select) return;
+    const container = document.getElementById('modalAccountCustomSelect');
+    const hiddenInput = document.getElementById('modalAccountInput');
+    const optionsContainer = container?.querySelector('.options');
+    if (!container || !hiddenInput || !optionsContainer) return;
 
     try {
       const res = await fetch(`${API_BASE}/accounts`, { headers: authHeaders() });
       if (!res.ok) throw new Error('خطا در دریافت حساب‌ها');
       userAccounts = await res.json();
 
-      const previousValue = select.value;
-      select.innerHTML = '<option value="">بدون حساب</option>' +
-        userAccounts.map((a) => `<option value="${a.id}">${escapeHtml(a.name)}</option>`).join('');
-      if (previousValue) select.value = previousValue;
+      // ذخیره مقدار قبلی
+      const previousValue = hiddenInput.value;
+
+      // ساخت گزینه‌ها
+      optionsContainer.innerHTML = userAccounts
+        .map(a => `<div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="${a.id}">${escapeHtml(a.name)}</div>`)
+        .join('');
+
+      // اگر مقدار قبلی معتبر بود، آن را انتخاب‌شده نشان بده
+      if (previousValue) {
+        const matched = optionsContainer.querySelector(`.option[data-value="${previousValue}"]`);
+        if (matched) {
+          container.querySelector('.selected-value').textContent = matched.textContent;
+        } else {
+          // اگر حسابی که قبلاً انتخاب شده بود دیگر وجود ندارد
+          hiddenInput.value = '';
+          container.querySelector('.selected-value').textContent = 'بدون حساب';
+        }
+      } else {
+        hiddenInput.value = '';
+        container.querySelector('.selected-value').textContent = 'بدون حساب';
+      }
+
+      // حذف event listener‌های قدیمی و اتصال مجدد برای کلیک روی گزینه‌ها
+      optionsContainer.querySelectorAll('.option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          hiddenInput.value = opt.dataset.value;
+          container.querySelector('.selected-value').textContent = opt.textContent;
+          // بستن dropdown (اگر تابع عمومی دارید صدا بزنید)
+          container.querySelector('.dropdown').classList.add('hidden');
+        });
+      });
+
     } catch (err) {
-      console.error('خطا در دریافت حساب‌ها برای فرم تراکنش:', err);
+      console.error('خطا در دریافت حساب‌ها:', err);
     }
   }
 
@@ -383,6 +414,12 @@
     const titleInput = document.getElementById('modalTitleInput');
     if (titleInput) titleInput.value = '';
     hideFormError();
+    const hiddenInput = document.getElementById('modalAccountInput');
+    const container = document.getElementById('modalAccountCustomSelect');
+    if (hiddenInput) hiddenInput.value = '';
+    if (container) {
+      container.querySelector('.selected-value').textContent = 'بدون حساب';
+    }
   }
 
   function openAddTransactionModal() {
@@ -664,9 +701,9 @@
     badge.className = 'transaction-type-badge inline-block font-bold px-6 py-2 rounded-full text-sm ' + typeBadgeClass;
 
     // document.getElementById('viewDate').textContent = tx.time ? `${tx.date} - ${tx.time}` : tx.date;
-     document.getElementById('viewDate').textContent = tx.time 
-    ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}` 
-    : toPersianDigits(tx.date);
+    document.getElementById('viewDate').textContent = tx.time
+      ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}`
+      : toPersianDigits(tx.date);
 
     const amountEl = document.getElementById('viewAmount');
     const amountSign = tx.type === 'income' ? '+' : tx.type === 'transfer' ? '' : '-';
