@@ -9,6 +9,6 @@ import { AuthModule } from '../auth/auth.module';
   imports: [TypeOrmModule.forFeature([Cheque]), AuthModule],
   providers: [ChequesService],
   controllers: [ChequesController],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, ChequesService],
 })
 export class ChequesModule {}
