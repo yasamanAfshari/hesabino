@@ -5,6 +5,8 @@
 
   // همه‌ی رکوردهای کاربر (بدهی + طلب) که از سرور خونده شده
   let allItems = [];
+  // لیست وام/اقساط که از همون API داشبورد (/api/installments) خونده می‌شه
+  let allLoans = [];
 
   function authHeaders(extra) {
     const token = localStorage.getItem('access_token');
@@ -509,11 +511,400 @@
     }
   }
 
+  // ===== اقساط و وام‌ها (همون API که ویجت داشبورد ازش استفاده می‌کنه) =====
+  function loanStatusBarClass(l) {
+    if (l.isCompleted) return 'bg-green-color';
+    if (l.isOverdue) return 'bg-red-color';
+    return 'bg-orange-color';
+  }
+
+  function renderLoanCard(l) {
+    const nextDueBox = l.isCompleted ? '' : `
+      <div class="flex items-center justify-between gap-1 text-sm ${l.isOverdue ? 'bg-red-color-25 border-red-color' : 'bg-zinc-100 border-zinc-300'} rounded-xl m-3 p-2 border">
+        <div>
+          <div>قسط بعدی</div>
+          <div class="text-xs text-gray-500">${l.nextDueDate ? escapeHtml(toPersianDigits(l.nextDueDate)) : '—'}</div>
+        </div>
+        <div class="font-bold text-main-color">${formatAmount(l.installmentAmount)} تومان</div>
+      </div>`;
+
+    const payBtn = l.isCompleted ? '' : `
+      <button class="text-sm main-btn transition-colors font-medium flex items-center gap-1 bg-main-color/5 px-3 py-1 rounded-full" onclick="DebtsApp.payLoan(${l.id})">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m5 13 4 4L19 7" />
+        </svg>
+        پرداخت قسط
+      </button>`;
+
+    return `
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md" data-loan-id="${l.id}">
+        <div class="flex justify-between items-center mb-2">
+          <span class="font-bold text-zinc-800 text-base">${escapeHtml(l.title)}</span>
+          <span class="text-xs ${l.isCompleted ? 'text-green-color bg-green-color-25' : 'text-gray-400 bg-gray-50'} px-2 py-0.5 rounded-md">${l.isCompleted ? 'تکمیل شده' : `${toPersianDigits(l.paidCount)} از ${toPersianDigits(l.installmentsCount)} قسط`}</span>
+        </div>
+
+        <div class="mt-3">
+          <div class="flex justify-between text-sm mb-1">
+            <span>${toPersianDigits(l.progressPercent)}٪</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="${loanStatusBarClass(l)} h-2.5 rounded-full progress-bar" style="width: ${l.progressPercent}%"></div>
+          </div>
+          <div class="flex justify-between text-sm mt-1">
+            <span class="text-gray-500">باقی‌مانده: ${formatAmount(l.remainingAmount)} تومان</span>
+            <span class="text-gray-500">کل: ${formatAmount(l.totalAmount)} تومان</span>
+          </div>
+        </div>
+
+        ${nextDueBox}
+
+        <div class="flex justify-end items-center pt-2 border-t border-gray-200 gap-3">
+          ${payBtn}
+          <button class="bg-red-400 p-1 rounded-md w-10 flex justify-center" onclick="DebtsApp.deleteLoan(${l.id})" title="حذف">${TRASH_ICON}</button>
+        </div>
+      </div>`;
+  }
+
+  function renderLoansList(loans) {
+    const container = document.getElementById('loansList');
+    if (!container) return;
+    if (!loans.length) {
+      container.innerHTML = '<p class="text-center text-gray-400 mt-6 col-span-full">هنوز وام یا قسطی ثبت نشده است</p>';
+      return;
+    }
+    // اقساط فعال قبل از اقساط تکمیل‌شده نمایش داده می‌شن
+    const sorted = [...loans].sort((a, b) => Number(a.isCompleted) - Number(b.isCompleted));
+    container.innerHTML = sorted.map(renderLoanCard).join('');
+  }
+
+  function applyLoansOverview(data) {
+    allLoans = Array.isArray(data.loans) ? data.loans : [];
+    renderLoansList(allLoans);
+  }
+
+  async function loadLoans() {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE}/installments`, { headers: authHeaders() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error('خطا در دریافت اقساط:', res.status, data);
+        return;
+      }
+      applyLoansOverview(data);
+    } catch (err) {
+      console.error('ارتباط با سرور برای دریافت اقساط برقرار نشد:', err);
+    }
+  }
+
+  function openLoanAddModal() {
+    const form = document.getElementById('loanForm');
+    if (form) form.reset();
+    document.getElementById('loanAlreadyPaidInput').value = '0';
+    hideFormError('loanModalFormError');
+    window.openModal('loanModal');
+  }
+
+  async function submitLoan(e) {
+    e.preventDefault();
+    hideFormError('loanModalFormError');
+
+    const title = (document.getElementById('loanTitleInput').value || '').trim();
+    const totalAmount = Number(document.getElementById('loanTotalAmountInput').value);
+    const installmentsCount = Number(document.getElementById('loanInstallmentsCountInput').value);
+    const alreadyPaidCount = Number(document.getElementById('loanAlreadyPaidInput').value) || 0;
+    const firstDueDateRaw = (document.getElementById('loanFirstDueDatePicker').value || '').trim();
+
+    if (!title) return showFormError('loanModalFormError', 'لطفاً عنوان وام را وارد کنید');
+    if (!totalAmount || totalAmount <= 0) return showFormError('loanModalFormError', 'لطفاً مبلغ کل وام را به‌درستی وارد کنید');
+    if (!installmentsCount || installmentsCount <= 0) return showFormError('loanModalFormError', 'لطفاً تعداد کل اقساط را به‌درستی وارد کنید');
+
+    const btn = document.getElementById('loanSubmitBtn');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'در حال ثبت...';
+
+    try {
+      const res = await fetch(`${API_BASE}/installments`, {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          title,
+          totalAmount,
+          installmentsCount,
+          alreadyPaidCount,
+          firstDueDate: firstDueDateRaw || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const msg = data.message || `خطا در ثبت قسط (کد ${res.status})`;
+        showFormError('loanModalFormError', Array.isArray(msg) ? msg[0] : msg);
+        return;
+      }
+
+      applyLoansOverview(data);
+      window.closeModal();
+      showToast('وام/قسط با موفقیت ثبت شد', 'success');
+    } catch (err) {
+      console.error('Loan save network error:', err);
+      showFormError('loanModalFormError', 'ارتباط با سرور برقرار نشد');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
+  async function payLoan(id) {
+    try {
+      const res = await fetch(`${API_BASE}/installments/${id}/pay`, { method: 'POST', headers: authHeaders() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = data.message || 'خطا در ثبت پرداخت قسط';
+        showToast(Array.isArray(msg) ? msg[0] : msg, 'error');
+        return;
+      }
+      applyLoansOverview(data);
+      showToast('قسط با موفقیت پرداخت شد', 'success');
+    } catch (err) {
+      console.error('Pay loan network error:', err);
+      showToast('ارتباط با سرور برقرار نشد', 'error');
+    }
+  }
+
+  async function deleteLoan(id) {
+    if (!window.confirm('این وام/قسط حذف شود؟')) return;
+    try {
+      const res = await fetch(`${API_BASE}/installments/${id}`, { method: 'DELETE', headers: authHeaders() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = data.message || 'خطا در حذف وام/قسط';
+        showToast(Array.isArray(msg) ? msg[0] : msg, 'error');
+        return;
+      }
+      applyLoansOverview(data);
+      showToast('وام/قسط حذف شد', 'success');
+    } catch (err) {
+      console.error('Delete loan network error:', err);
+      showToast('ارتباط با سرور برقرار نشد', 'error');
+    }
+  }
+
+  // ===== مودال یادآوری‌ها، هشدارها و تحلیل بدهی/طلب/اقساط =====
+  const ALERT_STYLES = {
+    danger: { bg: 'bg-red-color-25', border: 'border-red-color', text: 'text-red-color', icon: '⚠️' },
+    warning: { bg: 'bg-orange-color-25', border: 'border-orange-color', text: 'text-orange-color', icon: '⚠️' },
+    info: { bg: 'bg-main-color-25', border: 'border-main-color', text: 'text-main-color', icon: 'ℹ️' },
+    success: { bg: 'bg-green-color-25', border: 'border-green-color', text: 'text-green-color', icon: '✅' },
+  };
+
+  const ALERT_MODAL_TITLES = {
+    debt: 'یادآوری‌ها و تحلیل بدهی‌ها',
+    receivable: 'یادآوری‌ها و تحلیل طلب‌ها',
+    loan: 'یادآوری‌ها و تحلیل اقساط و وام‌ها',
+  };
+
+  function buildDebtAlerts(debts) {
+    const alerts = [];
+    if (!debts.length) {
+      alerts.push({
+        level: 'info',
+        title: 'هنوز بدهی‌ای ثبت نکردی',
+        message: 'با دکمه‌ی «ثبت بدهی جدید» می‌تونی بدهی‌هات رو با سررسید ثبت کنی.',
+      });
+      return alerts;
+    }
+
+    const overdue = debts.filter((it) => it.status === 'overdue');
+    const soon = debts.filter((it) => it.status !== 'paid' && it.status !== 'overdue' && it.remainingDays !== null && it.remainingDays <= 3);
+
+    overdue.forEach((it) => {
+      alerts.push({
+        level: 'danger',
+        title: `بدهی به «${it.counterparty}» سررسیدش گذشته`,
+        message: `مبلغ ${formatAmount(it.amount)} تومان، سررسید ${toPersianDigits(it.dueDate)}.`,
+      });
+    });
+
+    soon.forEach((it) => {
+      alerts.push({
+        level: 'warning',
+        title: `بدهی به «${it.counterparty}» به‌زودی سررسید می‌شه`,
+        message: `مبلغ ${formatAmount(it.amount)} تومان، سررسید ${toPersianDigits(it.dueDate)}.`,
+      });
+    });
+
+    const totalDebt = debts.filter((it) => it.status !== 'paid').reduce((sum, it) => sum + Number(it.amount || 0), 0);
+    if (totalDebt > 0) {
+      alerts.push({
+        level: 'info',
+        title: 'مجموع بدهی پرداخت‌نشده',
+        message: `در حال حاضر ${formatAmount(totalDebt)} تومان بدهی پرداخت‌نشده داری.`,
+      });
+    }
+
+    if (!overdue.length && !soon.length) {
+      alerts.push({
+        level: 'success',
+        title: 'وضعیت بدهی‌هات مرتبه',
+        message: 'هیچ بدهی‌ای سررسید گذشته یا نزدیکی نداره.',
+      });
+    }
+
+    return alerts;
+  }
+
+  function buildReceivableAlerts(receivables) {
+    const alerts = [];
+    if (!receivables.length) {
+      alerts.push({
+        level: 'info',
+        title: 'هنوز طلبی ثبت نکردی',
+        message: 'با دکمه‌ی «ثبت طلب جدید» می‌تونی طلب‌هات از دیگران رو با سررسید ثبت کنی.',
+      });
+      return alerts;
+    }
+
+    const overdue = receivables.filter((it) => it.status === 'overdue');
+    const soon = receivables.filter((it) => it.status !== 'paid' && it.status !== 'overdue' && it.remainingDays !== null && it.remainingDays <= 3);
+
+    overdue.forEach((it) => {
+      alerts.push({
+        level: 'danger',
+        title: `طلب از «${it.counterparty}» سررسیدش گذشته`,
+        message: `مبلغ ${formatAmount(it.amount)} تومان هنوز وصول نشده؛ بهتره پیگیری کنی.`,
+      });
+    });
+
+    soon.forEach((it) => {
+      alerts.push({
+        level: 'info',
+        title: `طلب از «${it.counterparty}» به‌زودی سررسید می‌شه`,
+        message: `مبلغ ${formatAmount(it.amount)} تومان، سررسید ${toPersianDigits(it.dueDate)}.`,
+      });
+    });
+
+    const totalReceivable = receivables.filter((it) => it.status !== 'paid').reduce((sum, it) => sum + Number(it.amount || 0), 0);
+    if (totalReceivable > 0) {
+      alerts.push({
+        level: 'info',
+        title: 'مجموع طلب وصول‌نشده',
+        message: `در حال حاضر ${formatAmount(totalReceivable)} تومان طلب وصول‌نشده داری.`,
+      });
+    }
+
+    if (!overdue.length && !soon.length) {
+      alerts.push({
+        level: 'success',
+        title: 'وضعیت طلب‌هات مرتبه',
+        message: 'هیچ طلبی سررسید گذشته یا نزدیکی نداره.',
+      });
+    }
+
+    return alerts;
+  }
+
+  function buildLoanAlerts(loans) {
+    const alerts = [];
+    if (!loans.length) {
+      alerts.push({
+        level: 'info',
+        title: 'هنوز وام یا قسطی ثبت نکردی',
+        message: 'با دکمه‌ی «ثبت قسط جدید» می‌تونی وام‌ها و اقساطت رو ثبت کنی.',
+      });
+      return alerts;
+    }
+
+    const active = loans.filter((l) => !l.isCompleted);
+    const overdue = active.filter((l) => l.isOverdue);
+    const soon = active.filter((l) => !l.isOverdue && l.daysUntilNext !== null && l.daysUntilNext <= 3);
+    const completed = loans.filter((l) => l.isCompleted);
+
+    overdue.forEach((l) => {
+      alerts.push({
+        level: 'danger',
+        title: `قسط «${l.title}» سررسیدش گذشته`,
+        message: `مبلغ هر قسط ${formatAmount(l.installmentAmount)} تومان، سررسید ${l.nextDueDate ? toPersianDigits(l.nextDueDate) : '—'}.`,
+      });
+    });
+
+    soon.forEach((l) => {
+      alerts.push({
+        level: 'warning',
+        title: `قسط «${l.title}» به‌زودی سررسید می‌شه`,
+        message: `مبلغ ${formatAmount(l.installmentAmount)} تومان، سررسید ${l.nextDueDate ? toPersianDigits(l.nextDueDate) : '—'}.`,
+      });
+    });
+
+    const totalRemaining = active.reduce((sum, l) => sum + Number(l.remainingAmount || 0), 0);
+    if (totalRemaining > 0) {
+      alerts.push({
+        level: 'info',
+        title: 'مجموع باقی‌مانده‌ی اقساط فعال',
+        message: `${formatAmount(totalRemaining)} تومان از وام‌های فعالت باقی مونده.`,
+      });
+    }
+
+    if (completed.length) {
+      alerts.push({
+        level: 'success',
+        title: `${toPersianDigits(completed.length)} وام تسویه شده`,
+        message: 'این وام‌ها به‌طور کامل پرداخت شدن.',
+      });
+    }
+
+    if (!overdue.length && !soon.length && active.length) {
+      alerts.push({
+        level: 'success',
+        title: 'وضعیت اقساطت مرتبه',
+        message: 'هیچ قسطی سررسید گذشته یا نزدیکی نداره.',
+      });
+    }
+
+    return alerts;
+  }
+
+  function renderAlertsList(scope) {
+    const container = document.getElementById('debtsAlertsList');
+    if (!container) return;
+
+    let alerts;
+    if (scope === 'debt') {
+      alerts = buildDebtAlerts(allItems.filter((it) => it.type === 'debt'));
+    } else if (scope === 'receivable') {
+      alerts = buildReceivableAlerts(allItems.filter((it) => it.type === 'receivable'));
+    } else {
+      alerts = buildLoanAlerts(allLoans);
+    }
+
+    container.innerHTML = alerts.map((a) => {
+      const style = ALERT_STYLES[a.level] || ALERT_STYLES.info;
+      return `
+        <div class="flex items-start gap-3 ${style.bg} border ${style.border} rounded-lg px-4 py-3 mb-3">
+          <span class="text-lg leading-none mt-0.5">${style.icon}</span>
+          <div class="flex-1">
+            <div class="font-bold text-sm ${style.text}">${escapeHtml(a.title)}</div>
+            <div class="text-xs text-zinc-600 mt-1">${escapeHtml(a.message)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function openAlertsModal(scope) {
+    const titleEl = document.getElementById('debtsAlertsModalTitle');
+    if (titleEl) titleEl.textContent = ALERT_MODAL_TITLES[scope] || 'یادآوری‌ها و تحلیل';
+    renderAlertsList(scope);
+    window.openModal('debtsAlertsModal');
+  }
+
   function onReady() {
     setupSelectValueTracking();
 
     document.getElementById('debtForm')?.addEventListener('submit', (e) => handleFormSubmit('debt', e));
     document.getElementById('demandForm')?.addEventListener('submit', (e) => handleFormSubmit('receivable', e));
+    document.getElementById('loanForm')?.addEventListener('submit', submitLoan);
 
     document.getElementById('debtSearchInput')?.addEventListener('input', debounce(applyDebtFilter, 250));
     document.getElementById('demandSearchInput')?.addEventListener('input', debounce(applyDemandFilter, 250));
@@ -527,6 +918,7 @@
     document.getElementById('demandDateToPicker')?.addEventListener('change', applyDemandFilter);
 
     loadDebts();
+    loadLoans();
   }
 
   window.DebtsApp = {
@@ -534,6 +926,10 @@
     openEdit: openEditModal,
     deleteItem,
     resetFilter,
+    openLoanAddModal,
+    payLoan,
+    deleteLoan,
+    openAlertsModal,
   };
 
   if (document.readyState === 'loading') {
