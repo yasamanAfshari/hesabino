@@ -41,6 +41,15 @@ async function bootstrap() {
   app.setBaseViewsDir(viewsPath);
   app.setViewEngine('ejs');
 
+  // نسخه‌ای برای cache-busting فایل‌های استاتیک (JS/CSS) — با هر بار بالا اومدن سرور
+  // عوض می‌شه، تا مرورگر کاربرها بعد از هر دیپلوی مجبور بشن نسخه‌ی تازه رو دانلود کنن
+  // و به مشکل «فایل قدیمی از کش مرورگر» (مثل باگ فیلترهای صفحه‌ی debts) دچار نشیم.
+  const assetVersion = Date.now();
+  app.use((req, res, next) => {
+    res.locals.assetVersion = assetVersion;
+    next();
+  });
+
   // فعال‌سازی express-ejs-layouts تا main.ejs به‌عنوان layout مشترک همه صفحات اعمال بشه
   app.use(expressLayouts);
   app.set('layout', 'main');
