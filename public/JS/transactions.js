@@ -26,6 +26,21 @@
     return String(str).replace(/[0-9]/g, (d) => digits[+d]);
   }
 
+  function toEnglishDigits(str) {
+    const persian = '۰۱۲۳۴۵۶۷۸۹';
+    return String(str || '').replace(/[۰-۹]/g, (d) => String(persian.indexOf(d)));
+  }
+
+  // برای مقایسه‌ی درست فیلتر تاریخ: چه رقم فارسی/انگلیسی باشه و چه بدون صفرِ ابتدایی
+  // (مثلاً «۱۴۰۵/۵/۱» و «1405/05/01»)، هر دو باید یکی حساب بشن.
+  function normalizeDateForCompare(str) {
+    const normalized = toEnglishDigits(str).trim();
+    const match = normalized.match(/^(\d{3,4})[/-](\d{1,2})[/-](\d{1,2})$/);
+    if (!match) return null;
+    const [, y, m, d] = match;
+    return `${y}/${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')}`;
+  }
+
   function formatAmount(amount) {
     const grouped = Number(amount || 0).toLocaleString('en-US');
     return toPersianDigits(grouped);
@@ -126,7 +141,7 @@
         <td class="px-5 py-3.5 text-gray-800 whitespace-nowrap">${escapeHtml(dateTime)}</td>
         <td class="px-5 py-3.5 text-gray-700">
           <div class="font-medium text-gray-800">${escapeHtml(tx.title || tx.description || '-')}</div>
-          ${tx.title && tx.description ? `<div class="text-xs text-gray-400 italic">${escapeHtml(tx.description)}</div>` : ''}
+          ${tx.title && tx.description ? `<div class="!text-[10px] text-gray-400 italic">${escapeHtml(tx.description)}</div>` : ''}
         </td>
         <td class="px-5 py-3.5"><span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">${escapeHtml(tx.category || '-')}</span></td>
         <td class="px-5 py-3.5"><span class="${typeBadgeClasses(tx.type)} px-2.5 py-1 rounded-full text-xs font-medium">${typeLabel(tx.type)}</span></td>
@@ -729,7 +744,8 @@
     const search = (document.getElementById('filterSearchInput')?.value || '').trim().toLowerCase();
     const type = getCustomSelectValue('filterTypeSelect');
     const category = getCustomSelectValue('filterCategorySelect');
-    const date = (document.getElementById('filterDatePicker')?.value || '').trim();
+    const dateFrom = normalizeDateForCompare((document.getElementById('filterDateFromPicker')?.value || '').trim());
+    const dateTo = normalizeDateForCompare((document.getElementById('filterDateToPicker')?.value || '').trim());
 
     let list = allTransactions;
 
@@ -740,7 +756,18 @@
     }
     if (type) list = list.filter((t) => t.type === type);
     if (category) list = list.filter((t) => t.category === category);
-    if (date) list = list.filter((t) => t.date === date);
+    if (dateFrom) {
+      list = list.filter((t) => {
+        const d = normalizeDateForCompare(t.date);
+        return d !== null && d >= dateFrom;
+      });
+    }
+    if (dateTo) {
+      list = list.filter((t) => {
+        const d = normalizeDateForCompare(t.date);
+        return d !== null && d <= dateTo;
+      });
+    }
 
     renderTable(list);
   }
@@ -750,8 +777,10 @@
     if (searchInput) searchInput.value = '';
     resetCustomSelect('filterTypeSelect');
     resetCustomSelect('filterCategorySelect');
-    const dateInput = document.getElementById('filterDatePicker');
-    if (dateInput) dateInput.value = '';
+    const dateFromInput = document.getElementById('filterDateFromPicker');
+    if (dateFromInput) dateFromInput.value = '';
+    const dateToInput = document.getElementById('filterDateToPicker');
+    if (dateToInput) dateToInput.value = '';
     applyFilters();
   }
 
@@ -812,8 +841,10 @@
       opt.addEventListener('click', applyFilters);
     });
 
-    const dateInput = document.getElementById('filterDatePicker');
-    if (dateInput) dateInput.addEventListener('change', applyFilters);
+    const dateFromInput = document.getElementById('filterDateFromPicker');
+    if (dateFromInput) dateFromInput.addEventListener('change', applyFilters);
+    const dateToInput = document.getElementById('filterDateToPicker');
+    if (dateToInput) dateToInput.addEventListener('change', applyFilters);
 
     loadTransactions();
   }
