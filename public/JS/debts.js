@@ -131,7 +131,6 @@
 
   function remainingDaysLabel(remainingDays) {
     if (remainingDays === null || remainingDays === undefined) return '-';
-    if (remainingDays < 0) return `${toPersianDigits(remainingDays)} روز`;
     return `${toPersianDigits(remainingDays)} روز`;
   }
 
@@ -156,12 +155,45 @@
           <span class="${statusBadgeClasses(item.status)} px-2.5 py-1 rounded-full text-xs font-medium">${statusLabel(item.status, item.type)}</span>
         </td>
         <td class="px-5 py-3.5">
-          <div class="flex justify-center gap-2.5">
+          <div class="flex justify-center items-center gap-2.5">
+            <input
+              type="checkbox"
+              class="w-4 h-4 accent-green-600 cursor-pointer"
+              title="پرداخت شده"
+              ${item.status === 'paid' ? 'checked' : ''}
+              onchange="DebtsApp.togglePaid(${item.id}, this.checked)"
+            />
             <button type="button" class="bg-main-color p-1 rounded-md" title="ویرایش" onclick="DebtsApp.openEdit('${item.type}', ${item.id})">${PENCIL_ICON}</button>
             <button type="button" class="bg-main-color p-1 rounded-md" title="حذف" onclick="DebtsApp.deleteItem(${item.id})">${TRASH_ICON}</button>
           </div>
         </td>
       </tr>`;
+  }
+
+  // ===== تیک زدن/برداشتن تیک «پرداخت شده» مستقیم از جدول =====
+  async function togglePaid(id, isPaid) {
+    try {
+      const res = await fetch(`${API_BASE}/debts/${id}`, {
+        method: 'PATCH',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ isPaid }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const msg = data.message || 'خطا در به‌روزرسانی وضعیت';
+        showToast(Array.isArray(msg) ? msg[0] : msg, 'error');
+        loadDebts();
+        return;
+      }
+
+      applyOverview(data);
+      showToast(isPaid ? 'وضعیت به «پرداخت شده» تغییر کرد' : 'وضعیت به «پرداخت نشده» تغییر کرد', 'success');
+    } catch (err) {
+      console.error('Toggle paid network error:', err);
+      showToast('ارتباط با سرور برقرار نشد', 'error');
+      loadDebts();
+    }
   }
 
   function renderTable(tbodyId, list, emptyText) {
@@ -200,13 +232,13 @@
 
     let matched = null;
     container.querySelectorAll('.option').forEach((opt) => {
-      const optValue = opt.dataset.value || opt.textContent.trim();
+      const optValue = 'value' in opt.dataset ? opt.dataset.value : opt.textContent.trim();
       if (optValue === value) matched = opt;
     });
 
     if (matched) {
       valueEl.textContent = matched.textContent.trim();
-      container.dataset.value = matched.dataset.value || matched.textContent.trim();
+      container.dataset.value = 'value' in matched.dataset ? matched.dataset.value : matched.textContent.trim();
     } else {
       valueEl.textContent = value;
       container.dataset.value = value;
@@ -221,7 +253,10 @@
     document.querySelectorAll('.custom-select').forEach((select) => {
       select.querySelectorAll('.option').forEach((opt) => {
         opt.addEventListener('click', () => {
-          select.dataset.value = opt.dataset.value || opt.textContent.trim();
+          // نکته‌ی مهم: نباید از || استفاده کرد، چون گزینه‌ی «همه» عمداً data-value=""
+          // داره؛ رشته‌ی خالی falsy هست و || اونو با متن نمایشی («همه») جایگزین می‌کرد
+          // و در نتیجه فیلتر «همه» هیچ‌وقت با هیچ رکوردی مچ نمی‌شد.
+          select.dataset.value = 'value' in opt.dataset ? opt.dataset.value : opt.textContent.trim();
         });
       });
     });
@@ -240,31 +275,26 @@
     if (el) el.classList.add('hidden');
   }
 
-  function resetForm(kind) {
-    const isDebt = kind === 'debt';
-    const formId = isDebt ? 'debtForm' : 'demandForm';
-    const idFieldId = isDebt ? 'debtId' : 'demandId';
-    const statusSelectId = isDebt ? 'debtStatusSelect' : 'demandStatusSelect';
-    const errorId = isDebt ? 'debtModalFormError' : 'demandModalFormError';
+  // ===== نگاشتِ نوع رکورد (debt/receivable) به پیشوند شناسه‌های فرم =====
+  // فرم بدهی همیشه با «debt» و فرم طلب همیشه با «demand» شروع می‌شه؛ با این helper
+  // به‌جای تکرار «isDebt ? 'debtX' : 'demandX'» در هر خط، فقط اسم فیلد رو می‌دیم.
+  const FORM_PREFIX = { debt: 'debt', receivable: 'demand' };
+  function fid(kind, suffix) {
+    return `${FORM_PREFIX[kind]}${suffix}`;
+  }
 
-    const form = document.getElementById(formId);
-    if (form) form.reset();
-    document.getElementById(idFieldId).value = '';
-    resetCustomSelect(statusSelectId);
-    hideFormError(errorId);
+  function resetForm(kind) {
+    document.getElementById(fid(kind, 'Form'))?.reset();
+    document.getElementById(fid(kind, 'Id')).value = '';
+    resetCustomSelect(fid(kind, 'StatusSelect'));
+    hideFormError(fid(kind, 'ModalFormError'));
   }
 
   function openAddModal(kind) {
     resetForm(kind);
-    if (kind === 'debt') {
-      document.getElementById('debtModalTitle').textContent = 'ثبت بدهی جدید';
-      document.getElementById('debtSubmitBtn').textContent = 'ثبت';
-      window.openModal('debtModal');
-    } else {
-      document.getElementById('demandModalTitle').textContent = 'ثبت طلب جدید';
-      document.getElementById('demandSubmitBtn').textContent = 'ثبت';
-      window.openModal('demandModal');
-    }
+    document.getElementById(fid(kind, 'ModalTitle')).textContent = kind === 'debt' ? 'ثبت بدهی جدید' : 'ثبت طلب جدید';
+    document.getElementById(fid(kind, 'SubmitBtn')).textContent = 'ثبت';
+    window.openModal(fid(kind, 'Modal'));
   }
 
   async function getItemById(id) {
@@ -290,31 +320,30 @@
     resetForm(kind);
     const isDebt = kind === 'debt';
 
-    document.getElementById(isDebt ? 'debtId' : 'demandId').value = item.id;
-    document.getElementById(isDebt ? 'debtModalTitle' : 'demandModalTitle').textContent = isDebt ? 'ویرایش بدهی' : 'ویرایش طلب';
-    document.getElementById(isDebt ? 'debtSubmitBtn' : 'demandSubmitBtn').textContent = 'ذخیره تغییرات';
+    document.getElementById(fid(kind, 'Id')).value = item.id;
+    document.getElementById(fid(kind, 'ModalTitle')).textContent = isDebt ? 'ویرایش بدهی' : 'ویرایش طلب';
+    document.getElementById(fid(kind, 'SubmitBtn')).textContent = 'ذخیره تغییرات';
 
-    document.getElementById(isDebt ? 'debtCounterpartyInput' : 'demandCounterpartyInput').value = item.counterparty || '';
-    document.getElementById(isDebt ? 'debtAmountInput' : 'demandAmountInput').value = item.amount != null ? item.amount : '';
-    document.getElementById(isDebt ? 'debtDueDatePicker' : 'demandDueDatePicker').value = item.dueDate || '';
-    document.getElementById(isDebt ? 'debtReminderInput' : 'demandReminderInput').checked = !!item.reminder;
+    document.getElementById(fid(kind, 'CounterpartyInput')).value = item.counterparty || '';
+    document.getElementById(fid(kind, 'AmountInput')).value = item.amount != null ? item.amount : '';
+    document.getElementById(fid(kind, 'DueDatePicker')).value = item.dueDate || '';
+    document.getElementById(fid(kind, 'ReminderInput')).checked = !!item.reminder;
 
-    setCustomSelectValue(isDebt ? 'debtStatusSelect' : 'demandStatusSelect', item.isPaid ? 'paid' : 'unpaid');
+    setCustomSelectValue(fid(kind, 'StatusSelect'), item.isPaid ? 'paid' : 'unpaid');
 
-    window.openModal(isDebt ? 'debtModal' : 'demandModal');
+    window.openModal(fid(kind, 'Modal'));
   }
 
   async function handleFormSubmit(kind, e) {
     e.preventDefault();
-    const isDebt = kind === 'debt';
-    const errorId = isDebt ? 'debtModalFormError' : 'demandModalFormError';
+    const errorId = fid(kind, 'ModalFormError');
     hideFormError(errorId);
 
-    const counterparty = (document.getElementById(isDebt ? 'debtCounterpartyInput' : 'demandCounterpartyInput').value || '').trim();
-    const amountRaw = document.getElementById(isDebt ? 'debtAmountInput' : 'demandAmountInput').value;
-    const dueDate = (document.getElementById(isDebt ? 'debtDueDatePicker' : 'demandDueDatePicker').value || '').trim();
-    const statusValue = getCustomSelectValue(isDebt ? 'debtStatusSelect' : 'demandStatusSelect');
-    const reminder = !!document.getElementById(isDebt ? 'debtReminderInput' : 'demandReminderInput').checked;
+    const counterparty = (document.getElementById(fid(kind, 'CounterpartyInput')).value || '').trim();
+    const amountRaw = document.getElementById(fid(kind, 'AmountInput')).value;
+    const dueDate = (document.getElementById(fid(kind, 'DueDatePicker')).value || '').trim();
+    const statusValue = getCustomSelectValue(fid(kind, 'StatusSelect'));
+    const reminder = !!document.getElementById(fid(kind, 'ReminderInput')).checked;
 
     if (!counterparty) {
       showFormError(errorId, 'لطفاً طرف حساب را وارد کنید');
@@ -338,10 +367,8 @@
       reminder,
     };
 
-    const idFieldId = isDebt ? 'debtId' : 'demandId';
-    const id = document.getElementById(idFieldId).value;
-    const btnId = isDebt ? 'debtSubmitBtn' : 'demandSubmitBtn';
-    const btn = document.getElementById(btnId);
+    const id = document.getElementById(fid(kind, 'Id')).value;
+    const btn = document.getElementById(fid(kind, 'SubmitBtn'));
     const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'در حال ذخیره...';
@@ -448,21 +475,13 @@
   }
 
   function resetFilter(kind) {
-    if (kind === 'debt') {
-      const searchInput = document.getElementById('debtSearchInput');
-      if (searchInput) searchInput.value = '';
-      resetCustomSelect('debtStatusFilter');
-      document.getElementById('debtDateFromPicker').value = '';
-      document.getElementById('debtDateToPicker').value = '';
-      applyDebtFilter();
-    } else {
-      const searchInput = document.getElementById('demandSearchInput');
-      if (searchInput) searchInput.value = '';
-      resetCustomSelect('demandStatusFilter');
-      document.getElementById('demandDateFromPicker').value = '';
-      document.getElementById('demandDateToPicker').value = '';
-      applyDemandFilter();
-    }
+    const filterPrefix = kind === 'debt' ? 'debt' : 'demand';
+    const searchInput = document.getElementById(`${filterPrefix}SearchInput`);
+    if (searchInput) searchInput.value = '';
+    resetCustomSelect(`${filterPrefix}StatusFilter`);
+    document.getElementById(`${filterPrefix}DateFromPicker`).value = '';
+    document.getElementById(`${filterPrefix}DateToPicker`).value = '';
+    kind === 'debt' ? applyDebtFilter() : applyDemandFilter();
   }
 
   // ===== اعمال نتیجه‌ی سرور روی صفحه =====
@@ -706,101 +725,70 @@
     loan: 'یادآوری‌ها و تحلیل اقساط و وام‌ها',
   };
 
-  function buildDebtAlerts(debts) {
+  // ===== متن‌های اختصاصیِ هشدار برای بدهی در برابر طلب (بقیه‌ی منطق مشترکه) =====
+  const RECORD_ALERT_COPY = {
+    debt: {
+      empty: { title: 'هنوز بدهی‌ای ثبت نکردی', message: 'با دکمه‌ی «ثبت بدهی جدید» می‌تونی بدهی‌هات رو با سررسید ثبت کنی.' },
+      overdueTitle: (cp) => `بدهی به «${cp}» سررسیدش گذشته`,
+      overdueMessage: (amount, dueDate) => `مبلغ ${formatAmount(amount)} تومان، سررسید ${toPersianDigits(dueDate)}.`,
+      soonTitle: (cp) => `بدهی به «${cp}» به‌زودی سررسید می‌شه`,
+      soonMessage: (amount, dueDate) => `مبلغ ${formatAmount(amount)} تومان، سررسید ${toPersianDigits(dueDate)}.`,
+      soonLevel: 'warning',
+      totalTitle: 'مجموع بدهی پرداخت‌نشده',
+      totalMessage: (total) => `در حال حاضر ${formatAmount(total)} تومان بدهی پرداخت‌نشده داری.`,
+      okTitle: 'وضعیت بدهی‌هات مرتبه',
+      okMessage: 'هیچ بدهی‌ای سررسید گذشته یا نزدیکی نداره.',
+    },
+    receivable: {
+      empty: { title: 'هنوز طلبی ثبت نکردی', message: 'با دکمه‌ی «ثبت طلب جدید» می‌تونی طلب‌هات از دیگران رو با سررسید ثبت کنی.' },
+      overdueTitle: (cp) => `طلب از «${cp}» سررسیدش گذشته`,
+      overdueMessage: (amount) => `مبلغ ${formatAmount(amount)} تومان هنوز وصول نشده؛ بهتره پیگیری کنی.`,
+      soonTitle: (cp) => `طلب از «${cp}» به‌زودی سررسید می‌شه`,
+      soonMessage: (amount, dueDate) => `مبلغ ${formatAmount(amount)} تومان، سررسید ${toPersianDigits(dueDate)}.`,
+      soonLevel: 'info',
+      totalTitle: 'مجموع طلب وصول‌نشده',
+      totalMessage: (total) => `در حال حاضر ${formatAmount(total)} تومان طلب وصول‌نشده داری.`,
+      okTitle: 'وضعیت طلب‌هات مرتبه',
+      okMessage: 'هیچ طلبی سررسید گذشته یا نزدیکی نداره.',
+    },
+  };
+
+  // ===== ساخت لیست هشدار/تحلیل برای یک لیست بدهی یا طلب (kind: 'debt' | 'receivable') =====
+  function buildRecordAlerts(items, kind) {
+    const copy = RECORD_ALERT_COPY[kind];
     const alerts = [];
-    if (!debts.length) {
-      alerts.push({
-        level: 'info',
-        title: 'هنوز بدهی‌ای ثبت نکردی',
-        message: 'با دکمه‌ی «ثبت بدهی جدید» می‌تونی بدهی‌هات رو با سررسید ثبت کنی.',
-      });
+
+    if (!items.length) {
+      alerts.push({ level: 'info', ...copy.empty });
       return alerts;
     }
 
-    const overdue = debts.filter((it) => it.status === 'overdue');
-    const soon = debts.filter((it) => it.status !== 'paid' && it.status !== 'overdue' && it.remainingDays !== null && it.remainingDays <= 3);
+    const overdue = items.filter((it) => it.status === 'overdue');
+    const soon = items.filter((it) => it.status !== 'paid' && it.status !== 'overdue' && it.remainingDays !== null && it.remainingDays <= 3);
 
     overdue.forEach((it) => {
       alerts.push({
         level: 'danger',
-        title: `بدهی به «${it.counterparty}» سررسیدش گذشته`,
-        message: `مبلغ ${formatAmount(it.amount)} تومان، سررسید ${toPersianDigits(it.dueDate)}.`,
+        title: copy.overdueTitle(it.counterparty),
+        message: copy.overdueMessage(it.amount, it.dueDate),
       });
     });
 
     soon.forEach((it) => {
       alerts.push({
-        level: 'warning',
-        title: `بدهی به «${it.counterparty}» به‌زودی سررسید می‌شه`,
-        message: `مبلغ ${formatAmount(it.amount)} تومان، سررسید ${toPersianDigits(it.dueDate)}.`,
+        level: copy.soonLevel,
+        title: copy.soonTitle(it.counterparty),
+        message: copy.soonMessage(it.amount, it.dueDate),
       });
     });
 
-    const totalDebt = debts.filter((it) => it.status !== 'paid').reduce((sum, it) => sum + Number(it.amount || 0), 0);
-    if (totalDebt > 0) {
-      alerts.push({
-        level: 'info',
-        title: 'مجموع بدهی پرداخت‌نشده',
-        message: `در حال حاضر ${formatAmount(totalDebt)} تومان بدهی پرداخت‌نشده داری.`,
-      });
+    const total = items.filter((it) => it.status !== 'paid').reduce((sum, it) => sum + Number(it.amount || 0), 0);
+    if (total > 0) {
+      alerts.push({ level: 'info', title: copy.totalTitle, message: copy.totalMessage(total) });
     }
 
     if (!overdue.length && !soon.length) {
-      alerts.push({
-        level: 'success',
-        title: 'وضعیت بدهی‌هات مرتبه',
-        message: 'هیچ بدهی‌ای سررسید گذشته یا نزدیکی نداره.',
-      });
-    }
-
-    return alerts;
-  }
-
-  function buildReceivableAlerts(receivables) {
-    const alerts = [];
-    if (!receivables.length) {
-      alerts.push({
-        level: 'info',
-        title: 'هنوز طلبی ثبت نکردی',
-        message: 'با دکمه‌ی «ثبت طلب جدید» می‌تونی طلب‌هات از دیگران رو با سررسید ثبت کنی.',
-      });
-      return alerts;
-    }
-
-    const overdue = receivables.filter((it) => it.status === 'overdue');
-    const soon = receivables.filter((it) => it.status !== 'paid' && it.status !== 'overdue' && it.remainingDays !== null && it.remainingDays <= 3);
-
-    overdue.forEach((it) => {
-      alerts.push({
-        level: 'danger',
-        title: `طلب از «${it.counterparty}» سررسیدش گذشته`,
-        message: `مبلغ ${formatAmount(it.amount)} تومان هنوز وصول نشده؛ بهتره پیگیری کنی.`,
-      });
-    });
-
-    soon.forEach((it) => {
-      alerts.push({
-        level: 'info',
-        title: `طلب از «${it.counterparty}» به‌زودی سررسید می‌شه`,
-        message: `مبلغ ${formatAmount(it.amount)} تومان، سررسید ${toPersianDigits(it.dueDate)}.`,
-      });
-    });
-
-    const totalReceivable = receivables.filter((it) => it.status !== 'paid').reduce((sum, it) => sum + Number(it.amount || 0), 0);
-    if (totalReceivable > 0) {
-      alerts.push({
-        level: 'info',
-        title: 'مجموع طلب وصول‌نشده',
-        message: `در حال حاضر ${formatAmount(totalReceivable)} تومان طلب وصول‌نشده داری.`,
-      });
-    }
-
-    if (!overdue.length && !soon.length) {
-      alerts.push({
-        level: 'success',
-        title: 'وضعیت طلب‌هات مرتبه',
-        message: 'هیچ طلبی سررسید گذشته یا نزدیکی نداره.',
-      });
+      alerts.push({ level: 'success', title: copy.okTitle, message: copy.okMessage });
     }
 
     return alerts;
@@ -871,10 +859,8 @@
     if (!container) return;
 
     let alerts;
-    if (scope === 'debt') {
-      alerts = buildDebtAlerts(allItems.filter((it) => it.type === 'debt'));
-    } else if (scope === 'receivable') {
-      alerts = buildReceivableAlerts(allItems.filter((it) => it.type === 'receivable'));
+    if (scope === 'debt' || scope === 'receivable') {
+      alerts = buildRecordAlerts(allItems.filter((it) => it.type === scope), scope);
     } else {
       alerts = buildLoanAlerts(allLoans);
     }
@@ -925,6 +911,7 @@
     openAddModal,
     openEdit: openEditModal,
     deleteItem,
+    togglePaid,
     resetFilter,
     openLoanAddModal,
     payLoan,
