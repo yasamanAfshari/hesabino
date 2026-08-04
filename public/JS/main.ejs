@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    // گارد ورود: اگه توکن نبود یا منقضی شده بود، قبل از نمایش صفحه بفرست /login
+    (function () {
+      var token = localStorage.getItem('access_token');
+      if (!token) {
+        window.location.replace('/login');
+        return;
+      }
+      try {
+        var payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp && Date.now() >= payload.exp * 1000) {
+          localStorage.removeItem('access_token');
+          window.location.replace('/login');
+        }
+      } catch (e) {
+        localStorage.removeItem('access_token');
+        window.location.replace('/login');
+      }
+    })();
+  </script>
+  <script>
+    // پیش‌بررسیِ زودهنگام: آیا کاربر حداقل یک حساب داره؟ این کار همزمان با
+    // لود شدن باقی صفحه شروع می‌شه تا وقتی page-loader محو می‌شه جواب آماده
+    // باشه و کاربر قبل از تکمیل مودال «افزودن اولین حساب»، هیچ محتوایی نبینه.
+    window.HesabinoOnboarding = (function () {
+      var resolveReady;
+      var ready = new Promise(function (res) { resolveReady = res; });
+      try {
+        var token = localStorage.getItem('access_token');
+        if (!token) {
+          resolveReady(false);
+        } else {
+          fetch('/api/accounts?includeArchived=true', {
+            headers: { Authorization: 'Bearer ' + token },
+          })
+            .then(function (res) { return res.ok ? res.json() : []; })
+            .then(function (list) { resolveReady(Array.isArray(list) && list.length === 0); })
+            .catch(function () { resolveReady(false); });
+        }
+      } catch (e) {
+        resolveReady(false);
+      }
+      return { ready: ready };
+    })();
+  </script>
+  <script>
+    // اعمال فوری تم (روشن/تیره) و رنگ تاکیدی قبل از رندر صفحه، تا چشمک نزنه
+    (function () {
+      try {
+        var theme = localStorage.getItem('hesabino:theme') || 'light';
+        var accent = localStorage.getItem('hesabino:accent') || 'blue';
+        var root = document.documentElement;
+        if (theme === 'dark') root.classList.add('dark-theme');
+        root.setAttribute('data-accent', accent);
+      } catch (e) { /* localStorage در دسترس نبود، از تم پیش‌فرض استفاده می‌شه */ }
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title || 'اپ' %></title>
+  <link rel="stylesheet" href="/css/output.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/persian-datepicker.css">
+  <link rel="stylesheet" href="/css/flatpickr.min.css">
+  <link rel="stylesheet" href="/css/onboarding.css">
+
+  <style>
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.9);
+      transition: opacity .35s ease, visibility .35s;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #page-loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 6px solid rgba(0, 0, 0, 0.12);
+      border-top-color: var(--color-main-color);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-main-color overflow-hidden">
+  <!-- صفحه لودینگ (اولین المان body) -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader" role="status" aria-label="loading"></div>
+  </div>
+
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
+  <div id="app-grid" class="relative grid h-screen grid-cols-1 overflow-hidden transition-all duration-300">
+    <%- include('partials/sidebar') %>
+
+    <main class="bg-back-color rounded-2xl my-2 ml-2 overflow-hidden grid grid-rows-[4.5rem_1fr]">
+      <%- body %>
+    </main>
+  </div>
+
+  <script src="/JS/chart.js"></script>
+  <script src="/JS/jquery-3.6.1.min.js"></script>
+  <script src="/JS/persian-date.min.js"></script>
+  <script src="/JS/persian-datepicker.js"></script>
+  <script src="/JS/fa.js"></script>
+  <script src="/JS/flatpickr.js"></script>
+  <script src="/JS/onboarding.js" defer></script>
+  <script src="/JS/public.js" defer></script>
+  <script src="/JS/sidebar.js" defer></script>
+  <script src="/JS/user-menu.js" defer></script>
+  <script src="/JS/theme.js" defer></script>
+
+  <script>
+    function logout() {
+      localStorage.removeItem('access_token');
+      window.location.href = '/login';
+    }
+  </script>
+
+</body>
+
+</html>
