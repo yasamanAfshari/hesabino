@@ -163,7 +163,16 @@
     if (window.jQuery && (typeof jQuery.fn.pDatepicker !== 'undefined' || typeof jQuery.fn.persianDatepicker !== 'undefined')) {
       inputs.forEach((input) => {
         try {
-          $(input).pDatepicker?.({ format: 'YYYY/MM/DD', initialValue: false });
+          $(input).pDatepicker?.({
+            format: 'YYYY/MM/DD',
+            initialValue: false,
+            // پلاگین موقع انتخاب تاریخ فقط .val() رو ست می‌کنه و رویداد change رو
+            // dispatch نمی‌کنه؛ بدون این، لیسنرهای change (مثلاً فیلترهای تاریخ)
+            // هیچ‌وقت اجرا نمی‌شدن. پس خودمون بعد از هر انتخاب change رو شبیه‌سازی می‌کنیم.
+            onSelect: function () {
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+            },
+          });
         } catch (e) {
           console.warn('datepicker init error for', input, e);
         }
