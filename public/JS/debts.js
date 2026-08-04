@@ -129,8 +129,12 @@
     return 'bg-orange-50 text-orange-600';
   }
 
+  // برای رکوردهای سررسید گذشته، به‌جای عدد منفیِ گیج‌کننده («-۵ روز»)، واضح می‌گیم
+  // «۵ روز گذشته» (رسم رایج فارسی، مثل formatSignedToman که همین‌جوری کار می‌کنه)
   function remainingDaysLabel(remainingDays) {
     if (remainingDays === null || remainingDays === undefined) return '-';
+    if (remainingDays < 0) return `${toPersianDigits(Math.abs(remainingDays))} روز گذشته`;
+    if (remainingDays === 0) return 'امروز';
     return `${toPersianDigits(remainingDays)} روز`;
   }
 
