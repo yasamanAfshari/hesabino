@@ -17,10 +17,12 @@ export class DebtsService {
 
   // ===== محاسبه‌ی وضعیت و روزهای باقی‌مانده برای یک رکورد =====
   private computeStatus(record: DebtRecord): { status: DebtStatus; remainingDays: number | null } {
-    const remainingDays = remainingDaysUntil(record.dueDate);
+    // اگه پرداخت/وصول شده، دیگه محاسبه‌ی روزهای باقی‌مانده (که ممکنه منفی هم باشه) معنی نداره؛
+    // فرانت‌اند با remainingDays === null یه «-» نشون میده.
     if (record.isPaid) {
-      return { status: 'paid', remainingDays };
+      return { status: 'paid', remainingDays: null };
     }
+    const remainingDays = remainingDaysUntil(record.dueDate);
     if (remainingDays !== null && remainingDays < 0) {
       return { status: 'overdue', remainingDays };
     }
