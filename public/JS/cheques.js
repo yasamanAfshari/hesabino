@@ -397,7 +397,10 @@
     }
     if (type) list = list.filter((c) => c.type === type);
     if (status) list = list.filter((c) => c.status === status);
-    if (date) list = list.filter((c) => c.date === date);
+    if (date) {
+      const normalizedFilterDate = normalizeDateForCompare(date);
+      list = list.filter((c) => normalizeDateForCompare(c.date) === normalizedFilterDate);
+    }
 
     renderTable(list);
   }
@@ -469,6 +472,14 @@
     const m = clean.match(/^(\d{3,4})\/(\d{1,2})\/(\d{1,2})$/);
     if (!m) return null;
     return { y: Number(m[1]), m: Number(m[2]), d: Number(m[3]) };
+  }
+
+  // برای مقایسه‌ی درست فیلتر تاریخ: چه رقم فارسی/انگلیسی باشه و چه بدون صفرِ ابتدایی
+  // (مثلاً «۱۴۰۵/۵/۱» و «1405/05/01»)، هر دو باید یکی حساب بشن.
+  function normalizeDateForCompare(str) {
+    const p = parseJalaliParts(str);
+    if (!p) return null;
+    return `${p.y}/${String(p.m).padStart(2, '0')}/${String(p.d).padStart(2, '0')}`;
   }
 
   function todayJalaliParts() {
