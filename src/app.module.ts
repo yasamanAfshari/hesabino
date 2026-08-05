@@ -39,8 +39,12 @@ import { ReportsModule } from './reports/reports.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    // محدودیت پیش‌فرض روی کل API: حداکثر ۳۰ درخواست در دقیقه برای هر IP
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 30 }]),
+    // محدودیت پیش‌فرض روی کل API: حداکثر ۲۰۰ درخواست در دقیقه برای هر IP.
+    // عدد قبلی (۳۰ در دقیقه) برای یک اپ چندصفحه‌ای که هر صفحه چند تا فچ همزمان
+    // می‌زنه (خلاصه‌ی آماری + لیست + یادآورها و...) خیلی کم بود و با استفاده‌ی
+    // عادی (نه حمله) هم ۴۲۹ می‌داد. برای ورود/ثبت‌نام (که باید سخت‌گیرانه‌تر
+    // باشه در برابر حدس رمز) یک محدودیت جدا و تنگ‌تر روی همون کنترلر گذاشته شده.
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 200 }]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
