@@ -411,7 +411,7 @@
   <div id="loanModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl max-w-2xl max-h-[90vh] lg:w-[30vw] w-full flex flex-col relative">
       <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
-        <h3 class="font-bold text-lg text-zinc-800">ثبت قسط/وام جدید</h3>
+        <h3 id="loanModalTitle" class="font-bold text-lg text-zinc-800">ثبت قسط/وام جدید</h3>
         <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6L6 18M6 6l12 12" />
@@ -427,7 +427,9 @@
             <input type="text" id="loanTitleInput" placeholder="عنوان وام (مثلاً وام خرید خودرو)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <!-- مبلغ/تعداد اقساط/سررسید فقط موقع ثبتِ وام جدید نمایش داده می‌شن؛ چون بعد از
+               ساخته‌شدنِ اقساط، این‌ها دیگه قابل ویرایش نیستن (فقط عنوان قابل تغییره) -->
+          <div id="loanExtraFieldsGrid" class="grid grid-cols-2 gap-3">
             <div class="relative">
               <input type="number" min="1" id="loanTotalAmountInput" placeholder="مبلغ کل وام (تومان)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
             </div>
