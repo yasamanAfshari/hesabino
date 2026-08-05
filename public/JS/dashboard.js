@@ -318,11 +318,10 @@
     const wrapper = document.getElementById('closest-goal-wrapper');
     if (!wrapper) return;
     if (!goal) {
-      setText('closest-goal-title', 'هدف پس‌اندازی ثبت نشده');
       wrapper.innerHTML = '<p class="text-zinc-400 !text-sm">برای ثبت هدف مالی به بخش پس‌انداز مراجعه کنید.</p>';
       return;
     }
-    setText('closest-goal-title', goal.title || 'نزدیک‌ترین هدف');
+    setText('closest-goal-name', goal.title || '');
     setText('closest-goal-percent', `${toPersianDigits(goal.progressPercent)}٪`);
     setWidth('closest-goal-bar', goal.progressPercent);
     setText('closest-goal-saved', formatAmount(goal.currentAmount));
@@ -612,7 +611,7 @@
         </div>
         <div class="flex items-center justify-between ${l.isOverdue ? 'bg-red-color-25' : 'bg-orange-color-25'} rounded-lg p-2.5">
           <div>
-            <p class="!text-xs text-zinc-500">قسط بعدی · ${l.nextDueDate ? toPersianDigits(l.nextDueDate) : '—'}</p>
+            <p class="!text-xs ${l.isOverdue ? 'text-red-color font-medium' : 'text-zinc-500'}">${l.isOverdue ? 'سررسید گذشته' : 'قسط بعدی'} · ${l.nextDueDate ? toPersianDigits(l.nextDueDate) : '—'}</p>
             <p class="!text-sm font-bold text-zinc-800">${formatAmount(l.installmentAmount)}</p>
           </div>
           <div class="flex items-center gap-2">
