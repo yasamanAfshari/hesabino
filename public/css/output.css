@@ -311,9 +311,6 @@
   .top-0 {
     top: 0px;
   }
-  .top-1 {
-    top: var(--spacing);
-  }
   .top-1\/2 {
     top: calc(1 / 2 * 100%);
   }
@@ -422,9 +419,6 @@
   .my-4 {
     margin-block: calc(var(--spacing) * 4);
   }
-  .mt-0 {
-    margin-top: 0px;
-  }
   .mt-0\.5 {
     margin-top: calc(var(--spacing) * 0.5);
   }
@@ -478,9 +472,6 @@
   }
   .mb-7 {
     margin-bottom: calc(var(--spacing) * 7);
-  }
-  .ml-1 {
-    margin-left: var(--spacing);
   }
   .ml-1\.5 {
     margin-left: calc(var(--spacing) * 1.5);
@@ -714,30 +705,17 @@
   .flex-1 {
     flex: 1;
   }
-  .flex-shrink {
-    flex-shrink: 1;
-  }
   .flex-shrink-0 {
     flex-shrink: 0;
   }
   .shrink-0 {
     flex-shrink: 0;
   }
-  .flex-grow {
-    flex-grow: 1;
-  }
   .grow {
     flex-grow: 1;
   }
-  .border-collapse {
-    border-collapse: collapse;
-  }
   .translate-x-0 {
     --tw-translate-x: 0px;
-    translate: var(--tw-translate-x) var(--tw-translate-y);
-  }
-  .translate-x-1 {
-    --tw-translate-x: var(--spacing);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   .translate-x-1\/2 {
@@ -746,10 +724,6 @@
   }
   .translate-x-full {
     --tw-translate-x: 100%;
-    translate: var(--tw-translate-x) var(--tw-translate-y);
-  }
-  .-translate-y-1 {
-    --tw-translate-y: calc(var(--spacing) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   .-translate-y-1\/2 {
@@ -1029,9 +1003,6 @@
   .bg-back-color {
     background-color: var(--color-back-color);
   }
-  .bg-black {
-    background-color: var(--color-black);
-  }
   .bg-black\/50 {
     background-color: color-mix(in srgb, #000 50%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1230,9 +1201,6 @@
   .px-10 {
     padding-inline: calc(var(--spacing) * 10);
   }
-  .py-0 {
-    padding-block: 0px;
-  }
   .py-0\.5 {
     padding-block: calc(var(--spacing) * 0.5);
   }
@@ -1381,9 +1349,6 @@
   }
   .\!text-\[11px\] {
     font-size: 11px !important;
-  }
-  .text-\[10px\] {
-    font-size: 10px;
   }
   .leading-none {
     --tw-leading: 1;
@@ -1564,9 +1529,6 @@
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
-  .ring-red-color {
-    --tw-ring-color: var(--color-red-color);
-  }
   .ring-red-color\/70 {
     --tw-ring-color: color-mix(in srgb, #AE0600 70%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1590,10 +1552,6 @@
   }
   .backdrop-blur-sm {
     --tw-backdrop-blur: blur(var(--blur-sm));
-    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  }
-  .backdrop-filter {
     -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
     backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
   }
@@ -1748,9 +1706,6 @@
     }
     .md\:grid-cols-7 {
       grid-template-columns: repeat(7, minmax(0, 1fr));
-    }
-    .md\:grid-cols-8 {
-      grid-template-columns: repeat(8, minmax(0, 1fr));
     }
     .md\:flex-row {
       flex-direction: row;
