@@ -117,15 +117,16 @@
       <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
     </svg>`;
 
+  // وضعیت همیشه فقط «پرداخت شده» یا «پرداخت نشده/وصول نشده»ست؛ سررسید گذشته یک
+  // برچسب جداست (isOverdue) که فقط رنگ بج رو قرمز می‌کنه، نه متنش رو.
   function statusLabel(status, type) {
     if (status === 'paid') return 'پرداخت شده';
-    if (status === 'overdue') return 'سررسید گذشته';
     return type === 'receivable' ? 'وصول نشده' : 'پرداخت نشده';
   }
 
-  function statusBadgeClasses(status) {
+  function statusBadgeClasses(status, isOverdue) {
     if (status === 'paid') return 'bg-green-50 text-green-700';
-    if (status === 'overdue') return 'bg-red-50 text-red-700';
+    if (isOverdue) return 'bg-red-50 text-red-700';
     return 'bg-orange-50 text-orange-600';
   }
 
@@ -156,7 +157,7 @@
           <span class="${remainingDaysClasses(item.remainingDays)} px-2.5 py-1 rounded-full text-xs font-medium">${remainingDaysLabel(item.remainingDays)}</span>
         </td>
         <td class="px-5 py-3.5">
-          <span class="${statusBadgeClasses(item.status)} px-2.5 py-1 rounded-full text-xs font-medium">${statusLabel(item.status, item.type)}</span>
+          <span class="${statusBadgeClasses(item.status, item.isOverdue)} px-2.5 py-1 rounded-full text-xs font-medium">${statusLabel(item.status, item.type)}</span>
         </td>
         <td class="px-5 py-3.5">
           <div class="flex justify-center items-center gap-2.5">
@@ -442,7 +443,13 @@
       filtered = filtered.filter((it) => (it.counterparty || '').toLowerCase().includes(search));
     }
     if (opts.status) {
-      filtered = filtered.filter((it) => it.status === opts.status);
+      // «سررسید گذشته» دیگه یک status نیست (status فقط paid/unpaid هست)؛
+      // پس این گزینه رو از روی فیلد isOverdue فیلتر می‌کنیم.
+      if (opts.status === 'overdue') {
+        filtered = filtered.filter((it) => it.isOverdue);
+      } else {
+        filtered = filtered.filter((it) => it.status === opts.status);
+      }
     }
     if (opts.dateFrom) {
       const from = normalizeDate(opts.dateFrom);
@@ -542,50 +549,55 @@
   }
 
   function renderLoanCard(l) {
-    const nextDueBox = l.isCompleted ? '' : `
-      <div class="flex items-center mb-0 justify-between gap-1 text-sm ${l.isOverdue ? 'bg-red-color-25 border-red-color' : 'bg-zinc-100 border-zinc-300'} rounded-xl m-3 p-2 border">
-        <div>
-          <div>قسط بعدی</div>
-          <div class="text-xs text-gray-500">${l.nextDueDate ? escapeHtml(toPersianDigits(l.nextDueDate)) : '—'}</div>
-        </div>
-        <div class="font-bold text-main-color">${formatAmount(l.installmentAmount)} تومان</div>
-      </div>`;
-
-    const payBtn = l.isCompleted ? '' : `
-      <button class="text-sm main-btn transition-colors font-medium flex items-center gap-1 bg-main-color/5 px-3 py-1 rounded-full" onclick="DebtsApp.payLoan(${l.id})">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m5 13 4 4L19 7" />
-        </svg>
-        پرداخت قسط
-      </button>`;
-
     return `
-      <div class="bg-white mb-0 rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md" data-loan-id="${l.id}">
-        <div class="flex justify-between items-center mb-2">
-          <span class="font-bold text-zinc-800 text-base">${escapeHtml(l.title)}</span>
-          <span class="text-xs ${l.isCompleted ? 'text-green-color bg-green-color-25' : 'text-gray-400 bg-gray-50'} px-2 py-0.5 rounded-md">${l.isCompleted ? 'تکمیل شده' : `${toPersianDigits(l.paidCount)} از ${toPersianDigits(l.installmentsCount)} قسط`}</span>
-        </div>
+        <div class="bg-white mb-0 rounded-2xl shadow-sm border border-gray-200/80 p-4 transition-all hover:shadow-md" data-loan-id="${l.id}">
+          <div class="cursor-pointer" onclick="DebtsApp.openLoanEditModal(${l.id})" title="ویرایش">
+            <!-- Title & Date -->
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-bold text-zinc-800 text-base">${escapeHtml(l.title)}</span>
+              <span class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">${l.isCompleted ? 'تکمیل شده' : `${toPersianDigits(l.paidCount)} از ${toPersianDigits(l.installmentsCount)} قسط`}</span>
+            </div>
 
-        <div class="mt-3">
-          <div class="flex justify-between text-sm mb-1">
-            <span>${toPersianDigits(l.progressPercent)}٪</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2.5">
-            <div class="${loanStatusBarClass(l)} h-2.5 rounded-full progress-bar" style="width: ${l.progressPercent}%"></div>
-          </div>
-          <div class="flex justify-between text-sm mt-1">
-            <span class="text-gray-500">باقی‌مانده: ${formatAmount(l.remainingAmount)} تومان</span>
-            <span class="text-gray-500">کل: ${formatAmount(l.totalAmount)} تومان</span>
-          </div>
-        </div>
+            <div class="mt-3">
+              <div class="flex justify-between text-sm mb-1">
+                <span>${toPersianDigits(l.progressPercent)}٪</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="${loanStatusBarClass(l)} h-2.5 rounded-full progress-bar" style="width: ${l.progressPercent}%"></div>
+              </div>
+              <div class="flex justify-between text-sm mt-1">
+                <span class="text-gray-500">باقی‌مانده: ${formatAmount(l.remainingAmount)} تومان</span>
+                <span class="text-gray-500">کل: ${formatAmount(l.totalAmount)} تومان</span>
+              </div>
+            </div>
 
-        ${nextDueBox}
+            <!-- قسط بعدی -->
+            ${l.isCompleted ? '' : `
+            <div class="flex items-center justify-between gap-1 text-sm bg-zinc-100 rounded-xl m-3 p-2 border border-zinc-300">
+              <div>
+                <div>قسط بعدی</div>
+                <div class="text-xs text-gray-500">${l.nextDueDate ? escapeHtml(toPersianDigits(l.nextDueDate)) : '—'}</div>
+              </div>
+              <div class="font-bold text-main-color">${formatAmount(l.installmentAmount)} تومان</div>
+            </div>`}
+          </div>
 
-        <div class="flex justify-end items-center pt-2 border-t border-gray-200 gap-3">
-          ${payBtn}
-          <button class="bg-red-400 p-1 rounded-md w-10 flex justify-center" onclick="DebtsApp.deleteLoan(${l.id})" title="حذف">${TRASH_ICON}</button>
-        </div>
-      </div>`;
+          <!-- Actions -->
+          <div class="flex justify-end items-center pt-2 border-t border-gray-200 gap-3">
+            ${l.isCompleted ? '' : `
+            <button class="text-sm main-btn transition-colors font-medium flex items-center gap-1 bg-main-color/5 px-3 py-1 rounded-full" onclick="DebtsApp.payLoan(${l.id})">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m5 13 4 4L19 7" />
+              </svg>
+              پرداخت قسط
+            </button>`}
+            <button class="bg-red-400 p-1 rounded-md w-10 flex justify-center" onclick="DebtsApp.deleteLoan(${l.id})" title="حذف">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="white" stroke-width="2">
+                <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+              </svg>
+            </button>
+          </div>
+        </div>`;
   }
 
   function renderLoansList(loans) {
@@ -621,10 +633,34 @@
     }
   }
 
+  // شناسه‌ی وامی که در حال ویرایشه؛ null یعنی مودال در حالت «ثبت وام جدید»ه.
+  // بعد از ساخته‌شدنِ اقساط فقط عنوان قابل ویرایشه (مبلغ/تعداد/سررسید ثابت می‌مونن)
+  let editingLoanId = null;
+
   function openLoanAddModal() {
+    editingLoanId = null;
     const form = document.getElementById('loanForm');
     if (form) form.reset();
     document.getElementById('loanAlreadyPaidInput').value = '0';
+    document.getElementById('loanModalTitle').textContent = 'ثبت قسط/وام جدید';
+    document.getElementById('loanSubmitBtn').textContent = 'ثبت';
+    document.getElementById('loanExtraFieldsGrid').classList.remove('hidden');
+    hideFormError('loanModalFormError');
+    window.openModal('loanModal');
+  }
+
+  function openLoanEditModal(id) {
+    const loan = allLoans.find((l) => l.id === id);
+    if (!loan) return;
+
+    editingLoanId = id;
+    const form = document.getElementById('loanForm');
+    if (form) form.reset();
+    document.getElementById('loanTitleInput').value = loan.title || '';
+    document.getElementById('loanModalTitle').textContent = 'ویرایش عنوان وام';
+    document.getElementById('loanSubmitBtn').textContent = 'ذخیره تغییرات';
+    // مبلغ/تعداد اقساط/سررسید بعد از ساخته‌شدنِ اقساط قابل تغییر نیستن
+    document.getElementById('loanExtraFieldsGrid').classList.add('hidden');
     hideFormError('loanModalFormError');
     window.openModal('loanModal');
   }
@@ -634,18 +670,57 @@
     hideFormError('loanModalFormError');
 
     const title = (document.getElementById('loanTitleInput').value || '').trim();
+    if (!title) return showFormError('loanModalFormError', 'لطفاً عنوان وام را وارد کنید');
+
+    const btn = document.getElementById('loanSubmitBtn');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+
+    // ===== حالت ویرایش: فقط عنوان =====
+    if (editingLoanId) {
+      btn.textContent = 'در حال ذخیره...';
+      try {
+        const res = await fetch(`${API_BASE}/installments/${editingLoanId}`, {
+          method: 'PATCH',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ title }),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          const msg = data.message || `خطا در ویرایش وام (کد ${res.status})`;
+          showFormError('loanModalFormError', Array.isArray(msg) ? msg[0] : msg);
+          return;
+        }
+
+        applyLoansOverview(data);
+        window.closeModal();
+        showToast('عنوان وام ویرایش شد', 'success');
+      } catch (err) {
+        console.error('Loan edit network error:', err);
+        showFormError('loanModalFormError', 'ارتباط با سرور برقرار نشد');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+      return;
+    }
+
+    // ===== حالت ثبت جدید =====
     const totalAmount = Number(document.getElementById('loanTotalAmountInput').value);
     const installmentsCount = Number(document.getElementById('loanInstallmentsCountInput').value);
     const alreadyPaidCount = Number(document.getElementById('loanAlreadyPaidInput').value) || 0;
     const firstDueDateRaw = (document.getElementById('loanFirstDueDatePicker').value || '').trim();
 
-    if (!title) return showFormError('loanModalFormError', 'لطفاً عنوان وام را وارد کنید');
-    if (!totalAmount || totalAmount <= 0) return showFormError('loanModalFormError', 'لطفاً مبلغ کل وام را به‌درستی وارد کنید');
-    if (!installmentsCount || installmentsCount <= 0) return showFormError('loanModalFormError', 'لطفاً تعداد کل اقساط را به‌درستی وارد کنید');
+    if (!totalAmount || totalAmount <= 0) {
+      btn.disabled = false;
+      return showFormError('loanModalFormError', 'لطفاً مبلغ کل وام را به‌درستی وارد کنید');
+    }
+    if (!installmentsCount || installmentsCount <= 0) {
+      btn.disabled = false;
+      return showFormError('loanModalFormError', 'لطفاً تعداد کل اقساط را به‌درستی وارد کنید');
+    }
 
-    const btn = document.getElementById('loanSubmitBtn');
-    const originalText = btn.textContent;
-    btn.disabled = true;
     btn.textContent = 'در حال ثبت...';
 
     try {
@@ -680,12 +755,18 @@
     }
   }
 
+  // جلوگیری از ارسال چندباره‌ی درخواست پرداخت قسط با کلیک‌های پشت‌سرهم روی دکمه
+  // (باعث ۴۲۹/Too Many Requests و پرداخت تکراری می‌شد)
+  const payingLoanIds = new Set();
+
   async function payLoan(id) {
+    if (payingLoanIds.has(id)) return;
+    payingLoanIds.add(id);
     try {
       const res = await fetch(`${API_BASE}/installments/${id}/pay`, { method: 'POST', headers: authHeaders() });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const msg = data.message || 'خطا در ثبت پرداخت قسط';
+        const msg = data.message || (res.status === 429 ? 'درخواست‌های زیاد؛ چند لحظه صبر کن و دوباره امتحان کن' : 'خطا در ثبت پرداخت قسط');
         showToast(Array.isArray(msg) ? msg[0] : msg, 'error');
         return;
       }
@@ -694,6 +775,8 @@
     } catch (err) {
       console.error('Pay loan network error:', err);
       showToast('ارتباط با سرور برقرار نشد', 'error');
+    } finally {
+      payingLoanIds.delete(id);
     }
   }
 
@@ -767,8 +850,8 @@
       return alerts;
     }
 
-    const overdue = items.filter((it) => it.status === 'overdue');
-    const soon = items.filter((it) => it.status !== 'paid' && it.status !== 'overdue' && it.remainingDays !== null && it.remainingDays <= 3);
+    const overdue = items.filter((it) => it.isOverdue);
+    const soon = items.filter((it) => it.status !== 'paid' && !it.isOverdue && it.remainingDays !== null && it.remainingDays <= 3);
 
     overdue.forEach((it) => {
       alerts.push({
@@ -918,6 +1001,7 @@
     togglePaid,
     resetFilter,
     openLoanAddModal,
+    openLoanEditModal,
     payLoan,
     deleteLoan,
     openAlertsModal,
