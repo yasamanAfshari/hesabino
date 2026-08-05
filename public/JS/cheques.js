@@ -176,13 +176,13 @@
 
     let matched = null;
     container.querySelectorAll('.option').forEach((opt) => {
-      const optValue = opt.dataset.value || opt.textContent.trim();
+      const optValue = 'value' in opt.dataset ? opt.dataset.value : opt.textContent.trim();
       if (optValue === value) matched = opt;
     });
 
     if (matched) {
       valueEl.textContent = matched.textContent.trim();
-      container.dataset.value = matched.dataset.value || matched.textContent.trim();
+      container.dataset.value = 'value' in matched.dataset ? matched.dataset.value : matched.textContent.trim();
     } else {
       valueEl.textContent = value;
       container.dataset.value = value;
@@ -198,7 +198,10 @@
     document.querySelectorAll('.custom-select').forEach((select) => {
       select.querySelectorAll('.option').forEach((opt) => {
         opt.addEventListener('click', () => {
-          select.dataset.value = opt.dataset.value || opt.textContent.trim();
+          // نکته‌ی مهم: نباید از || استفاده کرد، چون گزینه‌ی «همه» عمداً data-value=""
+          // داره؛ رشته‌ی خالی falsy هست و || اونو با متن نمایشی («همه») جایگزین می‌کرد
+          // و در نتیجه فیلتر «همه» هیچ‌وقت با هیچ رکوردی مچ نمی‌شد.
+          select.dataset.value = 'value' in opt.dataset ? opt.dataset.value : opt.textContent.trim();
         });
       });
     });
