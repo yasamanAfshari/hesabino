@@ -6,7 +6,10 @@ import { CreateDebtRecordDto } from './dto/create-debt-record.dto';
 import { UpdateDebtRecordDto } from './dto/update-debt-record.dto';
 import { remainingDaysUntil } from './date.util';
 
-export type DebtStatus = 'unpaid' | 'paid' | 'overdue';
+// وضعیت رکورد فقط «پرداخت شده / پرداخت نشده» است؛ سررسید گذشته یک وضعیتِ جدا از
+// پرداخت نیست، بلکه یک برچسبِ اضافه روی رکوردهای پرداخت‌نشده‌ست (فیلد isOverdue).
+// چون کاربر با دیدن «status» می‌خواد اول از همه بدونه پرداخت شده یا نه.
+export type DebtStatus = 'unpaid' | 'paid';
 
 @Injectable()
 export class DebtsService {
@@ -15,27 +18,30 @@ export class DebtsService {
     private debtsRepository: Repository<DebtRecord>,
   ) {}
 
-  // ===== محاسبه‌ی وضعیت و روزهای باقی‌مانده برای یک رکورد =====
-  private computeStatus(record: DebtRecord): { status: DebtStatus; remainingDays: number | null } {
+  // ===== محاسبه‌ی وضعیت، روزهای باقی‌مانده و سررسید-گذشته-بودن برای یک رکورد =====
+  private computeStatus(record: DebtRecord): {
+    status: DebtStatus;
+    remainingDays: number | null;
+    isOverdue: boolean;
+  } {
     // اگه پرداخت/وصول شده، دیگه محاسبه‌ی روزهای باقی‌مانده (که ممکنه منفی هم باشه) معنی نداره؛
     // فرانت‌اند با remainingDays === null یه «-» نشون میده.
     if (record.isPaid) {
-      return { status: 'paid', remainingDays: null };
+      return { status: 'paid', remainingDays: null, isOverdue: false };
     }
     const remainingDays = remainingDaysUntil(record.dueDate);
-    if (remainingDays !== null && remainingDays < 0) {
-      return { status: 'overdue', remainingDays };
-    }
-    return { status: 'unpaid', remainingDays };
+    const isOverdue = remainingDays !== null && remainingDays < 0;
+    return { status: 'unpaid', remainingDays, isOverdue };
   }
 
   private serialize(record: DebtRecord) {
-    const { status, remainingDays } = this.computeStatus(record);
+    const { status, remainingDays, isOverdue } = this.computeStatus(record);
     return {
       ...record,
       amount: Number(record.amount),
       status,
       remainingDays,
+      isOverdue,
     };
   }
 
