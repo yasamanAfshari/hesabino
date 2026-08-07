@@ -435,6 +435,7 @@
     if (container) {
       container.querySelector('.selected-value').textContent = 'بدون حساب';
     }
+    window.AmountInput.refreshForm(document.getElementById('transactionForm'));
   }
 
   function openAddTransactionModal() {
@@ -493,6 +494,7 @@
     applyFinancialTypeUI(tx.type || '');
 
     document.getElementById('modalAmountInput').value = tx.amount != null ? tx.amount : '';
+    window.AmountInput.refresh(document.getElementById('modalAmountInput'));
     document.getElementById('modalDescriptionInput').value = tx.description || '';
 
     await loadUserAccounts();
@@ -500,6 +502,33 @@
     if (accountSelect) accountSelect.value = tx.accountId != null ? String(tx.accountId) : '';
 
     window.openModal('addTransactionModal');
+  }
+
+  // ===== هشدار «حذف از چالش» =====
+  // چالش‌های داشبورد («پرهیز از خرج در دسته‌ی X») سمت سرور فقط وقتی ارزیابی می‌شن که
+  // endpoint مربوطه (GET /api/challenges) خونده بشه (نگاه کنید به ChallengesService.evaluate)؛
+  // یعنی تا قبل از این تغییر، کاربر فقط با مراجعه‌ی بعدی به داشبورد متوجه‌ی شکست چالشش می‌شد.
+  // اینجا بلافاصله بعد از ثبت/ویرایش هر تراکنشِ هزینه، دوباره همون overview رو می‌خونیم؛
+  // اگه دسته‌ی تراکنش دقیقاً با دسته‌ی «پرهیز»ِ چالش فعال یکی باشه و همون چالش به همین
+  // خاطر به نتیجه‌ی «failed» رسیده باشه، بلافاصله به کاربر اطلاع می‌دیم.
+  async function checkChallengeAfterTransactionSave(type, category) {
+    if (type !== 'expense' || !category) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/challenges`, { headers: authHeaders() });
+      if (!res.ok) return;
+      const data = await res.json();
+      const current = data && data.current;
+
+      if (current && current.avoidCategory === category && current.result === 'failed') {
+        // یه فاصله‌ی کوتاه، تا این پیام بعد از toast «تراکنش ثبت شد» جداگانه دیده بشه
+        setTimeout(() => {
+          showToast(`⚠️ به‌خاطر ثبت تراکنش در دسته «${category}»، از چالش «${current.title}» حذف شدید`, 'error');
+        }, 450);
+      }
+    } catch (err) {
+      // این هشدار صرفاً یک کمک اضافه‌ست؛ اگه گرفتنش شکست خورد، نباید جلوی ثبت تراکنش رو بگیره
+    }
   }
 
   async function handleFormSubmit(e) {
@@ -523,12 +552,25 @@
     const title = (document.getElementById('modalTitleInput').value || '').trim();
     const subtype = getCustomSelectValue('modalSubtypeSelect');
     const category = getCustomSelectValue('modalCategorySelect');
-    const amountRaw = document.getElementById('modalAmountInput').value;
+    const amountRaw = window.AmountInput.parse(document.getElementById('modalAmountInput').value);
     const accountIdRaw = document.getElementById('modalAccountInput').value;
     const description = (document.getElementById('modalDescriptionInput').value || '').trim();
 
+    // ===== فیلدهای الزامی: نام تراکنش، تاریخ، نوع مالی (بالاتر چک شده)، حساب، دسته‌بندی =====
+    if (!title) {
+      showFormError('لطفاً نام/عنوان تراکنش را وارد کنید');
+      return;
+    }
     if (!date) {
       showFormError('لطفاً تاریخ تراکنش را وارد کنید');
+      return;
+    }
+    if (!accountIdRaw) {
+      showFormError('لطفاً حساب را انتخاب کنید');
+      return;
+    }
+    if (!category) {
+      showFormError('لطفاً دسته‌بندی را انتخاب کنید');
       return;
     }
     if (amountRaw === '' || Number(amountRaw) <= 0 || Number.isNaN(Number(amountRaw))) {
@@ -575,6 +617,7 @@
       window.closeModal();
       showToast(id ? 'تراکنش با موفقیت ویرایش شد' : 'تراکنش با موفقیت ثبت شد', 'success');
       await loadTransactions();
+      await checkChallengeAfterTransactionSave(type, category);
     } catch (err) {
       console.error('Transaction save network error:', err);
       showFormError('ارتباط با سرور برقرار نشد');
@@ -589,7 +632,7 @@
   async function submitTransferFromModal() {
     const date = (document.getElementById('modalDatePicker').value || '').trim();
     const title = (document.getElementById('modalTitleInput').value || '').trim();
-    const amountRaw = document.getElementById('modalAmountInput').value;
+    const amountRaw = window.AmountInput.parse(document.getElementById('modalAmountInput').value);
     const description = (document.getElementById('modalDescriptionInput').value || '').trim();
     const fromAccountId = document.getElementById('modalTransferFromAccount').value;
     const toAccountId = document.getElementById('modalTransferToAccount').value;
@@ -698,12 +741,15 @@
   }
 
   // ===== مودال جزئیات =====
+  let currentViewTx = null;
+
   async function openViewModal(id) {
     const tx = await getTransactionById(id);
     if (!tx) {
       showToast('تراکنش مورد نظر پیدا نشد', 'error');
       return;
     }
+    currentViewTx = tx;
 
     const badge = document.getElementById('viewTypeBadge');
     const typeText = tx.type === 'income' ? 'واریز' : tx.type === 'transfer' ? 'انتقال' : 'برداشت';
@@ -739,6 +785,464 @@
     window.openModal('viewTransactionModal');
   }
 
+  // ===== چاپ =====
+  // محتوای innerHtml رو داخل ناحیه‌ی مخصوص چاپ (که خارج از هر عنصر اسکرول‌شونده/مودالی
+  // قرار داره) می‌ذاره و پرینت مرورگر رو باز می‌کنه. چون از تکنیک visibility (نگاه کنید
+  // به استایل #hbPrintArea توی transactions.ejs) استفاده شده، نه از خودِ جدولِ روی صفحه،
+  // نه محدودیت اسکرول جدول و نه ارتفاع مودال روی چاپ اثری نداره؛ کل محتوا چاپ می‌شه و
+  // اگه از یک صفحه بلندتر باشه، مرورگر خودش می‌ره صفحه‌ی بعد (thead هم تکرار می‌شه).
+  function printHtml(innerHtml) {
+    let area = document.getElementById('hbPrintArea');
+    if (!area) {
+      area = document.createElement('div');
+      area.id = 'hbPrintArea';
+      document.body.appendChild(area);
+    }
+    area.innerHTML = innerHtml;
+
+    const cleanup = () => {
+      area.innerHTML = '';
+      window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
+
+    window.print();
+  }
+
+  function nowPersianStamp() {
+    return toPersianDigits(new Date().toLocaleString('fa-IR'));
+  }
+
+  // چاپ جزئیات همون تراکنشی که مودال «جزئیات» (چشم) الان بازش کرده
+  function printCurrentTransactionDetails() {
+    const tx = currentViewTx;
+    if (!tx) {
+      showToast('ابتدا جزئیات یک تراکنش را باز کنید', 'error');
+      return;
+    }
+
+    const dateTime = tx.time
+      ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}`
+      : toPersianDigits(tx.date);
+    const typeText = tx.type === 'income' ? 'واریز' : tx.type === 'transfer' ? 'انتقال' : 'برداشت';
+    const amountSign = tx.type === 'income' ? '+' : tx.type === 'transfer' ? '' : '-';
+
+    const rows = [
+      ['عنوان', tx.title || '-'],
+      ['نوع مالی', typeText],
+      ['تاریخ و ساعت', dateTime],
+      ['مبلغ (تومان)', amountSign + formatAmount(tx.amount)],
+      ['دسته بندی', tx.category || '-'],
+      ['نوع تراکنش', tx.subtype || '-'],
+      ['حساب مرتبط', tx.accountName || '-'],
+      ['یادداشت', tx.description || '-'],
+    ];
+
+    const html = `
+      <div class="hb-print-title">جزئیات تراکنش</div>
+      <div class="hb-print-meta">تاریخ چاپ: ${nowPersianStamp()}</div>
+      <table>
+        <tbody>
+          ${rows.map(([label, value]) => `
+            <tr>
+              <th style="width:160px;">${escapeHtml(label)}</th>
+              <td>${escapeHtml(value)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+
+    printHtml(html);
+  }
+
+  // چاپ کل جدول تراکنش‌ها؛ روی همون لیستِ در حال حاضر فیلترشده (lastFilteredList) کار
+  // می‌کنه، نه فقط چیزی که توی اسکرول جدول دیده می‌شه، تا کل محتوا چاپ بشه
+  function printTransactionsList() {
+    const list = lastFilteredList;
+    if (!list.length) {
+      showToast('تراکنشی برای چاپ وجود ندارد', 'error');
+      return;
+    }
+
+    const bodyRows = list.map((tx) => {
+      const dateTime = tx.time
+        ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}`
+        : toPersianDigits(tx.date);
+      return `
+        <tr>
+          <td class="whitespace-nowrap">${escapeHtml(dateTime)}</td>
+          <td>${escapeHtml(tx.title || tx.description || '-')}</td>
+          <td>${escapeHtml(tx.category || '-')}</td>
+          <td>${escapeHtml(typeLabel(tx.type))}</td>
+          <td>${formatAmount(tx.amount)}</td>
+        </tr>`;
+    }).join('');
+
+    const html = `
+      <div class="hb-print-title">لیست تراکنش‌ها</div>
+      <div class="hb-print-meta">تعداد: ${toPersianDigits(list.length)} تراکنش — تاریخ چاپ: ${nowPersianStamp()}</div>
+      <table>
+        <thead>
+          <tr>
+            <th>تاریخ و ساعت</th>
+            <th>توضیحات</th>
+            <th>دسته</th>
+            <th>نوع مالی</th>
+            <th>مبلغ (تومان)</th>
+          </tr>
+        </thead>
+        <tbody>${bodyRows}</tbody>
+      </table>`;
+
+    printHtml(html);
+  }
+
+  // ===== خروجی CSV از لیست فیلترشده‌ی فعلی =====
+  function csvEscapeField(value) {
+    const str = String(value === null || value === undefined ? '' : value);
+    if (/[",\n]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
+    return str;
+  }
+
+  function exportTransactionsCsv() {
+    const list = lastFilteredList;
+    if (!list.length) {
+      showToast('تراکنشی برای خروجی گرفتن وجود ندارد', 'error');
+      return;
+    }
+
+    const header = ['تاریخ', 'ساعت', 'عنوان', 'دسته بندی', 'نوع مالی', 'مبلغ', 'حساب', 'یادداشت'];
+    const lines = [header.map(csvEscapeField).join(',')];
+    list.forEach((tx) => {
+      lines.push([
+        tx.date || '',
+        tx.time || '',
+        tx.title || '',
+        tx.category || '',
+        typeLabel(tx.type),
+        tx.amount != null ? tx.amount : '',
+        tx.accountName || '',
+        tx.description || '',
+      ].map(csvEscapeField).join(','));
+    });
+
+    // BOM اول فایل، برای این‌که اکسل حروف فارسی رو درست (نه به‌صورت جفنگ) نشون بده
+    const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ===== خواندن csv بانکی (وارد کردن) =====
+  // پارسر ساده و مقاوم csv: از کوتیشن، کاما/سِمی‌کالن به‌عنوان جداکننده، و \r\n/\n پشتیبانی می‌کنه
+  function parseCsvText(text) {
+    const cleaned = text.replace(/^\uFEFF/, ''); // حذف BOM اگه بود
+    const delimiter = (cleaned.slice(0, 500).match(/;/g) || []).length > (cleaned.slice(0, 500).match(/,/g) || []).length ? ';' : ',';
+
+    const rows = [];
+    let row = [];
+    let field = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < cleaned.length; i++) {
+      const ch = cleaned[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (cleaned[i + 1] === '"') { field += '"'; i++; }
+          else inQuotes = false;
+        } else {
+          field += ch;
+        }
+      } else if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === delimiter) {
+        row.push(field);
+        field = '';
+      } else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && cleaned[i + 1] === '\n') i++;
+        row.push(field);
+        field = '';
+        if (row.some((c) => c.trim() !== '')) rows.push(row);
+        row = [];
+      } else {
+        field += ch;
+      }
+    }
+    if (field !== '' || row.length) {
+      row.push(field);
+      if (row.some((c) => c.trim() !== '')) rows.push(row);
+    }
+
+    return rows;
+  }
+
+  // حدس زدن این‌که کدوم ستون فایل csv بانکی به کدوم فیلد ما (تاریخ/عنوان/مبلغ/نوع/دسته) مربوطه،
+  // بر اساس اسم ستون‌ها؛ کاربر می‌تونه توی مودال، این حدس رو دستی عوض کنه
+  const COLUMN_GUESS_KEYWORDS = {
+    date: ['تاریخ', 'date'],
+    title: ['شرح', 'توضیح', 'عنوان', 'title', 'description', 'detail'],
+    amount: ['مبلغ', 'amount', 'بدهکار', 'بستانکار', 'debit', 'credit'],
+    type: ['نوع', 'type'],
+    category: ['دسته', 'category'],
+  };
+
+  function guessColumnIndex(headers, field) {
+    const keywords = COLUMN_GUESS_KEYWORDS[field];
+    for (let i = 0; i < headers.length; i++) {
+      const h = (headers[i] || '').toLowerCase();
+      if (keywords.some((k) => h.includes(k.toLowerCase()))) return i;
+    }
+    return -1;
+  }
+
+  let csvParsedRows = []; // شامل ردیف هدر هم هست؛ ردیف ۰ = هدر
+  let csvHeaders = [];
+
+  function fillCsvColumnSelect(containerId, headers, selectedIndex) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const optionsContainer = container.querySelector('.options');
+    const valueEl = container.querySelector('.selected-value');
+    const placeholder = valueEl.dataset.placeholder;
+
+    optionsContainer.innerHTML = headers
+      .map((h, idx) => `<div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="${idx}">${escapeHtml(h || `ستون ${toPersianDigits(idx + 1)}`)}</div>`)
+      .join('');
+
+    delete container.dataset.value;
+    valueEl.textContent = placeholder;
+    if (selectedIndex >= 0) {
+      const opt = optionsContainer.querySelector(`.option[data-value="${selectedIndex}"]`);
+      if (opt) {
+        valueEl.textContent = opt.textContent;
+        container.dataset.value = String(selectedIndex);
+      }
+    }
+
+    // گزینه‌های تازه‌ساخته‌شده باید کلیک‌شون وایر بشه (منطق مشترک در public.js)
+    if (typeof container.__hbWireOptions === 'function') container.__hbWireOptions();
+    else {
+      // کانتینرهایی که هنوز توسط initCustomSelects وایر نشدن (اولین بار مودال باز می‌شه)
+      window.HesabinoUI && window.HesabinoUI.initCustomSelects(container.parentElement || document);
+    }
+  }
+
+  function fillCsvAccountSelect() {
+    const container = document.getElementById('csvAccountSelect');
+    if (!container) return;
+    const optionsContainer = container.querySelector('.options');
+    optionsContainer.innerHTML = userAccounts
+      .map((a) => `<div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="${a.id}">${escapeHtml(a.name)}</div>`)
+      .join('');
+    delete container.dataset.value;
+    const valueEl = container.querySelector('.selected-value');
+    valueEl.textContent = valueEl.dataset.placeholder;
+
+    if (typeof container.__hbWireOptions === 'function') container.__hbWireOptions();
+    else window.HesabinoUI && window.HesabinoUI.initCustomSelects(container.parentElement || document);
+  }
+
+  function renderCsvPreviewTable() {
+    const head = document.getElementById('csvPreviewHead');
+    const body = document.getElementById('csvPreviewBody');
+    if (!head || !body) return;
+
+    head.innerHTML = `<tr>${csvHeaders.map((h, i) => `<th class="px-3 py-2 text-right whitespace-nowrap">${escapeHtml(h || `ستون ${toPersianDigits(i + 1)}`)}</th>`).join('')}</tr>`;
+
+    const previewRows = csvParsedRows.slice(1, 6); // بدون ردیف هدر، فقط ۵ ردیف اول
+    body.innerHTML = previewRows
+      .map((r) => `<tr class="border-t border-gray-100">${csvHeaders.map((_, i) => `<td class="px-3 py-2 whitespace-nowrap">${escapeHtml(r[i] || '')}</td>`).join('')}</tr>`)
+      .join('');
+  }
+
+  function csvColumnValue() {
+    const cols = {};
+    document.querySelectorAll('.csv-col-select').forEach((c) => {
+      const field = c.dataset.col;
+      const idx = c.dataset.value;
+      cols[field] = idx !== undefined && idx !== '' ? Number(idx) : -1;
+    });
+    return cols;
+  }
+
+  function showCsvError(msg) {
+    const el = document.getElementById('csvImportError');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function hideCsvError() {
+    const el = document.getElementById('csvImportError');
+    if (el) el.classList.add('hidden');
+  }
+
+  function triggerCsvImport() {
+    const fileInput = document.getElementById('csvFileInput');
+    if (fileInput) fileInput.click();
+  }
+
+  async function handleCsvFile(file) {
+    if (!file) return;
+    hideCsvError();
+
+    let text;
+    try {
+      text = await file.text();
+    } catch (err) {
+      showToast('خواندن فایل csv با خطا مواجه شد', 'error');
+      return;
+    }
+
+    const rows = parseCsvText(text);
+    if (!rows.length) {
+      showToast('فایل csv خالی یا نامعتبر است', 'error');
+      return;
+    }
+
+    csvParsedRows = rows;
+    csvHeaders = rows[0].map((h) => (h || '').trim());
+    const dataRowCount = rows.length - 1;
+
+    document.getElementById('csvImportSummary').textContent =
+      `${toPersianDigits(dataRowCount)} ردیف تراکنش در فایل پیدا شد. ستون‌های مربوط به هر فیلد رو زیر مشخص کنید (حدس اولیه بر اساس اسم ستون‌ها زده شده).`;
+
+    fillCsvColumnSelect('csvColDate', csvHeaders, guessColumnIndex(csvHeaders, 'date'));
+    fillCsvColumnSelect('csvColTitle', csvHeaders, guessColumnIndex(csvHeaders, 'title'));
+    fillCsvColumnSelect('csvColAmount', csvHeaders, guessColumnIndex(csvHeaders, 'amount'));
+    fillCsvColumnSelect('csvColType', csvHeaders, guessColumnIndex(csvHeaders, 'type'));
+    fillCsvColumnSelect('csvColCategory', csvHeaders, guessColumnIndex(csvHeaders, 'category'));
+
+    if (!userAccounts.length) await loadUserAccountsQuietly();
+    fillCsvAccountSelect();
+
+    renderCsvPreviewTable();
+    window.openModal('csvImportModal');
+  }
+
+  // نسخه‌ی سبک loadUserAccounts که فقط userAccounts رو پر می‌کنه، بدون دست‌کاری سلکت‌باکس مودال ثبت تراکنش
+  async function loadUserAccountsQuietly() {
+    try {
+      const res = await fetch(`${API_BASE}/accounts`, { headers: authHeaders() });
+      if (!res.ok) throw new Error('خطا در دریافت حساب‌ها');
+      userAccounts = await res.json();
+    } catch (err) {
+      console.error('خطا در دریافت حساب‌ها:', err);
+    }
+  }
+
+  function parseCsvAmount(raw) {
+    // حذف هرچیزی غیر از رقم، نقطه و منفی (جداکننده‌ی هزارگان، واحد پول، فاصله و...)
+    const cleaned = toEnglishDigits(raw).replace(/[^\d.-]/g, '');
+    const num = Number(cleaned);
+    return Number.isNaN(num) ? null : num;
+  }
+
+  function guessTypeFromValue(raw, amount) {
+    const v = String(raw || '').toLowerCase();
+    if (/واریز|بستانکار|درآمد|deposit|credit|income/.test(v)) return 'income';
+    if (/برداشت|بدهکار|هزینه|withdraw|debit|expense/.test(v)) return 'expense';
+    if (amount != null && amount < 0) return 'expense';
+    return 'income';
+  }
+
+  async function confirmCsvImport() {
+    hideCsvError();
+
+    const accountId = document.getElementById('csvAccountSelect').dataset.value;
+    const cols = csvColumnValue();
+
+    if (!accountId) {
+      showCsvError('لطفاً حساب مقصد این تراکنش‌ها را انتخاب کنید');
+      return;
+    }
+    if (cols.date < 0) {
+      showCsvError('لطفاً ستون تاریخ را مشخص کنید');
+      return;
+    }
+    if (cols.amount < 0) {
+      showCsvError('لطفاً ستون مبلغ را مشخص کنید');
+      return;
+    }
+
+    const dataRows = csvParsedRows.slice(1);
+    const submitBtn = document.getElementById('csvImportSubmitBtn');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+
+    let successCount = 0;
+    let failCount = 0;
+    const importedExpenseCategories = new Set();
+
+    for (let i = 0; i < dataRows.length; i++) {
+      submitBtn.textContent = `در حال وارد کردن... (${toPersianDigits(i + 1)} از ${toPersianDigits(dataRows.length)})`;
+      const r = dataRows[i];
+
+      const dateRaw = toEnglishDigits((r[cols.date] || '').trim());
+      const amount = parseCsvAmount(r[cols.amount]);
+      if (!dateRaw || amount === null) {
+        failCount++;
+        continue;
+      }
+
+      const title = cols.title >= 0 ? (r[cols.title] || '').trim() : '';
+      const type = cols.type >= 0 ? guessTypeFromValue(r[cols.type], amount) : guessTypeFromValue('', amount);
+      const category = cols.category >= 0 ? (r[cols.category] || '').trim() : '';
+
+      const payload = {
+        date: dateRaw,
+        title: title || 'تراکنش وارد شده از csv بانکی',
+        type,
+        category: category || undefined,
+        accountId: Number(accountId),
+        amount: Math.abs(amount),
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/transactions`, {
+          method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          successCount++;
+          if (type === 'expense' && category) importedExpenseCategories.add(category);
+        } else {
+          failCount++;
+        }
+      } catch (err) {
+        failCount++;
+      }
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+
+    window.closeModal();
+
+    if (successCount) {
+      showToast(`${toPersianDigits(successCount)} تراکنش با موفقیت وارد شد` + (failCount ? ` (${toPersianDigits(failCount)} مورد وارد نشد)` : ''), failCount ? 'error' : 'success');
+    } else {
+      showToast('هیچ تراکنشی وارد نشد؛ ستون‌های انتخاب‌شده را بررسی کنید', 'error');
+    }
+
+    await loadTransactions();
+
+    // اگه در بین ردیف‌های وارد‌شده، تراکنش هزینه‌ای با دسته‌ی «پرهیز»ِ چالش فعال بود، همینجا هم اطلاع بده
+    for (const category of importedExpenseCategories) {
+      await checkChallengeAfterTransactionSave('expense', category);
+    }
+  }
+
+  // لیست تراکنش‌هایی که در حال حاضر (بعد از اعمال فیلترها) روی صفحه نمایش داده می‌شه؛
+  // برای «چاپ لیست» و «دریافت خروجی» دقیقاً از همین لیست استفاده می‌کنیم، نه کل تراکنش‌ها،
+  // تا خروجی/چاپ دقیقاً همون چیزی باشه که کاربر الان می‌بینه
+  let lastFilteredList = [];
+
   // ===== فیلترها (روی داده‌ی از قبل خونده‌شده، سمت کلاینت اعمال می‌شن) =====
   function applyFilters() {
     const search = (document.getElementById('filterSearchInput')?.value || '').trim().toLowerCase();
@@ -746,8 +1250,14 @@
     const category = getCustomSelectValue('filterCategorySelect');
     const dateFrom = normalizeDateForCompare((document.getElementById('filterDateFromPicker')?.value || '').trim());
     const dateTo = normalizeDateForCompare((document.getElementById('filterDateToPicker')?.value || '').trim());
+    const period = window.HesabinoPeriod ? window.HesabinoPeriod.get() : 'month';
 
     let list = allTransactions;
+
+    // ===== فیلتر سراسری بازه‌ی زمانی از هدر (روز/هفته/ماه/سال)؛ فقط وقتی فیلتر تاریخ دستی خالی باشه اعمال می‌شه =====
+    if (!dateFrom && !dateTo && window.HesabinoPeriod) {
+      list = list.filter((t) => window.HesabinoPeriod.matches(t.date, period));
+    }
 
     if (search) {
       list = list.filter((t) =>
@@ -770,6 +1280,7 @@
     }
 
     renderTable(list);
+    lastFilteredList = list;
   }
 
   function resetFilter() {
@@ -834,6 +1345,9 @@
     const confirmBtn = document.getElementById('confirmDeleteTransactionBtn');
     if (confirmBtn) confirmBtn.addEventListener('click', confirmDelete);
 
+    const printDetailsBtn = document.querySelector('.print-transaction-btn');
+    if (printDetailsBtn) printDetailsBtn.addEventListener('click', printCurrentTransactionDetails);
+
     const searchInput = document.getElementById('filterSearchInput');
     if (searchInput) searchInput.addEventListener('input', debounce(applyFilters, 250));
 
@@ -846,6 +1360,9 @@
     const dateToInput = document.getElementById('filterDateToPicker');
     if (dateToInput) dateToInput.addEventListener('change', applyFilters);
 
+    // ===== فیلتر سراسری بازه‌ی زمانی (هدر): با تغییرش، لیست همین‌جا (بدون درخواست جدید) دوباره فیلتر می‌شه =====
+    document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', applyFilters);
+
     loadTransactions();
   }
 
@@ -856,6 +1373,11 @@
     openView: openViewModal,
     openEdit: openEditModal,
     openDelete: openDeleteModal,
+    printList: printTransactionsList,
+    exportCsv: exportTransactionsCsv,
+    triggerCsvImport,
+    handleCsvFile,
+    confirmCsvImport,
   };
 
   if (document.readyState === 'loading') {
