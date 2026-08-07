@@ -179,6 +179,7 @@
     document.getElementById('addAccountType').value = 'bank';
     document.getElementById('addAccountCurrency').value = 'IRR';
     document.getElementById('addAccountOpeningBalance').value = '';
+    window.AmountInput.refreshForm(document.getElementById('addAccount'));
     openModal('addAccount');
   }
 
@@ -186,7 +187,7 @@
     const name = document.getElementById('addAccountName').value.trim();
     const type = document.getElementById('addAccountType').value;
     const currency = document.getElementById('addAccountCurrency').value;
-    const openingBalance = document.getElementById('addAccountOpeningBalance').value;
+    const openingBalance = window.AmountInput.parse(document.getElementById('addAccountOpeningBalance').value);
     const errorBox = document.getElementById('addAccountError');
     errorBox.classList.add('hidden');
 
@@ -230,6 +231,7 @@
     document.getElementById('editAccountType').value = account.type;
     document.getElementById('editAccountCurrency').value = account.currency;
     document.getElementById('editAccountOpeningBalance').value = account.openingBalance;
+    window.AmountInput.refresh(document.getElementById('editAccountOpeningBalance'));
 
     const archiveBtn = document.getElementById('editAccountArchiveBtn');
     archiveBtn.textContent = account.isArchived ? 'بازگرداندن حساب' : 'آرشیو حساب';
@@ -242,7 +244,7 @@
     const name = document.getElementById('editAccountName').value.trim();
     const type = document.getElementById('editAccountType').value;
     const currency = document.getElementById('editAccountCurrency').value;
-    const openingBalance = document.getElementById('editAccountOpeningBalance').value;
+    const openingBalance = window.AmountInput.parse(document.getElementById('editAccountOpeningBalance').value);
     const errorBox = document.getElementById('editAccountError');
     errorBox.classList.add('hidden');
 
@@ -329,6 +331,7 @@
     document.getElementById('transferAmount').value = '';
     document.getElementById('transferDate').value = '';
     document.getElementById('transferDescription').value = '';
+    window.AmountInput.refreshForm(document.getElementById('transferAccount'));
 
     const active = latestAccounts.filter((a) => !a.isArchived);
     if (active.length < 2) {
@@ -344,7 +347,7 @@
     const title = (document.getElementById('transferTitle').value || '').trim();
     const fromAccountId = document.getElementById('transferFromAccount').value;
     const toAccountId = document.getElementById('transferToAccount').value;
-    const amount = document.getElementById('transferAmount').value;
+    const amount = window.AmountInput.parse(document.getElementById('transferAmount').value);
     const date = (document.getElementById('transferDate').value || '').trim();
     const description = (document.getElementById('transferDescription').value || '').trim();
     const errorBox = document.getElementById('transferError');
@@ -441,6 +444,8 @@
   }
 
   async function deleteTransfer(id) {
+    if (!(await window.HesabinoUI.confirmDialog('آیا از حذف این انتقال مطمئن هستید؟'))) return;
+
     try {
       const res = await fetch(`${API_BASE}/transfers/${id}`, {
         method: 'DELETE',
