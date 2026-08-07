@@ -83,7 +83,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg">تعداد حساب‌ها</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5" id="accountsCount">۰ عدد</div>
+              <div class="text-zinc-500 !text-md my-2.5" id="accountsCount">۰ عدد</div>
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg">مجموع موجودی (تومان)</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5" id="accountsTotalBalance">۰ تومان
+              <div class="text-zinc-500 !text-md my-2.5" id="accountsTotalBalance">۰ تومان
               </div>
             </div>
           </div>
@@ -115,7 +115,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg">حساب‌های آرشیوشده</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5" id="accountsArchivedCount">۰ عدد
+              <div class="text-zinc-500 !text-md my-2.5" id="accountsArchivedCount">۰ عدد
               </div>
             </div>
           </div>
@@ -140,20 +140,7 @@
               </button>
             </div>
 
-            <!-- دکمه‌های عملیات (فقط در تب حساب‌ها نمایش داده می‌شوند) -->
-            <div class="flex items-center gap-3" id="tabActionsAccounts">
-              <label class="flex items-center gap-2 text-sm text-zinc-600 cursor-pointer select-none whitespace-nowrap">
-                <input type="checkbox" id="showArchivedToggle" onchange="AccountsApp.toggleShowArchived()">
-                نمایش آرشیوشده‌ها
-              </label>
-              <button class="px-4 py-2 rounded-lg border border-main-color text-main-color text-sm whitespace-nowrap" onclick="AccountsApp.openTransferModal()">انتقال بین حساب‌ها</button>
-              <button class="main-btn text-sm whitespace-nowrap" onclick="AccountsApp.openAddModal()">حساب جدید</button>
-            </div>
 
-            <!-- دکمه‌های عملیات (فقط در تب انتقال‌ها - فعلاً خالی) -->
-            <div class="flex items-center gap-3 hidden" id="tabActionsTransfers">
-              <!-- در صورت نیاز دکمه‌های مربوط به انتقال‌ها اینجا اضافه شود -->
-            </div>
           </div>
         </div>
 
@@ -163,6 +150,20 @@
           <!-- تب حساب‌ها -->
           <div class="tab-panel active" id="tabPanelAccounts">
             <div class="tab-scroll-area px-2 scrollbar">
+              <!-- دکمه‌های عملیات (چیدمان گرید، سمت چپ) -->
+              <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3" id="tabActionsAccounts">
+                <div class="flex flex-wrap items-center justify-end gap-3">
+                  <div class="flex flex-wrap items-center justify-end gap-3 w-full sm:w-auto">
+                    <label class="flex items-center gap-2 text-sm text-zinc-600 cursor-pointer select-none whitespace-nowrap order-last sm:order-none w-full sm:w-auto">
+                      <input type="checkbox" id="showArchivedToggle" onchange="AccountsApp.toggleShowArchived()">
+                      نمایش آرشیوشده‌ها
+                    </label>
+                    <button class="px-4 py-2 rounded-lg border border-main-color text-main-color text-sm whitespace-nowrap justify-end order-first sm:order-none" onclick="AccountsApp.openTransferModal()">انتقال بین حساب‌ها</button>
+                    <button class="main-btn text-sm whitespace-nowrap order-first sm:order-none" onclick="AccountsApp.openAddModal()">حساب جدید</button>
+                  </div>
+                </div>
+              </div>
+
               <div class="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 grc gap-4 mt-2" id="accountsList">
                 <p class="text-center text-gray-400 mt-6 col-span-full">در حال بارگذاری حساب‌ها...</p>
               </div>
@@ -308,8 +309,7 @@
         </div>
 
         <div class="relative">
-          <label class="text-xs text-zinc-500 mb-1 block">عنوان (اختیاری)</label>
-          <input type="text" id="transferTitle" placeholder="مثلاً شارژ کیف پول" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <input type="text" id="transferTitle" placeholder=" عنوان" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div class="relative">
