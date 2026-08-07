@@ -11,19 +11,105 @@
     #modalCategorySelect .option.fintype-hidden {
       display: none !important;
     }
+
+    /* ===== ناحیه‌ی مخصوص چاپ =====
+       این div همیشه توی DOM هست ولی روی صفحه (نه موقع چاپ) با position:fixed و
+       آفست منفی از دید کاربر خارجه؛ display:none استفاده نشده چون در اون صورت
+       موقع چاپ هم قابل نمایش نمی‌شد (visibility روی فرزندهای display:none اثر نداره) */
+    #hbPrintArea {
+      visibility: hidden;
+      position: fixed;
+      top: -99999px;
+      left: -99999px;
+    }
+
+    @media print {
+      /* صفحه‌بندی این اپ با CSS Grid و overflow-hidden + ارتفاع ثابت (h-screen) روی
+         #app-grid و main پیاده شده؛ همین‌ها باعث می‌شن یک عنصر position:absolute
+         داخلشون (مثل ناحیه‌ی چاپ) به‌جای این‌که آزادانه بین چند صفحه پخش بشه، توی
+         ارتفاع یک صفحه‌نمایش کلیپ (بریده) بشه. برای همین موقع چاپ، این محدودیت‌ها
+         (فقط موقع چاپ، نه روی صفحه‌ی عادی) خنثی می‌شن.
+         نکته: از position:fixed برای ناحیه‌ی چاپ استفاده نشده چون مرورگرها با
+         position:fixed توی چاپ چندصفحه‌ای معمولاً یا محتوا رو کات می‌کنن یا توی هر
+         صفحه تکرارش می‌کنن؛ position:absolute (نسبت به body، بعد از خنثی‌شدن
+         overflow/height والدها) درست بین صفحات پخش و صفحه‌بندی می‌شه. */
+      #app-grid,
+      main {
+        overflow: visible !important;
+        height: auto !important;
+        position: static !important;
+        display: block !important;
+      }
+
+      body * {
+        visibility: hidden !important;
+      }
+
+      #hbPrintArea,
+      #hbPrintArea * {
+        visibility: visible !important;
+      }
+
+      #hbPrintArea {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        margin: 0;
+        padding: 12px;
+        direction: rtl;
+      }
+
+      #hbPrintArea table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      /* هدر جدول توی هر صفحه‌ی چاپی تکرار بشه؛ و هر ردیف کامل توی یک صفحه بمونه
+         (اگه جدول بلندتر از یک صفحه بود، بین ردیف‌ها صفحه عوض می‌شه، نه وسط یک ردیف) */
+      #hbPrintArea thead {
+        display: table-header-group;
+      }
+
+      #hbPrintArea tr {
+        page-break-inside: avoid;
+      }
+
+      #hbPrintArea th,
+      #hbPrintArea td {
+        border: 1px solid #999;
+        padding: 6px 8px;
+        text-align: right;
+        font-size: 12px;
+      }
+
+      #hbPrintArea .hb-print-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+
+      #hbPrintArea .hb-print-meta {
+        font-size: 11px;
+        color: #555;
+        margin-bottom: 12px;
+      }
+    }
   </style>
 </head>
 
 <body class="bg-main-color overflow-hidden">
 
-  <%- include('partials/header' , { pageTitle: 'مدیریت تراکنش ها' } ) %>
+  <%- include('partials/header' , { pageTitle: 'مدیریت تراکنش ها', showPeriodFilter: true } ) %>
 
   <section class="scrollbar overflow-y-auto px-6 pb-1">
     <div class="main-box-small">
       <div class="flex justify-between items-center">
         <div class="">
-          <button class="main-btn">دریافت خروجی</button>
-          <button class="main-btn">افزودن csv بانکی</button>
+          <button type="button" class="main-btn" onclick="TransactionsApp.exportCsv()">دریافت خروجی</button>
+          <button type="button" class="main-btn" onclick="TransactionsApp.triggerCsvImport()">افزودن csv بانکی</button>
+          <button type="button" class="main-btn" onclick="TransactionsApp.printList()">چاپ لیست</button>
+          <input type="file" id="csvFileInput" accept=".csv,text/csv" class="hidden" onchange="TransactionsApp.handleCsvFile(this.files[0]); this.value = '';">
         </div>
         <button class="main-btn" onclick="openAddTransactionModal()">ثبت تراکنش</button>
       </div>
@@ -183,12 +269,14 @@
           <div class="grid grid-cols-2 gap-3.5">
 
             <div class="col-span-2">
+              <label class="text-xs text-zinc-500 mb-1 block">عنوان <span class="text-red-color">*</span></label>
               <div class="relative">
                 <input type="text" id="modalTitleInput" placeholder="عنوان (مثلاً بنزین ماشین)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
               </div>
             </div>
 
             <div class="col-span-1">
+              <label class="text-xs text-zinc-500 mb-1 block">تاریخ <span class="text-red-color">*</span></label>
               <div class="relative">
                 <input type="text" id="modalDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
 
@@ -200,6 +288,7 @@
             </div>
 
             <div class="col-span-1">
+              <label class="text-xs text-zinc-500 mb-1 block">ساعت</label>
               <div class="relative">
                 <input type="text" id="modalTimePicker" class="time-picker w-full h-10 date-none-txt border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="ساعت" autocomplete="off">
 
@@ -211,6 +300,7 @@
             </div>
 
             <div class="col-span-1">
+              <label class="text-xs text-zinc-500 mb-1 block">نوع مالی <span class="text-red-color">*</span></label>
               <div id="modalFinancialTypeSelect" class="custom-select relative">
                 <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
                   <span class="selected-value text-gray-700" data-placeholder="نوع مالی">نوع مالی</span>
@@ -233,6 +323,7 @@
             </div>
 
             <div class="col-span-1" id="modalSubtypeWrapper">
+              <label class="text-xs text-zinc-500 mb-1 block">نوع تراکنش</label>
               <div id="modalSubtypeSelect" class="custom-select relative">
                 <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
                   <span class="selected-value text-gray-700" data-placeholder="نوع تراکنش">نوع تراکنش</span>
@@ -268,12 +359,14 @@
             </div>
 
             <div class="col-span-1">
+              <label class="text-xs text-zinc-500 mb-1 block">مبلغ</label>
               <div class="relative">
                 <input type="number" min="0" step="1" id="modalAmountInput" placeholder="قیمت " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
               </div>
             </div>
 
             <div class="col-span-1" id="modalCategoryWrapper">
+              <label class="text-xs text-zinc-500 mb-1 block">دسته بندی <span class="text-red-color">*</span></label>
               <div id="modalCategorySelect" class="custom-select relative">
                 <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
                   <span class="selected-value text-gray-700" data-placeholder="دسته">دسته</span>
@@ -299,6 +392,7 @@
             </div>
 
             <div class="col-span-2" id="modalAccountWrapper">
+              <label class="text-xs text-zinc-500 mb-1 block">حساب <span class="text-red-color">*</span></label>
               <div class="custom-select relative" id="modalAccountCustomSelect">
                 <!-- hidden input برای حفظ سازگاری با کدهای قدیمی -->
                 <input type="hidden" id="modalAccountInput" value="" />
@@ -323,12 +417,12 @@
 
             <!-- فقط برای «انتقال بین حساب‌ها» -->
             <div class="col-span-1 hidden" id="modalTransferFromWrapper">
-              <label class="text-xs text-zinc-500 mb-1 block">از حساب</label>
+              <label class="text-xs text-zinc-500 mb-1 block">از حساب <span class="text-red-color">*</span></label>
               <select id="modalTransferFromAccount" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
             </div>
 
             <div class="col-span-1 hidden" id="modalTransferToWrapper">
-              <label class="text-xs text-zinc-500 mb-1 block">به حساب</label>
+              <label class="text-xs text-zinc-500 mb-1 block">به حساب <span class="text-red-color">*</span></label>
               <select id="modalTransferToAccount" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
             </div>
 
@@ -444,6 +538,151 @@
 
     </div>
   </div>
+
+  <!-- مودال پیش‌نمایش/تنظیم ورودی csv بانکی -->
+  <div id="csvImportModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col relative">
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-lg text-zinc-800">افزودن csv بانکی</h3>
+        <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body overflow-y-auto scrollbar px-6 py-4">
+        <div id="csvImportError" class="hidden mb-3 rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
+        <p id="csvImportSummary" class="text-sm text-gray-600 mb-3"></p>
+
+        <div class="grid grid-cols-2 gap-3.5 mb-4">
+          <div class="col-span-2">
+            <label class="text-xs text-zinc-500 mb-1 block">این تراکنش‌ها به کدام حساب تعلق دارند؟ <span class="text-red-color">*</span></label>
+            <div id="csvAccountSelect" class="custom-select relative">
+              <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                <span class="selected-value text-gray-700" data-placeholder="انتخاب حساب">انتخاب حساب</span>
+                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </button>
+              <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
+                <div class="p-2 border-b border-main-color-25">
+                  <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                </div>
+                <div class="options max-h-52 overflow-y-auto"><!-- توسط جاوااسکریپت پر می‌شه --></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-1">
+            <label class="text-xs text-zinc-500 mb-1 block">ستون تاریخ <span class="text-red-color">*</span></label>
+            <div id="csvColDate" class="custom-select relative csv-col-select" data-col="date">
+              <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                <span class="selected-value text-gray-700" data-placeholder="انتخاب ستون">انتخاب ستون</span>
+                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </button>
+              <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
+                <div class="p-2 border-b border-main-color-25">
+                  <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                </div>
+                <div class="options max-h-52 overflow-y-auto"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-1">
+            <label class="text-xs text-zinc-500 mb-1 block">ستون عنوان/شرح</label>
+            <div id="csvColTitle" class="custom-select relative csv-col-select" data-col="title">
+              <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                <span class="selected-value text-gray-700" data-placeholder="انتخاب ستون (اختیاری)">انتخاب ستون (اختیاری)</span>
+                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </button>
+              <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
+                <div class="p-2 border-b border-main-color-25">
+                  <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                </div>
+                <div class="options max-h-52 overflow-y-auto"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-1">
+            <label class="text-xs text-zinc-500 mb-1 block">ستون مبلغ <span class="text-red-color">*</span></label>
+            <div id="csvColAmount" class="custom-select relative csv-col-select" data-col="amount">
+              <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                <span class="selected-value text-gray-700" data-placeholder="انتخاب ستون">انتخاب ستون</span>
+                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </button>
+              <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
+                <div class="p-2 border-b border-main-color-25">
+                  <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                </div>
+                <div class="options max-h-52 overflow-y-auto"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-1">
+            <label class="text-xs text-zinc-500 mb-1 block">ستون نوع (واریز/برداشت)</label>
+            <div id="csvColType" class="custom-select relative csv-col-select" data-col="type">
+              <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                <span class="selected-value text-gray-700" data-placeholder="انتخاب ستون (اختیاری)">انتخاب ستون (اختیاری)</span>
+                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </button>
+              <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
+                <div class="p-2 border-b border-main-color-25">
+                  <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                </div>
+                <div class="options max-h-52 overflow-y-auto"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-1">
+            <label class="text-xs text-zinc-500 mb-1 block">ستون دسته‌بندی</label>
+            <div id="csvColCategory" class="custom-select relative csv-col-select" data-col="category">
+              <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                <span class="selected-value text-gray-700" data-placeholder="انتخاب ستون (اختیاری)">انتخاب ستون (اختیاری)</span>
+                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </button>
+              <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
+                <div class="p-2 border-b border-main-color-25">
+                  <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو..." />
+                </div>
+                <div class="options max-h-52 overflow-y-auto"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs text-gray-500 mb-2">پیش‌نمایش چند سطر اول فایل:</p>
+        <div class="border border-gray-200 rounded-lg overflow-x-auto scrollbar">
+          <table class="w-full text-xs">
+            <thead id="csvPreviewHead" class="bg-blue-50"></thead>
+            <tbody id="csvPreviewBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+        <button type="button" id="csvImportSubmitBtn" onclick="TransactionsApp.confirmCsvImport()" class="main-btn px-4 py-2 rounded-lg">وارد کردن</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ناحیه‌ی مخصوص چاپ (جزئیات یک تراکنش یا کل جدول)؛ همیشه خالیه مگر لحظه‌ی چاپ -->
+  <div id="hbPrintArea"></div>
 
   <script>
     function openModal(id) {
