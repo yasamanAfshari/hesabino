@@ -166,6 +166,37 @@ export function formatJalali(y: number, m: number, d: number): string {
   return `${y}/${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')}`;
 }
 
+// چهار بازه‌ی زمانی که فیلتر سراسری هدر (روز/هفته/ماه/سال) پشتیبانی می‌کند
+export type DashboardPeriod = 'today' | 'week' | 'month' | 'year';
+
+// آیا یک تاریخ شمسی (رشته‌ی YYYY/MM/DD با ارقام فارسی یا انگلیسی) داخل بازه‌ی
+// انتخاب‌شده در فیلتر سراسری هدر قرار می‌گیرد؟ پایه‌ی مشترک برای همه‌ی ماژول‌هایی
+// که باید با تغییر این فیلتر، داده‌شان تغییر کند (داشبورد، تراکنش‌ها، ...)
+export function matchesPeriod(
+  dateStr: string,
+  period: DashboardPeriod,
+  from: Date = new Date(),
+): boolean {
+  const d = toEnglishDigits(dateStr || '');
+  if (!d) return false;
+
+  const todayStr = todayJalaliString(from);
+  if (period === 'today') {
+    return d === todayStr;
+  }
+  if (period === 'week') {
+    const diff = daysBetweenJalali(d, todayStr);
+    return diff !== null && diff >= 0 && diff <= 6;
+  }
+  if (period === 'year') {
+    const { y } = currentJalaliDate(from);
+    return d.startsWith(`${y}/`);
+  }
+  // month (پیش‌فرض)
+  const monthKey = currentJalaliMonthKey(from);
+  return d.startsWith(monthKey) || d.startsWith(toPersianDigits(monthKey));
+}
+
 // نام فارسی روز هفته برای یک تاریخ میلادی (برای «پرخرج‌ترین روز هفته» در تحلیل رفتار خرج)
 const WEEKDAY_NAMES_FA = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
 export function weekdayNameFromJalali(dateStr: string): string | null {
