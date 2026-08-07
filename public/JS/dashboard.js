@@ -137,33 +137,55 @@
 
   // ===== ردیف کارت‌های آماری بالا =====
   function renderStatCards(data) {
+    const period = data.period || 'month';
+    const periodLabel = (window.HesabinoPeriod && window.HesabinoPeriod.LABELS[period]) || 'این ماه';
+    setText('stat-income-label', `درآمد ${periodLabel}`);
+    setText('stat-expense-label', `هزینه‌های ${periodLabel}`);
+
     setText('stat-accounts-count', `${toPersianDigits(data.accounts.accountsCount)} حساب`);
     setText('stat-balance', formatAmount(data.totals.balance));
 
     setText('stat-income', formatAmount(data.totals.income));
-    const incomeChange = data.previousMonth.income > 0
-      ? Math.round(((data.totals.income - data.previousMonth.income) / data.previousMonth.income) * 100)
-      : (data.totals.income > 0 ? 100 : 0);
     const incomeTrendEl = document.getElementById('stat-income-trend');
-    if (incomeTrendEl) {
-      incomeTrendEl.className = incomeChange >= 0 ? 'trend-p flex justify-center items-center px-1.5' : 'trend-m flex justify-center items-center px-1.5';
-      incomeTrendEl.innerHTML = `<span>${toPersianDigits(Math.abs(incomeChange))}٪</span>`;
+    const expenseTrendEl = document.getElementById('stat-expense-trend');
+    if (period === 'month') {
+      // مقایسه با ماه قبل فقط برای بازه‌ی «ماه» معنا داره
+      const incomeChange = data.previousMonth.income > 0
+        ? Math.round(((data.totals.income - data.previousMonth.income) / data.previousMonth.income) * 100)
+        : (data.totals.income > 0 ? 100 : 0);
+      if (incomeTrendEl) {
+        incomeTrendEl.className = incomeChange >= 0 ? 'trend-p flex justify-center items-center px-1.5' : 'trend-m flex justify-center items-center px-1.5';
+        incomeTrendEl.innerHTML = `<span>${toPersianDigits(Math.abs(incomeChange))}٪</span>`;
+      }
+      setText('stat-income-subtitle', incomeChange >= 0 ? 'نسبت به ماه قبل بهتر' : 'نسبت به ماه قبل کمتر');
+    } else {
+      if (incomeTrendEl) {
+        incomeTrendEl.className = 'trend flex justify-center items-center px-1.5';
+        incomeTrendEl.innerHTML = '<span>—</span>';
+      }
+      setText('stat-income-subtitle', `مجموع درآمد ${periodLabel}`);
     }
-    setText('stat-income-subtitle', incomeChange >= 0 ? 'نسبت به ماه قبل بهتر' : 'نسبت به ماه قبل کمتر');
 
     setText('stat-expense', formatAmount(data.totals.expense));
-    const expenseChange = data.previousMonth.expense > 0
-      ? Math.round(((data.totals.expense - data.previousMonth.expense) / data.previousMonth.expense) * 100)
-      : (data.totals.expense > 0 ? 100 : 0);
-    const expenseTrendEl = document.getElementById('stat-expense-trend');
-    if (expenseTrendEl) {
-      expenseTrendEl.className = expenseChange <= 0 ? 'trend-p flex justify-center items-center px-1.5' : 'trend-m flex justify-center items-center px-1.5';
-      expenseTrendEl.innerHTML = `<span>${toPersianDigits(Math.abs(expenseChange))}٪</span>`;
+    if (period === 'month') {
+      const expenseChange = data.previousMonth.expense > 0
+        ? Math.round(((data.totals.expense - data.previousMonth.expense) / data.previousMonth.expense) * 100)
+        : (data.totals.expense > 0 ? 100 : 0);
+      if (expenseTrendEl) {
+        expenseTrendEl.className = expenseChange <= 0 ? 'trend-p flex justify-center items-center px-1.5' : 'trend-m flex justify-center items-center px-1.5';
+        expenseTrendEl.innerHTML = `<span>${toPersianDigits(Math.abs(expenseChange))}٪</span>`;
+      }
+      const budgetPercent = data.budget.totalBudget > 0
+        ? Math.round((data.totals.expense / data.budget.totalBudget) * 100)
+        : null;
+      setText('stat-expense-subtitle', budgetPercent !== null ? `${toPersianDigits(budgetPercent)}٪ از بودجه مصرف شد` : 'بدون بودجه تعیین‌شده');
+    } else {
+      if (expenseTrendEl) {
+        expenseTrendEl.className = 'trend flex justify-center items-center px-1.5';
+        expenseTrendEl.innerHTML = '<span>—</span>';
+      }
+      setText('stat-expense-subtitle', `مجموع هزینه‌های ${periodLabel}`);
     }
-    const budgetPercent = data.budget.totalBudget > 0
-      ? Math.round((data.totals.expense / data.budget.totalBudget) * 100)
-      : null;
-    setText('stat-expense-subtitle', budgetPercent !== null ? `${toPersianDigits(budgetPercent)}٪ از بودجه مصرف شد` : 'بدون بودجه تعیین‌شده');
 
     const cs = data.chequesSummary;
     setText('stat-cheques-count', `${toPersianDigits(cs.pendingCount)} عدد`);
@@ -176,9 +198,10 @@
     setText('stat-health-label', data.health.label);
   }
 
-  // ===== نمودار دسته‌بندی هزینه‌ها (دونات) + لیست رنگی =====
+  // ===== نمودار دسته‌بندی هزینه‌ها (دونات) + لیست رنگی؛ periodLabel از فیلتر سراسری هدر میاد =====
   function renderCategoryChart(data, periodLabel) {
-    const label = periodLabel || 'این ماه';
+    const label = periodLabel || (window.HesabinoPeriod && window.HesabinoPeriod.LABELS[data.period || 'month']) || 'این ماه';
+    setText('category-chart-title', `هزینه به تفکیک دسته (${label})`);
     const legendEl = document.getElementById('category-legend-list');
     if (legendEl) {
       if (!data.categoryBreakdown.length) {
@@ -426,7 +449,7 @@
   let assetsById = {};
 
   async function deleteAsset(id) {
-    if (!confirm('این دارایی حذف شود؟')) return;
+    if (!(await window.HesabinoUI.confirmDialog('این دارایی حذف شود؟'))) return;
     try {
       const res = await fetch(`${API_BASE}/assets/${id}`, { method: 'DELETE', headers: authHeaders() });
       if (!res.ok) throw new Error('خطا در حذف دارایی');
@@ -458,6 +481,7 @@
       form.elements['value'].value = asset.value;
     }
     updateAssetFormFields();
+    window.AmountInput.refreshForm(form);
     setText('assetModalTitle', 'ویرایش دارایی');
     setText('assetFormSubmit', 'ذخیره تغییرات');
     openModal('assetModal');
@@ -508,7 +532,7 @@
   let subscriptionsById = {};
 
   async function deleteSubscription(id) {
-    if (!confirm('این اشتراک حذف شود؟')) return;
+    if (!(await window.HesabinoUI.confirmDialog('این اشتراک حذف شود؟'))) return;
     try {
       const res = await fetch(`${API_BASE}/subscriptions/${id}`, { method: 'DELETE', headers: authHeaders() });
       if (!res.ok) throw new Error('خطا در حذف اشتراک');
@@ -530,6 +554,7 @@
     form.elements['title'].value = sub.title;
     form.elements['amount'].value = sub.amount;
     form.elements['billingDay'].value = sub.billingDay;
+    window.AmountInput.refreshForm(form);
     setText('subscriptionModalTitle', 'ویرایش اشتراک');
     setText('subscriptionFormSubmit', 'ذخیره تغییرات');
     openModal('subscriptionModal');
@@ -581,7 +606,7 @@
   window.payLoan = payLoan;
 
   async function deleteLoan(id) {
-    if (!confirm('این وام/قسط حذف شود؟')) return;
+    if (!(await window.HesabinoUI.confirmDialog('این وام/قسط حذف شود؟'))) return;
     try {
       const res = await fetch(`${API_BASE}/installments/${id}`, { method: 'DELETE', headers: authHeaders() });
       if (!res.ok) throw new Error('خطا در حذف قسط');
@@ -683,6 +708,7 @@
     if (form) {
       form.reset();
       form.elements['id'].value = '';
+      window.AmountInput.refreshForm(form);
     }
     setText('challengeModalTitle', 'شروع چالش جدید');
     setText('challengeFormSubmit', 'شروع چالش');
@@ -700,6 +726,7 @@
     form.elements['avoidCategory'].value = currentChallenge.avoidCategory;
     form.elements['targetDays'].value = currentChallenge.targetDays;
     form.elements['rewardPoints'].value = currentChallenge.rewardPoints;
+    window.AmountInput.refreshForm(form);
     setText('challengeModalTitle', 'ویرایش چالش');
     setText('challengeFormSubmit', 'ذخیره تغییرات');
     openModal('challengeModal');
@@ -708,7 +735,7 @@
 
   async function deleteChallenge() {
     if (!currentChallenge) return;
-    if (!confirm('این چالش حذف شود؟')) return;
+    if (!(await window.HesabinoUI.confirmDialog('این چالش حذف شود؟'))) return;
     try {
       const res = await fetch(`${API_BASE}/challenges/${currentChallenge.id}`, { method: 'DELETE', headers: authHeaders() });
       if (!res.ok) throw new Error('خطا در حذف چالش');
@@ -786,22 +813,95 @@
     }).join('');
   }
 
-  // ===== تحلیل هوشمند AI (اگر کلید API تنظیم شده باشد، جای تحلیل مبتنی بر قانون ثابت را می‌گیرد) =====
-  async function loadAiInsight() {
+  // ===== تحلیل هوشمند AI (اگر کلید API/مدل تنظیم شده باشد، جای تحلیل مبتنی بر قانون ثابت را می‌گیرد) =====
+  // این تحلیل دیگه خودکار (روی هر بار لود شدن داشبورد) گرفته نمی‌شه، چون پشتش یک مدل
+  // زبانی محلیه که چند ثانیه طول می‌کشه؛ به‌جاش آخرین نتیجه در localStorage کش می‌شه و
+  // فقط با کلیک روی آیکون به‌روزرسانی، دوباره گرفته می‌شه.
+  const AI_INSIGHT_CACHE_KEY = 'hb_ai_insight_cache_v1';
+
+  function readAiInsightCache() {
+    try {
+      const raw = localStorage.getItem(AI_INSIGHT_CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function writeAiInsightCache(cache) {
+    try {
+      localStorage.setItem(AI_INSIGHT_CACHE_KEY, JSON.stringify(cache));
+    } catch (err) {
+      // پر بودن فضای localStorage یا مسدود بودنش نباید کل بارگذاری داشبورد رو خراب کنه
+    }
+  }
+
+  function formatAiInsightTimestamp(iso) {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return 'به‌روزرسانی: —';
+    const datePart = toPersianDigits(date.toLocaleDateString('fa-IR'));
+    const timePart = toPersianDigits(date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }));
+    return `به‌روزرسانی: ${datePart} - ${timePart}`;
+  }
+
+  function setAiInsightBadgeText(text) {
+    const badgeText = document.getElementById('ai-insight-updated-text');
+    if (badgeText) badgeText.textContent = text;
+  }
+
+  function setAiInsightRefreshSpinning(spinning) {
+    const icon = document.getElementById('ai-insight-refresh-icon');
+    const btn = document.getElementById('ai-insight-refresh-btn');
+    if (icon) icon.classList.toggle('animate-spin', spinning);
+    if (btn) btn.disabled = spinning;
+  }
+
+  // آخرین تحلیل ذخیره‌شده (اگه وجود داشته باشه) رو بدون هیچ درخواست شبکه‌ای نشون می‌ده
+  function restoreCachedAiInsight() {
+    const cache = readAiInsightCache();
+    if (!cache) {
+      setAiInsightBadgeText('هنوز به‌روزرسانی نشده');
+      return;
+    }
+
+    const behaviorEl = document.getElementById('hero-insight-behavior');
+    const predictionEl = document.getElementById('hero-insight-prediction');
+    if (behaviorEl && cache.behavior) behaviorEl.textContent = cache.behavior;
+    if (predictionEl && cache.prediction) predictionEl.textContent = cache.prediction;
+    setAiInsightBadgeText(formatAiInsightTimestamp(cache.generatedAt));
+  }
+
+  // با کلیک کاربر روی آیکون به‌روزرسانی صدا زده می‌شه؛ یک درخواست تازه به دستیار هوشمند می‌زنه
+  async function refreshAiInsight() {
+    setAiInsightRefreshSpinning(true);
     try {
       const res = await fetch(`${API_BASE}/ai/insight`, { headers: authHeaders() });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.usedAi) return;
+      if (!res.ok) throw new Error(data.message || 'خطا در دریافت تحلیل هوشمند');
+
+      if (!data.usedAi) {
+        showToast('دستیار هوشمند در دسترس نیست؛ تحلیل بر پایه‌ی قانون ثابت همچنان نمایش داده می‌شود', 'error');
+        return;
+      }
 
       const behaviorEl = document.getElementById('hero-insight-behavior');
       const predictionEl = document.getElementById('hero-insight-prediction');
-      const badge = document.getElementById('ai-insight-badge');
       if (behaviorEl && data.analysis) behaviorEl.textContent = data.analysis;
       if (predictionEl && data.suggestion) predictionEl.textContent = data.suggestion;
-      if (badge) badge.classList.remove('hidden');
+
+      const generatedAt = new Date().toISOString();
+      writeAiInsightCache({ behavior: data.analysis, prediction: data.suggestion, generatedAt });
+      setAiInsightBadgeText(formatAiInsightTimestamp(generatedAt));
     } catch (err) {
-      // در نبود اتصال یا کلید API، تحلیل مبتنی بر قانون ثابت (renderHero) همچنان نمایش داده می‌شود
+      showToast(err.message || 'ارتباط با دستیار هوشمند برقرار نشد', 'error');
+    } finally {
+      setAiInsightRefreshSpinning(false);
     }
+  }
+
+  function bindAiInsightRefreshButton() {
+    const btn = document.getElementById('ai-insight-refresh-btn');
+    if (btn) btn.addEventListener('click', refreshAiInsight);
   }
 
   // ===== چت با دستیار هوشمند مالی =====
@@ -843,7 +943,8 @@
   // ===== بارگذاری کامل داشبورد =====
   async function loadDashboard() {
     try {
-      const res = await fetch(`${API_BASE}/dashboard`, { headers: authHeaders() });
+      const period = window.HesabinoPeriod ? window.HesabinoPeriod.get() : 'month';
+      const res = await fetch(`${API_BASE}/dashboard?period=${period}`, { headers: authHeaders() });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || 'خطا در دریافت اطلاعات داشبورد');
 
@@ -866,7 +967,13 @@
       renderDebtSummary(data);
       renderTransactionsTable(data);
 
-      loadAiInsight();
+      // توجه: قبلاً اینجا loadAiInsight() صدا زده می‌شد و یعنی هر بار داشبورد لود می‌شد
+      // (یا فیلتر بازه عوض می‌شد، یا هر افزودن/ویرایش/حذفی که loadDashboard رو دوباره صدا
+      // می‌زد)، یک درخواست تحلیل هوشمند (که پشتش مدل Ollama محلیه و می‌تونه چند ثانیه طول
+      // بکشه) هم می‌رفت. حالا فقط آخرین تحلیلِ ذخیره‌شده (اگه از قبل گرفته شده) رو از
+      // localStorage نشون می‌دیم؛ برای گرفتن تحلیل تازه، کاربر خودش روی آیکون به‌روزرسانی
+      // کنار بج «به‌روزرسانی: ...» کلیک می‌کنه (نگاه کنید به restoreCachedAiInsight/refreshAiInsight).
+      restoreCachedAiInsight();
     } catch (err) {
       showToast(err.message || 'خطا در بارگذاری داشبورد', 'error');
     }
@@ -943,6 +1050,7 @@
     if (form) {
       form.reset();
       form.elements['id'].value = '';
+      window.AmountInput.refreshForm(form);
     }
     setText('assetModalTitle', 'افزودن دارایی');
     setText('assetFormSubmit', 'افزودن');
@@ -957,6 +1065,7 @@
     if (form) {
       form.reset();
       form.elements['id'].value = '';
+      window.AmountInput.refreshForm(form);
     }
     setText('subscriptionModalTitle', 'افزودن اشتراک');
     setText('subscriptionFormSubmit', 'افزودن');
@@ -967,45 +1076,21 @@
   function openLoanAddModal() {
     if (!requireAccount()) return;
     const form = document.getElementById('loanForm');
-    if (form) form.reset();
+    if (form) {
+      form.reset();
+      window.AmountInput.refreshForm(form);
+    }
     openModal('loanModal');
   }
   window.openLoanAddModal = openLoanAddModal;
 
-  // ===== دکمه‌های «سال/ماه/هفته/امروز» بالای نمودار هزینه به تفکیک دسته =====
-  const PERIOD_LABELS = { today: 'امروز', week: 'این هفته', month: 'این ماه', year: 'امسال' };
-
-  function setActivePeriodButton(period) {
-    document.querySelectorAll('.category-period-btn').forEach((btn) => {
-      const isActive = btn.dataset.period === period;
-      btn.classList.toggle('bg-blue-100', isActive);
-      btn.classList.toggle('text-blue-600', isActive);
-      btn.classList.toggle('bg-gray-100', !isActive);
-    });
-  }
-
-  async function loadCategoryBreakdown(period) {
-    setActivePeriodButton(period);
-    try {
-      const res = await fetch(`${API_BASE}/dashboard/category-breakdown?period=${period}`, { headers: authHeaders() });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || 'خطا در دریافت اطلاعات');
-      renderCategoryChart({ categoryBreakdown: data.categoryBreakdown }, PERIOD_LABELS[period] || 'این بازه');
-    } catch (err) {
-      showToast(err.message || 'خطا در دریافت هزینه به تفکیک دسته', 'error');
-    }
-  }
-
-  function bindCategoryPeriodButtons() {
-    document.querySelectorAll('.category-period-btn').forEach((btn) => {
-      btn.addEventListener('click', () => loadCategoryBreakdown(btn.dataset.period));
-    });
-  }
-
   function onReady() {
     loadDashboard();
     bindAiChat();
-    bindCategoryPeriodButtons();
+    bindAiInsightRefreshButton();
+
+    // ===== فیلتر سراسری بازه‌ی زمانی (هدر): با هر تغییر، کل داشبورد دوباره لود می‌شه =====
+    document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', loadDashboard);
 
     const typeSelect = document.getElementById('assetTypeSelect');
     if (typeSelect) typeSelect.addEventListener('change', updateAssetFormFields);
@@ -1014,35 +1099,35 @@
       const type = fd.get('type');
       const body = { title: fd.get('title'), type };
       if (type === 'gold') {
-        body.quantity = Number(fd.get('quantityGold'));
-        body.unitPrice = Number(fd.get('unitPriceGold'));
+        body.quantity = Number(window.AmountInput.parse(fd.get('quantityGold')));
+        body.unitPrice = Number(window.AmountInput.parse(fd.get('unitPriceGold')));
       } else if (type === 'currency') {
-        body.quantity = Number(fd.get('quantityCurrency'));
-        body.unitPrice = Number(fd.get('unitPriceCurrency'));
+        body.quantity = Number(window.AmountInput.parse(fd.get('quantityCurrency')));
+        body.unitPrice = Number(window.AmountInput.parse(fd.get('unitPriceCurrency')));
       } else {
-        body.value = Number(fd.get('value'));
+        body.value = Number(window.AmountInput.parse(fd.get('value')));
       }
       return body;
     });
 
     bindEditableForm('subscriptionForm', 'subscriptions', (fd) => ({
       title: fd.get('title'),
-      amount: Number(fd.get('amount')),
-      billingDay: Number(fd.get('billingDay')),
+      amount: Number(window.AmountInput.parse(fd.get('amount'))),
+      billingDay: Number(window.AmountInput.parse(fd.get('billingDay'))),
     }));
 
     bindQuickForm('loanForm', 'installments', (fd) => ({
       title: fd.get('title'),
-      totalAmount: Number(fd.get('totalAmount')),
-      installmentsCount: Number(fd.get('installmentsCount')),
-      alreadyPaidCount: Number(fd.get('alreadyPaidCount')) || 0,
+      totalAmount: Number(window.AmountInput.parse(fd.get('totalAmount'))),
+      installmentsCount: Number(window.AmountInput.parse(fd.get('installmentsCount'))),
+      alreadyPaidCount: Number(window.AmountInput.parse(fd.get('alreadyPaidCount'))) || 0,
     }));
 
     bindEditableForm('challengeForm', 'challenges', (fd) => ({
       title: fd.get('title'),
       avoidCategory: fd.get('avoidCategory'),
-      targetDays: Number(fd.get('targetDays')),
-      rewardPoints: Number(fd.get('rewardPoints')),
+      targetDays: Number(window.AmountInput.parse(fd.get('targetDays'))),
+      rewardPoints: Number(window.AmountInput.parse(fd.get('rewardPoints'))),
     }));
 
   }
