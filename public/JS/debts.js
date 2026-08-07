@@ -293,6 +293,7 @@
     document.getElementById(fid(kind, 'Id')).value = '';
     resetCustomSelect(fid(kind, 'StatusSelect'));
     hideFormError(fid(kind, 'ModalFormError'));
+    window.AmountInput.refreshForm(document.getElementById(fid(kind, 'Modal')));
   }
 
   function openAddModal(kind) {
@@ -331,6 +332,7 @@
 
     document.getElementById(fid(kind, 'CounterpartyInput')).value = item.counterparty || '';
     document.getElementById(fid(kind, 'AmountInput')).value = item.amount != null ? item.amount : '';
+    window.AmountInput.refresh(document.getElementById(fid(kind, 'AmountInput')));
     document.getElementById(fid(kind, 'DueDatePicker')).value = item.dueDate || '';
     document.getElementById(fid(kind, 'ReminderInput')).checked = !!item.reminder;
 
@@ -345,7 +347,7 @@
     hideFormError(errorId);
 
     const counterparty = (document.getElementById(fid(kind, 'CounterpartyInput')).value || '').trim();
-    const amountRaw = document.getElementById(fid(kind, 'AmountInput')).value;
+    const amountRaw = window.AmountInput.parse(document.getElementById(fid(kind, 'AmountInput')).value);
     const dueDate = (document.getElementById(fid(kind, 'DueDatePicker')).value || '').trim();
     const statusValue = getCustomSelectValue(fid(kind, 'StatusSelect'));
     const reminder = !!document.getElementById(fid(kind, 'ReminderInput')).checked;
@@ -410,7 +412,7 @@
   }
 
   async function deleteItem(id) {
-    if (!window.confirm('آیا از حذف این رکورد مطمئن هستید؟')) return;
+    if (!(await window.HesabinoUI.confirmDialog('آیا از حذف این رکورد مطمئن هستید؟'))) return;
 
     try {
       const res = await fetch(`${API_BASE}/debts/${id}`, {
@@ -642,6 +644,7 @@
     const form = document.getElementById('loanForm');
     if (form) form.reset();
     document.getElementById('loanAlreadyPaidInput').value = '0';
+    window.AmountInput.refreshForm(document.getElementById('loanModal'));
     document.getElementById('loanModalTitle').textContent = 'ثبت قسط/وام جدید';
     document.getElementById('loanSubmitBtn').textContent = 'ثبت';
     document.getElementById('loanExtraFieldsGrid').classList.remove('hidden');
@@ -657,6 +660,7 @@
     const form = document.getElementById('loanForm');
     if (form) form.reset();
     document.getElementById('loanTitleInput').value = loan.title || '';
+    window.AmountInput.refreshForm(document.getElementById('loanModal'));
     document.getElementById('loanModalTitle').textContent = 'ویرایش عنوان وام';
     document.getElementById('loanSubmitBtn').textContent = 'ذخیره تغییرات';
     // مبلغ/تعداد اقساط/سررسید بعد از ساخته‌شدنِ اقساط قابل تغییر نیستن
@@ -707,9 +711,9 @@
     }
 
     // ===== حالت ثبت جدید =====
-    const totalAmount = Number(document.getElementById('loanTotalAmountInput').value);
-    const installmentsCount = Number(document.getElementById('loanInstallmentsCountInput').value);
-    const alreadyPaidCount = Number(document.getElementById('loanAlreadyPaidInput').value) || 0;
+    const totalAmount = Number(window.AmountInput.parse(document.getElementById('loanTotalAmountInput').value));
+    const installmentsCount = Number(window.AmountInput.parse(document.getElementById('loanInstallmentsCountInput').value));
+    const alreadyPaidCount = Number(window.AmountInput.parse(document.getElementById('loanAlreadyPaidInput').value)) || 0;
     const firstDueDateRaw = (document.getElementById('loanFirstDueDatePicker').value || '').trim();
 
     if (!totalAmount || totalAmount <= 0) {
@@ -781,7 +785,7 @@
   }
 
   async function deleteLoan(id) {
-    if (!window.confirm('این وام/قسط حذف شود؟')) return;
+    if (!(await window.HesabinoUI.confirmDialog('این وام/قسط حذف شود؟'))) return;
     try {
       const res = await fetch(`${API_BASE}/installments/${id}`, { method: 'DELETE', headers: authHeaders() });
       const data = await res.json().catch(() => ({}));
