@@ -3,9 +3,8 @@
 
   const API_BASE = '';
 
-  // فایل عکسی که انتخاب شده ولی هنوز با دکمه‌ی «ذخیره تغییرات» ارسال نشده
   let pendingAvatarFile = null;
-  let pendingPreviewUrl = null;
+  let originalAvatarUrl = '';  // آدرس عکس فعلی، برای برگرداندن در صورت خطا
 
   function authHeaders(extra) {
     const token = localStorage.getItem('access_token');
@@ -42,7 +41,6 @@
     }
   }
 
-  // ===== قرار دادن مستقیم عکس توی آواتار هدر (div#user-avatar > img#user-avatar-img) =====
   function setHeaderAvatar(url) {
     const headerAvatar = document.getElementById('user-avatar');
     if (!headerAvatar) return;
@@ -51,7 +49,7 @@
     setAvatarPreview(headerImg, headerAvatar, url);
   }
 
-  // ===== بارگذاری اطلاعات فعلی کاربر =====
+  // ===== بارگذاری پروفایل =====
   async function loadProfile() {
     try {
       const res = await fetch(`${API_BASE}/users/profile`, { headers: authHeaders() });
@@ -60,17 +58,17 @@
 
       document.getElementById('profileFullname').value = user.fullname || '';
       document.getElementById('profileEmail').value = user.email || '';
-      setAvatarPreview(
-        document.getElementById('settings-avatar-img'),
-        document.getElementById('settings-avatar'),
-        user.avatarUrl,
-      );
+
+      const imgEl = document.getElementById('settings-avatar-img');
+      const containerEl = document.getElementById('settings-avatar');
+      setAvatarPreview(imgEl, containerEl, user.avatarUrl);
+      originalAvatarUrl = user.avatarUrl || '';   // برای بازگشت در صورت خطای آپلود
     } catch (err) {
       console.warn('خطا در دریافت پروفایل:', err);
     }
   }
 
-  // ===== ذخیره‌ی نام/ایمیل =====
+  // ===== ذخیره‌ی نام/ایمیل و سپس آپلود عکس =====
   function setupProfileForm() {
     const form = document.getElementById('profileForm');
     if (!form) return;
@@ -116,7 +114,6 @@
           return;
         }
 
-        // اگه عکس جدیدی انتخاب شده بود ولی هنوز آپلود نشده، همین الان (موقع ذخیره) آپلودش می‌کنیم
         let latestUser = data;
         if (pendingAvatarFile) {
           const avatarResult = await uploadPendingAvatar();
@@ -139,7 +136,7 @@
     });
   }
 
-  // ===== آپلود واقعی عکسِ در انتظار، روی سرور (فقط موقع زدن دکمه‌ی ذخیره صدا زده می‌شه) =====
+  // ===== آپلود عکس و به‌روزرسانی آواتارها =====
   async function uploadPendingAvatar() {
     const errorEl = document.getElementById('avatarError');
     const imgEl = document.getElementById('settings-avatar-img');
@@ -149,45 +146,63 @@
     const formData = new FormData();
     formData.append('avatar', pendingAvatarFile);
 
+    // آزاد کردن URL.createObjectURL قبلی (که برای پیش‌نمایش ساخته بودیم)
+    if (imgEl.src.startsWith('blob:')) {
+      URL.revokeObjectURL(imgEl.src);
+    }
+
     try {
       const res = await fetch(`${API_BASE}/users/avatar`, {
         method: 'POST',
-        headers: authHeaders(), // توجه: Content-Type رو دستی ست نمی‌کنیم تا مرورگر boundary مالتی‌پارت رو خودش بسازه
+        headers: authHeaders(),
         body: formData,
       });
       const data = await res.json();
 
       if (!res.ok) {
+        // بازگشت به عکس اصلی
+        setAvatarPreview(imgEl, containerEl, originalAvatarUrl);
+        pendingAvatarFile = null;
+        if (noteEl) noteEl.classList.add('hidden');
         errorEl.textContent = data.message || 'خطا در آپلود عکس';
         errorEl.classList.remove('hidden');
         return { ok: false };
       }
 
-      // آدرس نهایی و دائمی سرور رو جایگزین پیش‌نمایش موقت می‌کنیم
+      // آپلود موفق: جایگزینی عکس دائمی در تنظیمات و هدر
       setAvatarPreview(imgEl, containerEl, data.avatarUrl);
       setHeaderAvatar(data.avatarUrl);
-      if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl);
       pendingAvatarFile = null;
-      pendingPreviewUrl = null;
       if (noteEl) noteEl.classList.add('hidden');
+      // به‌روزرسانی آدرس اصلی برای دفعات بعد
+      originalAvatarUrl = data.avatarUrl;
 
       return { ok: true, user: data };
     } catch (err) {
+      // برگرداندن پیش‌نمایش در صورت خطای شبکه
+      setAvatarPreview(imgEl, containerEl, originalAvatarUrl);
+      pendingAvatarFile = null;
+      if (noteEl) noteEl.classList.add('hidden');
       errorEl.textContent = 'ارتباط با سرور برقرار نشد';
       errorEl.classList.remove('hidden');
       return { ok: false };
     }
   }
 
-  // ===== انتخاب عکس پروفایل (فقط پیش‌نمایش؛ آپلود واقعی موقع زدن دکمه‌ی ذخیره انجام می‌شه) =====
+  // ===== انتخاب عکس و نمایش پیش‌نمایش فقط در تنظیمات =====
   function setupAvatarUpload() {
-    const input = document.getElementById('avatarInput');
+    let input = document.getElementById('avatarInput');
     if (!input) return;
 
+    // حذف هرگونه event listener قبلی (مثلاً در هدر) که ممکن است هدر را تغییر دهد
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+    input = newInput;
+
     const errorEl = document.getElementById('avatarError');
+    const noteEl = document.getElementById('avatarPendingNote');
     const imgEl = document.getElementById('settings-avatar-img');
     const containerEl = document.getElementById('settings-avatar');
-    const noteEl = document.getElementById('avatarPendingNote');
 
     input.addEventListener('change', () => {
       errorEl.classList.add('hidden');
@@ -208,20 +223,20 @@
         return;
       }
 
-      // پیش‌نمایش فوری و محلی، هم توی خود صفحه‌ی تنظیمات هم توی هدر؛ ولی هنوز چیزی به سرور فرستاده نمی‌شه
-      if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl);
+      // ذخیره فایل و نمایش پیش‌نمایش در تنظیمات
       pendingAvatarFile = file;
-      pendingPreviewUrl = URL.createObjectURL(file);
-
-      setAvatarPreview(imgEl, containerEl, pendingPreviewUrl);
-      setHeaderAvatar(pendingPreviewUrl);
       if (noteEl) noteEl.classList.remove('hidden');
 
+      // نمایش پیش‌نمایش محلی (فقط در settings-avatar-img)
+      const localUrl = URL.createObjectURL(file);
+      setAvatarPreview(imgEl, containerEl, localUrl);
+
+      // پاک کردن مقدار input تا بتوان دوباره همان فایل را انتخاب کرد
       input.value = '';
     });
   }
 
-  // ===== تغییر رمز عبور =====
+  // ===== بقیه توابع (رمز عبور، حذف حساب) بدون تغییر =====
   function setupPasswordForm() {
     const form = document.getElementById('passwordForm');
     if (!form) return;
@@ -283,7 +298,6 @@
     });
   }
 
-  // ===== حذف حساب کاربری =====
   function setupDeleteAccount() {
     const btn = document.getElementById('deleteAccountBtn');
     if (!btn) return;
@@ -291,7 +305,10 @@
     const messageEl = document.getElementById('deleteAccountMessage');
 
     btn.addEventListener('click', async () => {
-      const confirmed = window.confirm('آیا از حذف حساب کاربری خود مطمئن هستید؟ این عمل غیرقابل بازگشت است.');
+      const confirmed = await window.HesabinoUI.confirmDialog(
+        'آیا از حذف حساب کاربری خود مطمئن هستید؟ این عمل غیرقابل بازگشت است.',
+        { title: 'حذف حساب کاربری' },
+      );
       if (!confirmed) return;
 
       btn.disabled = true;
