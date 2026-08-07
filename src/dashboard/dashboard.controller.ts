@@ -8,9 +8,10 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   // ===== خروجی یک‌جای همه‌ی داده‌های موردنیاز صفحه‌ی داشبورد =====
+  // period: فیلتر سراسری بازه‌ی زمانی از هدر (امروز/هفته/ماه/سال)
   @Get()
-  async getOverview(@Req() req: any) {
-    return this.dashboardService.getOverview(req.user.userId);
+  async getOverview(@Req() req: any, @Query('period') period?: string) {
+    return this.dashboardService.getOverview(req.user.userId, period);
   }
 
   // ===== هزینه به تفکیک دسته برای بازه‌ی انتخابی (دکمه‌های امروز/هفته/ماه/سال) =====
