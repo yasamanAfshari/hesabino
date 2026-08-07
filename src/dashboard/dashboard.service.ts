@@ -13,16 +13,19 @@ import { InstallmentsService } from '../installments/installments.service';
 import { ChallengesService } from '../challenges/challenges.service';
 import { BUDGET_CATEGORIES } from '../budget/budget.constants';
 import {
+  DashboardPeriod,
   currentJalaliDate,
   currentJalaliMonthKey,
-  daysBetweenJalali,
   daysInJalaliMonth,
+  matchesPeriod,
   remainingDaysUntil,
   toEnglishDigits,
   toPersianDigits,
   todayJalaliString,
   weekdayNameFromJalali,
 } from '../common/jalali.util';
+
+const VALID_PERIODS: DashboardPeriod[] = ['today', 'week', 'month', 'year'];
 
 interface MonthTotals {
   income: number;
@@ -108,6 +111,7 @@ export class DashboardService {
     savingsRatePercent: number;
     expenseToIncomePercent: number;
     myDebt: number;
+    hasDebtRecords: boolean;
     monthlyIncome: number;
     budgetOverview: any;
     loansOverview: any;
@@ -119,20 +123,26 @@ export class DashboardService {
     const savingsFactor = params.hasIncomeData ? clamp((params.savingsRatePercent / 30) * 100) : null;
     const expenseFactor = params.hasIncomeData ? clamp(100 - params.expenseToIncomePercent) : null;
 
-    // بدهی: چه صفر باشد چه مثبت، این یک واقعیتِ ثبت‌شده است (نه فرضِ پیش‌فرض)، پس همیشه معتبر است
-    const debtFactor = params.myDebt <= 0
-      ? 100
-      : clamp(100 - (params.myDebt / (params.monthlyIncome || params.myDebt || 1)) * 100);
+    // بدهی: فقط وقتی کاربر حداقل یک رکورد بدهی (چه پرداخت‌شده چه نشده) ثبت کرده باشه این عامل
+    // معنا داره؛ وگرنه نمی‌شه فهمید صفر بودنش یعنی واقعاً بدون‌بدهیه یا صرفاً هنوز چیزی وارد نکرده
+    // (مثلاً برای کاربر تازه‌وارد که هیچ‌چیزی ثبت نکرده، نباید همون اول ۱۰۰٪ نشون بدیم)
+    const debtFactor = !params.hasDebtRecords
+      ? null
+      : params.myDebt <= 0
+        ? 100
+        : clamp(100 - (params.myDebt / (params.monthlyIncome || params.myDebt || 1)) * 100);
 
     // بودجه: فقط وقتی کاربر واقعاً بودجه تعیین کرده، این عامل معنا دارد
     const budgetFactor = params.budgetOverview.hasBudget && params.budgetOverview.totalBudget > 0
       ? clamp(100 - Math.max(0, params.budgetOverview.spent / params.budgetOverview.totalBudget - 1) * 200)
       : null;
 
-    // اقساط: نبودِ وام هم خودش یک واقعیتِ معتبر است (یعنی بدهی قسطی ندارد)، پس معتبر است
-    const installmentFactor = params.loansOverview.activeCount > 0
-      ? (params.loansOverview.overdueCount > 0 ? clamp(100 - params.loansOverview.overdueCount * 30) : 95)
-      : 100;
+    // اقساط: به همین ترتیب، فقط وقتی کاربر حداقل یک وام (فعال یا تکمیل‌شده) ثبت کرده باشه معنا داره
+    const installmentFactor = params.loansOverview.loans.length === 0
+      ? null
+      : params.loansOverview.activeCount > 0
+        ? (params.loansOverview.overdueCount > 0 ? clamp(100 - params.loansOverview.overdueCount * 30) : 95)
+        : 100;
 
     // اهداف پس‌انداز: فقط وقتی حداقل یک هدف ثبت شده این عامل معنا دارد
     const goalsFactor = params.goalsOverview.goals.length > 0
@@ -163,34 +173,17 @@ export class DashboardService {
     return { score, label, factors };
   }
 
-  // ===== هزینه به تفکیک دسته، برای بازه‌ی انتخابی دکمه‌های «امروز/هفته/ماه/سال» =====
+  // ===== هزینه به تفکیک دسته، برای بازه‌ی انتخابیِ فیلتر سراسری هدر (امروز/هفته/ماه/سال) =====
   async getCategoryBreakdown(userId: number, period: string) {
-    const normalizedPeriod = ['today', 'week', 'month', 'year'].includes(period) ? period : 'month';
-    const todayStr = toEnglishDigits(todayJalaliString());
-    const todayParts = currentJalaliDate();
-    const monthKey = currentJalaliMonthKey();
-    const persianMonthKey = toPersianDigits(monthKey);
+    const normalizedPeriod: DashboardPeriod = VALID_PERIODS.includes(period as DashboardPeriod)
+      ? (period as DashboardPeriod)
+      : 'month';
 
     const transactions = await this.transactionsRepository.find({
       where: { userId, type: 'expense' },
     });
 
-    const filtered = transactions.filter((tx) => {
-      const d = toEnglishDigits(tx.date || '');
-      if (!d) return false;
-      if (normalizedPeriod === 'today') {
-        return d === todayStr;
-      }
-      if (normalizedPeriod === 'week') {
-        const diff = daysBetweenJalali(d, todayStr);
-        return diff !== null && diff >= 0 && diff <= 6;
-      }
-      if (normalizedPeriod === 'year') {
-        return d.startsWith(`${todayParts.y}/`);
-      }
-      // month (پیش‌فرض)
-      return d.startsWith(monthKey) || d.startsWith(persianMonthKey);
-    });
+    const filtered = transactions.filter((tx) => matchesPeriod(tx.date || '', normalizedPeriod));
 
     const byCategory: Record<string, number> = {};
     let total = 0;
@@ -212,7 +205,50 @@ export class DashboardService {
     return { period: normalizedPeriod, expense: total, categoryBreakdown };
   }
 
-  async getOverview(userId: number) {
+  // ===== جمع درآمد/هزینه/دسته‌بندی برای بازه‌ی انتخابیِ فیلتر سراسری هدر =====
+  // برای «ماه» از thisMonth (که قبلاً خونده شده) استفاده می‌کنه تا کوئری اضافه نزنه؛
+  // برای بقیه‌ی بازه‌ها (امروز/هفته/سال) کل تراکنش‌های کاربر رو با matchesPeriod فیلتر می‌کنه
+  private async getPeriodTotals(
+    userId: number,
+    period: DashboardPeriod,
+    monthTotals: MonthTotals,
+  ): Promise<{ income: number; expense: number; byCategory: Record<string, number>; transactionCount: number }> {
+    if (period === 'month') {
+      return {
+        income: monthTotals.income,
+        expense: monthTotals.expense,
+        byCategory: monthTotals.byCategory,
+        transactionCount: monthTotals.transactionCount,
+      };
+    }
+
+    const transactions = await this.transactionsRepository.find({ where: { userId } });
+    const result = { income: 0, expense: 0, byCategory: {} as Record<string, number>, transactionCount: 0 };
+
+    for (const tx of transactions) {
+      if (!matchesPeriod(tx.date || '', period)) continue;
+      result.transactionCount += 1;
+      const amount = Number(tx.amount) || 0;
+      if (tx.type === 'income') {
+        result.income += amount;
+      } else if (tx.type === 'expense') {
+        result.expense += amount;
+        const category = tx.category || 'سایر';
+        result.byCategory[category] = (result.byCategory[category] || 0) + amount;
+      }
+    }
+
+    return result;
+  }
+
+  // ===== خروجی یک‌جای همه‌ی داده‌های داشبورد؛ period فیلتر سراسری هدر است (امروز/هفته/ماه/سال) =====
+  // توجه: بخش‌هایی مثل پیش‌بینی پایان ماه، سلامت مالی، بودجه و نمودار جریان مالی ذاتاً ماهانه‌اند
+  // و همیشه بر اساس «ماه جاری واقعی» محاسبه می‌شوند؛ period فقط روی کارت‌های آماری درآمد/هزینه/تراز
+  // و نمودار دسته‌بندی هزینه (که در واقع همون فیلتر سابق دکمه‌های امروز/هفته/ماه/سال بود) اثر می‌گذارد
+  async getOverview(userId: number, period?: string) {
+    const normalizedPeriod: DashboardPeriod = VALID_PERIODS.includes(period as DashboardPeriod)
+      ? (period as DashboardPeriod)
+      : 'month';
     const monthKey = currentJalaliMonthKey();
     const today = currentJalaliDate();
 
@@ -221,6 +257,9 @@ export class DashboardService {
       this.getMonthTotals(userId, monthKey),
       this.getMonthTotals(userId, this.shiftMonthKey(monthKey, 1)),
     ]);
+
+    // ===== جمع درآمد/هزینه/دسته‌بندی برای بازه‌ی انتخابیِ فیلتر سراسری هدر =====
+    const periodTotals = await this.getPeriodTotals(userId, normalizedPeriod, thisMonth);
 
     // ===== ۶ ماه اخیر برای نمودار جریان مالی و نسبت هزینه به درآمد =====
     const cashFlow: { month: string; income: number; expense: number; hasData: boolean }[] = [];
@@ -258,22 +297,25 @@ export class DashboardService {
       0,
     );
 
-    // ===== دسته‌بندی هزینه‌ها این ماه، مرتب شده و با درصد سهم از کل =====
-    const categoryEntries = Object.entries(thisMonth.byCategory).sort((a, b) => b[1] - a[1]);
+    // ===== دسته‌بندی هزینه‌ها برای بازه‌ی انتخابی، مرتب شده و با درصد سهم از کل =====
+    const categoryEntries = Object.entries(periodTotals.byCategory).sort((a, b) => b[1] - a[1]);
     const categoryBreakdown = categoryEntries.map(([category, amount]) => ({
       category,
       amount,
-      percent: thisMonth.expense > 0 ? Math.round((amount / thisMonth.expense) * 100) : 0,
+      percent: periodTotals.expense > 0 ? Math.round((amount / periodTotals.expense) * 100) : 0,
     }));
     const topCategory = categoryBreakdown[0] || null;
-    const topCategoryPrevAmount = topCategory ? prevMonth.byCategory[topCategory.category] || 0 : 0;
-    const topCategoryChangePercent = topCategory
-      ? topCategoryPrevAmount > 0
-        ? Math.round(((topCategory.amount - topCategoryPrevAmount) / topCategoryPrevAmount) * 100)
-        : topCategory.amount > 0
-          ? 100
-          : 0
-      : 0;
+    // مقایسه با ماه قبل فقط وقتی بازه‌ی انتخابی «ماه» باشد معنا دارد
+    const topCategoryPrevAmount =
+      normalizedPeriod === 'month' && topCategory ? prevMonth.byCategory[topCategory.category] || 0 : 0;
+    const topCategoryChangePercent =
+      normalizedPeriod === 'month' && topCategory
+        ? topCategoryPrevAmount > 0
+          ? Math.round(((topCategory.amount - topCategoryPrevAmount) / topCategoryPrevAmount) * 100)
+          : topCategory.amount > 0
+            ? 100
+            : 0
+        : null;
 
     // ===== پرخرج‌ترین روز هفته‌ی این ماه =====
     const weekdayEntries = Object.entries(thisMonth.byWeekday).sort((a, b) => b[1] - a[1]);
@@ -288,13 +330,22 @@ export class DashboardService {
     const todayExpense = thisMonth.byDay[toEnglishDigits(todayJalaliString())] || 0;
     const dailyAllowance = budgetTotal > 0 ? Math.round(budgetTotal / daysInMonth) : null;
 
-    // ===== نرخ پس‌انداز و تراز ماه جاری =====
+    // ===== نرخ پس‌انداز و تراز ماه جاری (برای محاسبه‌ی سلامت مالی؛ همیشه ماهانه، مستقل از فیلتر) =====
     const monthlyBalance = thisMonth.income - thisMonth.expense;
-    const savingsRatePercent = thisMonth.income > 0
+    const monthSavingsRatePercent = thisMonth.income > 0
       ? Math.round((monthlyBalance / thisMonth.income) * 100)
       : 0;
-    const expenseToIncomePercent = thisMonth.income > 0
+    const monthExpenseToIncomePercent = thisMonth.income > 0
       ? Math.round((thisMonth.expense / thisMonth.income) * 100)
+      : 0;
+
+    // ===== نرخ پس‌انداز و تراز برای بازه‌ی انتخابیِ فیلتر سراسری هدر (کارت‌های آماری بالای داشبورد) =====
+    const periodBalance = periodTotals.income - periodTotals.expense;
+    const periodSavingsRatePercent = periodTotals.income > 0
+      ? Math.round((periodBalance / periodTotals.income) * 100)
+      : 0;
+    const periodExpenseToIncomePercent = periodTotals.income > 0
+      ? Math.round((periodTotals.expense / periodTotals.income) * 100)
       : 0;
 
     // ===== نزدیک‌ترین هدف پس‌انداز (کوچک‌ترین باقی‌مانده، هنوز محقق‌نشده) =====
@@ -303,12 +354,13 @@ export class DashboardService {
       ? openGoals.reduce((a: any, b: any) => (a.remaining < b.remaining ? a : b))
       : null;
 
-    // ===== وضعیت سلامت مالی =====
+    // ===== وضعیت سلامت مالی (همیشه بر اساس ماه جاری واقعی، مستقل از فیلتر بازه‌ی هدر) =====
     const health = this.computeHealthScore({
       hasIncomeData: thisMonth.income > 0,
-      savingsRatePercent,
-      expenseToIncomePercent,
+      savingsRatePercent: monthSavingsRatePercent,
+      expenseToIncomePercent: monthExpenseToIncomePercent,
       myDebt: debtsOverview.summary.myDebt,
+      hasDebtRecords: debtsOverview.items.some((r: any) => r.type === 'debt'),
       monthlyIncome: thisMonth.income,
       budgetOverview,
       loansOverview: installmentsOverview,
@@ -388,14 +440,15 @@ export class DashboardService {
 
     return {
       month: monthKey,
+      period: normalizedPeriod,
       totals: {
         balance: totalBalance,
-        income: thisMonth.income,
-        expense: thisMonth.expense,
-        monthlyBalance,
-        savingsRatePercent,
-        expenseToIncomePercent,
-        hasIncomeData: thisMonth.income > 0,
+        income: periodTotals.income,
+        expense: periodTotals.expense,
+        monthlyBalance: periodBalance,
+        savingsRatePercent: periodSavingsRatePercent,
+        expenseToIncomePercent: periodExpenseToIncomePercent,
+        hasIncomeData: periodTotals.income > 0,
       },
       previousMonth: { income: prevMonth.income, expense: prevMonth.expense },
       accounts: accountsSummary,
