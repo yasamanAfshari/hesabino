@@ -40,6 +40,12 @@ export class AppController {
     return { title: 'بودجه' };
   }
 
+  @Get('income')
+  @Render('income')
+  income() {
+    return { title: 'درآمد', incomeCategories: INCOME_CATEGORIES };
+  }
+
   @Get('savings')
   @Render('savings')
   savings() {
