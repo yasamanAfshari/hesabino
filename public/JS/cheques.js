@@ -227,6 +227,7 @@
     resetCustomSelect('modalTypeSelect');
     resetCustomSelect('modalStatusSelect');
     hideFormError();
+    window.AmountInput.refreshForm(document.getElementById('chequeModal'));
   }
 
   function openAddModal() {
@@ -265,6 +266,7 @@
 
     document.getElementById('chequeNumberInput').value = cheque.number || '';
     document.getElementById('chequeAmountInput').value = cheque.amount != null ? cheque.amount : '';
+    window.AmountInput.refresh(document.getElementById('chequeAmountInput'));
     document.getElementById('chequeCounterpartyInput').value = cheque.counterparty || '';
     document.getElementById('chequeBankInput').value = cheque.bank || '';
 
@@ -286,7 +288,7 @@
 
     const number = (document.getElementById('chequeNumberInput').value || '').trim();
     const type = getCustomSelectValue('modalTypeSelect');
-    const amountRaw = document.getElementById('chequeAmountInput').value;
+    const amountRaw = window.AmountInput.parse(document.getElementById('chequeAmountInput').value);
     const counterparty = (document.getElementById('chequeCounterpartyInput').value || '').trim();
     const bank = (document.getElementById('chequeBankInput').value || '').trim();
     const date = (document.getElementById('chequeDatePicker').value || '').trim();
@@ -360,7 +362,7 @@
 
   // ===== حذف چک =====
   async function deleteCheque(id) {
-    if (!window.confirm('آیا از حذف این چک مطمئن هستید؟')) return;
+    if (!(await window.HesabinoUI.confirmDialog('آیا از حذف این چک مطمئن هستید؟'))) return;
 
     try {
       const res = await fetch(`${API_BASE}/cheques/${id}`, {
