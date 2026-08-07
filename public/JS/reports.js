@@ -314,9 +314,28 @@
     }
   }
 
+  // ===== نگاشت فیلتر سراسری هدر (امروز/هفته/ماه/سال) روی بازه‌های خودِ گزارش =====
+  // گزارش‌ها دقت روزانه/هفتگی ندارن، پس «امروز» و «این هفته» به نزدیک‌ترین بازه‌ی
+  // معنادار یعنی «این ماه» نگاشت می‌شن؛ «امسال» هم مستقیم به «سال جاری»
+  function mapGlobalPeriodToRange(period) {
+    return period === 'year' ? 'year' : 'month';
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const select = document.getElementById('reportRangeSelect');
+
+    if (window.HesabinoPeriod) {
+      select.value = mapGlobalPeriodToRange(window.HesabinoPeriod.get());
+    }
     loadReport(select.value);
+
     select.addEventListener('change', () => loadReport(select.value));
+
+    // ===== با تغییر فیلتر سراسری هدر، بازه‌ی گزارش هم همگام می‌شه =====
+    document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', (e) => {
+      const mapped = mapGlobalPeriodToRange(e.detail.period);
+      select.value = mapped;
+      loadReport(mapped);
+    });
   });
 })();
