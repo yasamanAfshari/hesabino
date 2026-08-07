@@ -201,14 +201,15 @@
     document.getElementById('addSavingDeadline').value = '';
 
     hideError('addSavingError');
+    window.AmountInput.refreshForm(document.getElementById('addSaving'));
     window.openModal('addSaving');
   }
 
   async function submitCreate() {
     hideError('addSavingError');
     const title = document.getElementById('addSavingTitle').value.trim();
-    const targetAmount = Number(document.getElementById('addSavingTarget').value);
-    const currentAmount = Number(document.getElementById('addSavingCurrent').value) || 0;
+    const targetAmount = Number(window.AmountInput.parse(document.getElementById('addSavingTarget').value));
+    const currentAmount = Number(window.AmountInput.parse(document.getElementById('addSavingCurrent').value)) || 0;
     const deadline = document.getElementById('addSavingDeadline').value.trim();
 
     if (!title) return showError('addSavingError', 'نام هدف را وارد کنید');
@@ -253,6 +254,7 @@
     document.getElementById('editSavingDeadline').value = goal.deadline || '';
 
     hideError('editSavingError');
+    window.AmountInput.refreshForm(document.getElementById('editSaving'));
     window.openModal('editSaving');
   }
 
@@ -260,8 +262,8 @@
     hideError('editSavingError');
     const id = Number(document.getElementById('editSavingId').value);
     const title = document.getElementById('editSavingTitle').value.trim();
-    const targetAmount = Number(document.getElementById('editSavingTarget').value);
-    const currentAmount = Number(document.getElementById('editSavingCurrent').value) || 0;
+    const targetAmount = Number(window.AmountInput.parse(document.getElementById('editSavingTarget').value));
+    const currentAmount = Number(window.AmountInput.parse(document.getElementById('editSavingCurrent').value)) || 0;
     const deadline = document.getElementById('editSavingDeadline').value.trim();
 
     if (!title) return showError('editSavingError', 'نام هدف را وارد کنید');
@@ -296,11 +298,11 @@
 
   async function submitDelete() {
     const id = Number(document.getElementById('editSavingId').value);
-    await deleteGoal(id, true);
+    await deleteGoal(id);
   }
 
-  async function deleteGoal(id, skipConfirm) {
-    if (!skipConfirm && !window.confirm('آیا از حذف این هدف پس‌انداز مطمئن هستید؟')) return;
+  async function deleteGoal(id) {
+    if (!(await window.HesabinoUI.confirmDialog('آیا از حذف این هدف پس‌انداز مطمئن هستید؟'))) return;
 
     try {
       const res = await fetch(`${API_BASE}/savings/${id}`, {
@@ -329,13 +331,14 @@
     document.getElementById('addPriceGoalId').value = id;
     document.getElementById('addPriceAmount').value = '';
     hideError('addPriceError');
+    window.AmountInput.refreshForm(document.getElementById('addPriceToSaving'));
     window.openModal('addPriceToSaving');
   }
 
   async function submitDeposit() {
     hideError('addPriceError');
     const id = Number(document.getElementById('addPriceGoalId').value);
-    const amount = Number(document.getElementById('addPriceAmount').value);
+    const amount = Number(window.AmountInput.parse(document.getElementById('addPriceAmount').value));
 
     if (!amount || amount <= 0) return showError('addPriceError', 'مبلغ را به‌درستی وارد کنید');
 
