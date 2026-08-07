@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><% title = 'درآمد' %></title>
+  <style>
+    .main-box {
+      height: 60vh !important;
+    }
+  </style>
+</head>
+
+<body class="bg-main-color overflow-hidden">
+
+  <%- include('partials/header' , { pageTitle: 'مدیریت درآمد' } ) %>
+
+  <section class="scrollbar overflow-y-auto px-6 pb-1">
+
+    <div class="overflow-x-auto scrollbar mb-2">
+      <div class="grid grid-cols-3 gap-4 min-w-max">
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-green-color-25 p-2 flex justify-center items-center rounded-lg border border-green-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M35.75 19.5487V26.1788C35.75 31.8825 34.3037 33.3125 28.535 33.3125H10.465C4.69625 33.3125 3.25 31.8825 3.25 26.1788V12.8212C3.25 7.1175 4.69625 5.6875 10.465 5.6875H21.9375" stroke="var(--color-green-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M26.8125 9.75L29.25 12.1875L35.75 5.6875" stroke="var(--color-green-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg" id="incomeMonthLabel">درآمد این ماه</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5" id="incomeTotalAmount">۰ تومان</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-main-color-25 p-2 flex justify-center items-center rounded-lg border border-main-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.25 13.8206H35.75" stroke="var(--color-main-color)" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M10.465 5.69556H28.5187C34.3037 5.69556 35.75 7.12556 35.75 12.8293V26.1706C35.75 31.8743 34.3037 33.3043 28.535 33.3043H10.465C4.69625 33.3206 3.25 31.8906 3.25 26.1868V12.8293C3.25 7.12556 4.69625 5.69556 10.465 5.69556Z" stroke="var(--color-main-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">نسبت به ماه قبل</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5" id="incomeChangePercent">۰٪</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-box-small dashboard-status">
+          <div class="flex justify-start gap-4">
+            <div class="w-16 h-16 bg-main-color-25 p-2 flex justify-center items-center rounded-lg border border-main-color">
+              <svg width="39" height="39" viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.75 26.8206H13" stroke="var(--color-main-color)" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M17.0625 26.8206H23.5625" stroke="var(--color-main-color)" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M10.465 5.69556H28.5187C34.3037 5.69556 35.75 7.12556 35.75 12.8293V26.1706C35.75 31.8743 34.3037 33.3043 28.535 33.3043H10.465C4.69625 33.3206 3.25 31.8906 3.25 26.1868V12.8293C3.25 7.12556 4.69625 5.69556 10.465 5.69556Z" stroke="var(--color-main-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div class="text-zinc-700 font-bold !text-lg">تعداد تراکنش</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5" id="incomeTxCount">۰</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-box-small my-2">
+      <div class="flex justify-between items-center flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-zinc-600 whitespace-nowrap">ماه:</label>
+          <select id="incomeMonthSelect" class="border border-gray-200 rounded-lg px-3 py-1.5 !text-sm bg-white"></select>
+        </div>
+        <button class="main-btn" onclick="IncomeApp.openAddModal()">افزودن درآمد</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 my-2">
+      <!-- ریز درآمد به تفکیک دسته -->
+      <div class="main-box">
+        <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3">
+          <h2 class="font-bold text-lg text-zinc-800">ریز درآمد به تفکیک منبع</h2>
+        </div>
+        <div class="h-[85%] overflow-auto scrollbar px-2" id="incomeCategoryList">
+          <p class="text-center text-gray-400 mt-6">در حال بارگذاری...</p>
+        </div>
+      </div>
+
+      <!-- لیست تراکنش‌های درآمدی همین ماه -->
+      <div class="main-box">
+        <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3">
+          <h2 class="font-bold text-lg text-zinc-800">تراکنش‌های درآمدی این ماه</h2>
+        </div>
+        <div class="h-[85%] overflow-auto scrollbar px-2" id="incomeTransactionList">
+          <p class="text-center text-gray-400 mt-6">در حال بارگذاری...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- مودال افزودن دستی درآمد -->
+  <div id="addIncomeModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col relative">
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-lg text-zinc-800">افزودن درآمد</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body overflow-y-auto scrollbar px-6 py-4 flex flex-col gap-4">
+        <div id="addIncomeError" class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2"></div>
+
+        <div>
+          <label class="text-sm text-zinc-600 mb-1 block">عنوان (اختیاری)</label>
+          <input type="text" id="incomeTitleInput" placeholder="مثلاً حقوق تیر" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+        </div>
+
+        <div>
+          <label class="text-sm text-zinc-600 mb-1 block">دسته / منبع درآمد</label>
+          <select id="incomeCategorySelect" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white">
+            <% incomeCategories.forEach((cat) => { %>
+            <option value="<%= cat %>"><%= cat %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-sm text-zinc-600 mb-1 block">مبلغ (تومان)</label>
+          <input type="number" min="0" step="1" id="incomeAmountInput" placeholder="مبلغ" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+        </div>
+
+        <div>
+          <label class="text-sm text-zinc-600 mb-1 block">تاریخ</label>
+          <input type="text" id="incomeDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
+        </div>
+
+        <div>
+          <label class="text-sm text-zinc-600 mb-1 block">توضیحات (اختیاری)</label>
+          <textarea id="incomeDescriptionInput" rows="2" class="w-full border border-main-color rounded-lg p-3 outline-none resize-none"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+        <button class="main-btn px-4 py-2 rounded-lg" id="addIncomeSubmitBtn" onclick="IncomeApp.submitAdd()">ثبت درآمد</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => modal.classList.add('is-open'));
+      });
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeModal() {
+      document.querySelectorAll('.modal.is-open').forEach((modal) => {
+        modal.classList.remove('is-open');
+        setTimeout(() => modal.classList.add('hidden'), 250);
+      });
+      document.body.classList.remove('overflow-hidden');
+    }
+  </script>
+
+  <script src="/JS/income.js" defer></script>
+</body>
+
+</html>
