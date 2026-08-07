@@ -35,6 +35,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { AiModule } from './ai/ai.module';
 import { RemindersModule } from './reminders/reminders.module';
 import { ReportsModule } from './reports/reports.module';
+import { IncomeModule } from './income/income.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { ReportsModule } from './reports/reports.module';
     AiModule,
     RemindersModule,
     ReportsModule,
+    IncomeModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
