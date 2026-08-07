@@ -1,5 +1,5 @@
 <header class="flex items-center justify-center px-6 relative grid grid-cols-3">
-  <div class="grid-cols-1">
+  <div class="grid-cols-1 flex gap-1.5">
     <button id="mobile-hamburger" class="md:hidden">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -7,70 +7,80 @@
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
     </button>
+
+    <% if (typeof showPeriodFilter !== 'undefined' && showPeriodFilter) { %>
+    <!-- فیلتر سراسری بازه‌ی زمانی؛ فقط توی داشبورد، گزارش‌ها و تراکنش‌ها نمایش داده می‌شه -->
+    <select id="global-period-select" title="بازه‌ی زمانی نمایش داده‌ها" class="text-sm border border-gray-200 rounded-lg px-2 py-1 bg-white text-zinc-700 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400">
+      <option value="today">امروز</option>
+      <option value="week">این هفته</option>
+      <option value="month" selected>این ماه</option>
+      <option value="year">امسال</option>
+    </select>
+    <% } %>
   </div>
 
-  <div class="grid-cols-1">
+  <div class="grid-cols-1 flex items-center justify-center gap-3 flex-wrap">
     <h3 id="page-title" class="font-bold text-zinc-950 text-center">
       <%= typeof pageTitle !== 'undefined' ? pageTitle : '' %>
     </h3>
   </div>
 
   <!-- منوی پروفایل کاربر -->
-    <div class="fixed user-profile z-40" id="user-menu">
-      <button id="user-menu-button" type="button" class="flex items-center gap-3 rounded-full py-1 pl-1 pr-2 hover:bg-black/5 transition-colors cursor-pointer focus:outline-none">
-        <span id="user-fullname" class="text-lg font-medium truncate max-w-[70px] sm:max-w-[120px] md:max-w-[140px]" dir="auto" title="در حال بارگذاری...">
-          در حال بارگذاری...
-        </span>
-        <div id="user-avatar" class="w-8 h-8 rounded-full bg-gray-300 shrink-0 overflow-hidden flex items-center justify-center">
-          <img id="user-avatar-img" src="" alt="" class="w-full h-full object-cover hidden" />
-        </div>
-        <svg id="user-menu-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 transition-transform duration-200 shrink-0">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-
-      <!-- دراپ‌داون -->
-      <div id="user-menu-dropdown" class="hidden absolute left-0 top-full mt-3 w-64 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-50">
-
-        <!-- تغییر تم -->
-        <div class="flex items-center justify-between px-4 py-2.5">
-          <span class="text-sm text-gray-600">حالت شب</span>
-          <button class="theme-toggle" id="themeToggle">
-            <div class="icon sun">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 18.5C15.5899 18.5 18.5 15.5899 18.5 12C18.5 8.41015 15.5899 5.5 12 5.5C8.41015 5.5 5.5 8.41015 5.5 12C5.5 15.5899 8.41015 18.5 12 18.5Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M19.14 19.14L19.01 19.01M19.01 4.99L19.14 4.86L19.01 4.99ZM4.86 19.14L4.99 19.01L4.86 19.14ZM12 2.08V2V2.08ZM12 22V21.92V22ZM2.08 12H2H2.08ZM22 12H21.92H22ZM4.99 4.99L4.86 4.86L4.99 4.99Z" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
-            <span class="toggle-ball"></span>
-            <div class="icon moon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.03009 12.42C2.39009 17.57 6.76009 21.76 11.9901 21.99C15.6801 22.15 18.9801 20.43 20.9601 17.72C21.7801 16.61 21.3401 15.87 19.9701 16.12C19.3001 16.24 18.6101 16.29 17.8901 16.26C13.0001 16.06 9.00009 11.97 8.98009 7.14C8.97009 5.84 9.24009 4.61 9.73009 3.49C10.2701 2.25 9.62009 1.66 8.37009 2.19C4.41009 3.86 1.70009 7.85 2.03009 12.42Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
-          </button>
-        </div>
-
-        <div class="h-px bg-gray-100 mx-2 my-1"></div>
-
-        <!-- تنظیمات -->
-        <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
-            <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M2 12.8801V11.1201C2 10.0801 2.85 9.22006 3.9 9.22006C5.71 9.22006 6.45 7.94006 5.54 6.37006C5.02 5.47006 5.33 4.30006 6.24 3.78006L7.97 2.79006C8.76 2.32006 9.78 2.60006 10.25 3.39006L10.36 3.58006C11.26 5.15006 12.74 5.15006 13.65 3.58006L13.76 3.39006C14.23 2.60006 15.25 2.32006 16.04 2.79006L17.77 3.78006C18.68 4.30006 18.99 5.47006 18.47 6.37006C17.56 7.94006 18.3 9.22006 20.11 9.22006C21.15 9.22006 22.01 10.0701 22.01 11.1201V12.8801C22.01 13.9201 21.16 14.7801 20.11 14.7801C18.3 14.7801 17.56 16.0601 18.47 17.6301C18.99 18.5401 18.68 19.7001 17.77 20.2201L16.04 21.2101C15.25 21.6801 14.23 21.4001 13.76 20.6101L13.65 20.4201C12.75 18.8501 11.27 18.8501 10.36 20.4201L10.25 20.6101C9.78 21.4001 8.76 21.6801 7.97 21.2101L6.24 20.2201C5.33 19.7001 5.02 18.5301 5.54 17.6301C6.45 16.0601 5.71 14.7801 3.9 14.7801C2.85 14.7801 2 13.9201 2 12.8801Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          <span>تنظیمات</span>
-        </a>
-
-        <!-- خروج -->
-        <a href="#" onclick="logout(); return false;" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-color hover:bg-red-color-25 transition-colors">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
-            <path d="M8.90002 7.55999C9.21002 3.95999 11.06 2.48999 15.11 2.48999H15.24C19.71 2.48999 21.5 4.27999 21.5 8.74999V15.27C21.5 19.74 19.71 21.53 15.24 21.53H15.11C11.09 21.53 9.24002 20.08 8.91002 16.54" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M15 12H3.62" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M5.85 8.6499L2.5 11.9999L5.85 15.3499" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          <span>خروج</span>
-        </a>
+  <div class="fixed user-profile z-40" id="user-menu">
+    <button id="user-menu-button" type="button" class="flex items-center gap-3 rounded-full py-1 pl-1 pr-2 hover:bg-black/5 transition-colors cursor-pointer focus:outline-none">
+      <span id="user-fullname" class="text-lg font-medium truncate max-w-[70px] sm:max-w-[120px] md:max-w-[140px]" dir="auto" title="در حال بارگذاری...">
+        در حال بارگذاری...
+      </span>
+      <div id="user-avatar" class="w-8 h-8 rounded-full bg-gray-300 shrink-0 overflow-hidden flex items-center justify-center">
+        <img id="user-avatar-img" src="" alt="" class="w-full h-full object-cover hidden" />
       </div>
+      <svg id="user-menu-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 transition-transform duration-200 shrink-0">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+
+    <!-- دراپ‌داون -->
+    <div id="user-menu-dropdown" class="hidden absolute left-0 top-full mt-3 w-64 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-50">
+
+      <!-- تغییر تم -->
+      <div class="flex items-center justify-between px-4 py-2.5">
+        <span class="text-sm text-gray-600">حالت شب</span>
+        <button class="theme-toggle" id="themeToggle">
+          <div class="icon sun">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 18.5C15.5899 18.5 18.5 15.5899 18.5 12C18.5 8.41015 15.5899 5.5 12 5.5C8.41015 5.5 5.5 8.41015 5.5 12C5.5 15.5899 8.41015 18.5 12 18.5Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M19.14 19.14L19.01 19.01M19.01 4.99L19.14 4.86L19.01 4.99ZM4.86 19.14L4.99 19.01L4.86 19.14ZM12 2.08V2V2.08ZM12 22V21.92V22ZM2.08 12H2H2.08ZM22 12H21.92H22ZM4.99 4.99L4.86 4.86L4.99 4.99Z" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <span class="toggle-ball"></span>
+          <div class="icon moon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.03009 12.42C2.39009 17.57 6.76009 21.76 11.9901 21.99C15.6801 22.15 18.9801 20.43 20.9601 17.72C21.7801 16.61 21.3401 15.87 19.9701 16.12C19.3001 16.24 18.6101 16.29 17.8901 16.26C13.0001 16.06 9.00009 11.97 8.98009 7.14C8.97009 5.84 9.24009 4.61 9.73009 3.49C10.2701 2.25 9.62009 1.66 8.37009 2.19C4.41009 3.86 1.70009 7.85 2.03009 12.42Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+        </button>
+      </div>
+
+      <div class="h-px bg-gray-100 mx-2 my-1"></div>
+
+      <!-- تنظیمات -->
+      <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M2 12.8801V11.1201C2 10.0801 2.85 9.22006 3.9 9.22006C5.71 9.22006 6.45 7.94006 5.54 6.37006C5.02 5.47006 5.33 4.30006 6.24 3.78006L7.97 2.79006C8.76 2.32006 9.78 2.60006 10.25 3.39006L10.36 3.58006C11.26 5.15006 12.74 5.15006 13.65 3.58006L13.76 3.39006C14.23 2.60006 15.25 2.32006 16.04 2.79006L17.77 3.78006C18.68 4.30006 18.99 5.47006 18.47 6.37006C17.56 7.94006 18.3 9.22006 20.11 9.22006C21.15 9.22006 22.01 10.0701 22.01 11.1201V12.8801C22.01 13.9201 21.16 14.7801 20.11 14.7801C18.3 14.7801 17.56 16.0601 18.47 17.6301C18.99 18.5401 18.68 19.7001 17.77 20.2201L16.04 21.2101C15.25 21.6801 14.23 21.4001 13.76 20.6101L13.65 20.4201C12.75 18.8501 11.27 18.8501 10.36 20.4201L10.25 20.6101C9.78 21.4001 8.76 21.6801 7.97 21.2101L6.24 20.2201C5.33 19.7001 5.02 18.5301 5.54 17.6301C6.45 16.0601 5.71 14.7801 3.9 14.7801C2.85 14.7801 2 13.9201 2 12.8801Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>تنظیمات</span>
+      </a>
+
+      <!-- خروج -->
+      <a href="#" onclick="logout(); return false;" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-color hover:bg-red-color-25 transition-colors">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <path d="M8.90002 7.55999C9.21002 3.95999 11.06 2.48999 15.11 2.48999H15.24C19.71 2.48999 21.5 4.27999 21.5 8.74999V15.27C21.5 19.74 19.71 21.53 15.24 21.53H15.11C11.09 21.53 9.24002 20.08 8.91002 16.54" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M15 12H3.62" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M5.85 8.6499L2.5 11.9999L5.85 15.3499" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>خروج</span>
+      </a>
+    </div>
   </div>
 </header>
