@@ -239,11 +239,17 @@
   }
 
   // ===== تحلیل هوشمند و پیشنهادات =====
+  function renderInsightsLoading() {
+    const el = document.getElementById('report-insights');
+    document.getElementById('report-ai-badge').textContent = '';
+    el.innerHTML = '<p class="text-zinc-400 !text-sm">در حال آماده‌سازی تحلیل...</p>';
+  }
+
   function renderInsights(data) {
     const el = document.getElementById('report-insights');
-    document.getElementById('report-ai-badge').textContent = data.insightsUsedAi ? 'تولیدشده با هوش مصنوعی' : 'تحلیل مبتنی بر قوانین';
+    document.getElementById('report-ai-badge').textContent = data.usedAi ? 'تولیدشده با هوش مصنوعی' : 'تحلیل مبتنی بر قوانین';
 
-    if (!data.insights.length) {
+    if (!data.insights || !data.insights.length) {
       el.innerHTML = '<p class="text-zinc-400 !text-sm">تحلیلی برای نمایش وجود ندارد.</p>';
       return;
     }
@@ -265,6 +271,9 @@
 
   // ===== جدول میانگین هزینه‌ها =====
   function renderCategoryTable(data) {
+    const headerEl = document.getElementById('report-category-avg-header');
+    if (headerEl) headerEl.textContent = data.granularity === 'day' ? 'میانگین روزانه' : 'میانگین ماهانه';
+
     const el = document.getElementById('report-category-table');
     if (!data.categoryAverages.length) {
       el.innerHTML = '<tr><td colspan="4" class="text-zinc-400 !text-sm text-center py-6">داده‌ای برای نمایش وجود ندارد.</td></tr>';
@@ -286,12 +295,31 @@
       return `
         <tr class="border-b border-gray-50">
           <td class="py-2.5 px-2 font-medium text-zinc-700">${escapeHtml(row.category)}</td>
-          <td class="py-2.5 px-2 text-zinc-600">${formatAmount(row.monthlyAverage)}</td>
+          <td class="py-2.5 px-2 text-zinc-600">${formatAmount(row.periodAverage)}</td>
           <td class="py-2.5 px-2 text-zinc-600">${formatAmount(row.rangeExpense)}</td>
           <td class="py-2.5 px-2">${comparisonHtml}</td>
         </tr>
       `;
     }).join('');
+  }
+
+  let insightsRequestId = 0;
+
+  async function loadInsights(range) {
+    const requestId = ++insightsRequestId;
+    renderInsightsLoading();
+    try {
+      const res = await fetch(`${API_BASE}/reports/insights?range=${encodeURIComponent(range)}`, { headers: authHeaders() });
+      if (!res.ok) throw new Error('خطا در دریافت تحلیل هوشمند');
+      const data = await res.json();
+      // اگه در این فاصله کاربر بازه‌ی دیگه‌ای انتخاب کرده، این پاسخِ دیرآمده رو نادیده می‌گیریم
+      if (requestId !== insightsRequestId) return;
+      renderInsights(data);
+    } catch (err) {
+      console.error(err);
+      if (requestId !== insightsRequestId) return;
+      document.getElementById('report-insights').innerHTML = '<p class="text-zinc-400 !text-sm">تحلیل هوشمند در حال حاضر در دسترس نیست.</p>';
+    }
   }
 
   async function loadReport(range) {
@@ -306,36 +334,30 @@
       renderTop5Chart(data);
       renderRatioRings(data);
       renderTrendChart(data);
-      renderInsights(data);
       renderStatusCards(data);
       renderCategoryTable(data);
+
+      // تحلیل هوشمند جدا و بعد از نمایش بقیه‌ی گزارش خونده می‌شه، چون ممکنه
+      // چند ثانیه طول بکشه و نباید نمایش نمودارها/اعداد رو معطل نگه داره
+      loadInsights(range);
     } catch (err) {
       console.error(err);
     }
   }
 
-  // ===== نگاشت فیلتر سراسری هدر (امروز/هفته/ماه/سال) روی بازه‌های خودِ گزارش =====
-  // گزارش‌ها دقت روزانه/هفتگی ندارن، پس «امروز» و «این هفته» به نزدیک‌ترین بازه‌ی
-  // معنادار یعنی «این ماه» نگاشت می‌شن؛ «امسال» هم مستقیم به «سال جاری»
+  // ===== فیلتر سراسری هدر (امروز/هفته/ماه/سال) مستقیماً همون بازه‌ی گزارشه؛ چون
+  // الان گزارش هم دقت روزانه (امروز/این‌هفته) و هم ماهانه (این‌ماه/امسال) رو پشتیبانی می‌کنه =====
   function mapGlobalPeriodToRange(period) {
-    return period === 'year' ? 'year' : 'month';
+    return period;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const select = document.getElementById('reportRangeSelect');
-
-    if (window.HesabinoPeriod) {
-      select.value = mapGlobalPeriodToRange(window.HesabinoPeriod.get());
-    }
-    loadReport(select.value);
-
-    select.addEventListener('change', () => loadReport(select.value));
+    const period = window.HesabinoPeriod ? window.HesabinoPeriod.get() : 'month';
+    loadReport(mapGlobalPeriodToRange(period));
 
     // ===== با تغییر فیلتر سراسری هدر، بازه‌ی گزارش هم همگام می‌شه =====
     document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', (e) => {
-      const mapped = mapGlobalPeriodToRange(e.detail.period);
-      select.value = mapped;
-      loadReport(mapped);
+      loadReport(mapGlobalPeriodToRange(e.detail.period));
     });
   });
 })();
