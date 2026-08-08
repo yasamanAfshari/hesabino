@@ -8,6 +8,11 @@
   // لیست وام/اقساط که از همون API داشبورد (/api/installments) خونده می‌شه
   let allLoans = [];
 
+  // خلاصه‌ی رکوردهای معمولِ بدهی/طلب + خلاصه‌ی حساب‌کتاب اشخاص (تب جدا)؛ کارت‌های
+  // بالای صفحه مجموعِ این دوتاست چون شخص هم می‌تونه توی «بدهی من»/«طلب از دیگران» سهم داشته باشه.
+  let lastDebtsSummary = { myDebt: 0, receivable: 0, net: 0 };
+  let lastPersonsSummary = { debt: 0, receivable: 0, net: 0 };
+
   function authHeaders(extra) {
     const token = localStorage.getItem('access_token');
     return Object.assign({ Authorization: `Bearer ${token}` }, extra || {});
@@ -215,6 +220,21 @@
     document.getElementById('debtsMyDebtAmount').textContent = `${formatAmount(summary.myDebt)} تومان`;
     document.getElementById('debtsReceivableAmount').textContent = `${formatAmount(summary.receivable)} تومان`;
     document.getElementById('debtsNetAmount').textContent = formatSignedToman(summary.net);
+  }
+
+  // ===== ترکیب خلاصه‌ی رکوردهای بدهی/طلب معمولی با خلاصه‌ی حساب‌کتاب اشخاص =====
+  function renderCombinedSummary() {
+    renderSummary({
+      myDebt: lastDebtsSummary.myDebt + lastPersonsSummary.debt,
+      receivable: lastDebtsSummary.receivable + lastPersonsSummary.receivable,
+      net: lastDebtsSummary.net + lastPersonsSummary.net,
+    });
+  }
+
+  // صدا زده می‌شه از persons.js، هر بار خلاصه‌ی حساب‌کتاب اشخاص تغییر کنه
+  function setPersonsSummary(summary) {
+    lastPersonsSummary = summary || { debt: 0, receivable: 0, net: 0 };
+    renderCombinedSummary();
   }
 
   // ===== سلکت‌باکس سفارشی =====
@@ -499,9 +519,9 @@
 
   // ===== اعمال نتیجه‌ی سرور روی صفحه =====
   function applyOverview(data) {
-    const summary = data.summary || { myDebt: 0, receivable: 0, net: 0 };
+    lastDebtsSummary = data.summary || { myDebt: 0, receivable: 0, net: 0 };
     allItems = Array.isArray(data.items) ? data.items : [];
-    renderSummary(summary);
+    renderCombinedSummary();
     applyDebtFilter();
     applyDemandFilter();
   }
@@ -1009,6 +1029,7 @@
     payLoan,
     deleteLoan,
     openAlertsModal,
+    setPersonsSummary,
   };
 
   if (document.readyState === 'loading') {
