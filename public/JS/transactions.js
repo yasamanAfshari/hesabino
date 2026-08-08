@@ -1363,7 +1363,7 @@
     // ===== فیلتر سراسری بازه‌ی زمانی (هدر): با تغییرش، لیست همین‌جا (بدون درخواست جدید) دوباره فیلتر می‌شه =====
     document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', applyFilters);
 
-    loadTransactions();
+    loadTransactions().finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
   }
 
   // توابعی که از HTML (onclick های داخل سطرهای داینامیک و دکمه‌ی بازنشانی) صدا زده می‌شن

@@ -1014,8 +1014,7 @@
     document.getElementById('demandDateFromPicker')?.addEventListener('change', applyDemandFilter);
     document.getElementById('demandDateToPicker')?.addEventListener('change', applyDemandFilter);
 
-    loadDebts();
-    loadLoans();
+    Promise.all([loadDebts(), loadLoans()]).finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
   }
 
   window.DebtsApp = {

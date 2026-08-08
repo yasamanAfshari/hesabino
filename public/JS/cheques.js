@@ -645,7 +645,7 @@
     const dateInput = document.getElementById('filterDatePicker');
     if (dateInput) dateInput.addEventListener('change', applyFilters);
 
-    loadCheques();
+    loadCheques().finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
   }
 
   window.ChequesApp = {

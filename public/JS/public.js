@@ -2,18 +2,44 @@
   'use strict';
 
   // ===== ۱. لودر صفحه =====
+  // قبلاً این لودر فقط با یک تایمر ثابت (800ms) بعد از رویداد window load مخفی می‌شد؛
+  // یعنی ربطی به اینکه دیتای واقعی صفحه (داشبورد/تراکنش‌ها/حساب‌ها و...) از سرور
+  // fetch شده باشه یا نه نداشت. اگه درخواست کندتر از 800ms طول می‌کشید، لودر محو
+  // می‌شد ولی محتوا هنوز خالی بود (چشمک خالی/پرش لایوت). حالا هر صفحه بعد از اینکه
+  // اولین fetch دیتای خودش تموم شد (چه موفق چه ناموفق)، صریحاً hidePageLoader رو
+  // صدا می‌زنه؛ یک سقف زمانی (safety net) هم هست تا اگه صفحه‌ای فراموش کرد صدا
+  // بزنه، لودر برای همیشه روی صفحه نمونه.
   function setupLoader() {
-    window.addEventListener('load', () => {
-      const loader = document.getElementById('page-loader');
-      if (!loader) return;
-      const visibleDelay = 800;
-      const fadeDuration = 600;
+    const loader = document.getElementById('page-loader');
+    window.HesabinoUI = window.HesabinoUI || {};
 
-      setTimeout(() => {
-        loader.classList.add('hidden');
-        setTimeout(() => loader.remove(), fadeDuration);
-      }, visibleDelay);
-    });
+    if (!loader) {
+      window.HesabinoUI.hidePageLoader = function () {};
+      return;
+    }
+
+    const minVisible = 400;   // حداقل زمان نمایش، برای جلوگیری از چشمک خیلی سریع
+    const safetyNet = 8000;   // اگه هیچ صفحه‌ای hidePageLoader رو صدا نزد، حداکثر این‌قدر صبر کن
+    const fadeDuration = 600;
+    const startedAt = Date.now();
+    let hidden = false;
+
+    function reallyHide() {
+      if (hidden) return;
+      hidden = true;
+      loader.classList.add('hidden');
+      setTimeout(() => loader.remove(), fadeDuration);
+    }
+
+    function hidePageLoader() {
+      const elapsed = Date.now() - startedAt;
+      const remaining = Math.max(0, minVisible - elapsed);
+      setTimeout(reallyHide, remaining);
+    }
+
+    setTimeout(reallyHide, safetyNet);
+
+    window.HesabinoUI.hidePageLoader = hidePageLoader;
   }
 
   // ===== خواندن مقدار زنده‌ی متغیرهای CSS، برای هماهنگی نمودارها با تم روشن/تیره =====
@@ -688,9 +714,14 @@ function initTimePickers() {
   window.HesabinoUI = window.HesabinoUI || {};
   window.HesabinoUI.confirmDialog = confirmDialog;
 
+  // page-loader همین الان تنظیم می‌شه (نه داخل onReady) تا هر صفحه بلافاصله بعد از
+  // fetch اولیه‌ی دیتاش بتونه window.HesabinoUI.hidePageLoader رو صدا بزنه، بدون
+  // اینکه به ترتیب اجرای اسکریپت‌های deferred دیگه وابسته باشه؛ چون این اسکریپت هم
+  // deferred است، DOM (شامل #page-loader) موقع اجرا کامل پارس شده.
+  setupLoader();
+
   // ===== ۱۰. اجرای همه توابع بعد از آماده شدن DOM =====
   function onReady() {
-    setupLoader();
     initCharts();
     initExpenseRatioChart();
     initProgressBar();

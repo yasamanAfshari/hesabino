@@ -1085,7 +1085,7 @@
   window.openLoanAddModal = openLoanAddModal;
 
   function onReady() {
-    loadDashboard();
+    loadDashboard().finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
     bindAiChat();
     bindAiInsightRefreshButton();
 

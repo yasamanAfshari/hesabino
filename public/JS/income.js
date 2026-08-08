@@ -268,9 +268,12 @@
   }
 
   function onReady() {
-    if (!localStorage.getItem('access_token')) return;
+    if (!localStorage.getItem('access_token')) {
+      window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader();
+      return;
+    }
 
-    loadIncome();
+    loadIncome().finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
 
     const monthSelect = document.getElementById('incomeMonthSelect');
     if (monthSelect) {

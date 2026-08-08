@@ -159,6 +159,9 @@
               <button class="tab-btn px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="loans" onclick="switchTab('loans')">
                 اقساط و وام‌ها
               </button>
+              <button class="tab-btn px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="persons" onclick="switchTab('persons')">
+                حساب‌کتاب اشخاص
+              </button>
             </div>
 
             <!-- دکمه‌های عملیات تب بدهی‌ها -->
@@ -195,6 +198,11 @@
                   <path d="M16.2715 20.6483C16.2715 22.4358 14.809 23.8983 13.0215 23.8983C12.1332 23.8983 11.3098 23.53 10.7248 22.945C10.1398 22.36 9.77148 21.5367 9.77148 20.6483" stroke="white" stroke-width="1.5" stroke-miterlimit="10" />
                 </svg>
               </button>
+            </div>
+
+            <!-- دکمه‌های عملیات تب اشخاص -->
+            <div class="flex items-center gap-3 hidden" id="tabActionsPersons">
+              <button class="main-btn" onclick="PersonsApp.openAddModal()">افزودن شخص جدید</button>
             </div>
           </div>
         </div>
@@ -401,6 +409,32 @@
             </div>
           </div>
 
+          <!-- ===== تب حساب‌کتاب اشخاص ===== -->
+          <!-- هر شخص یه کارته؛ روی هر کارت ممکنه ۱ یا چند رکورد بدهی/طلب اضافه بشه
+               و خودِ کارت مجموع بدهی/طلب و خالص رو نشون می‌ده. کلیک روی کارت،
+               مودال ثبت/مشاهده‌ی رکوردهای همون شخص رو باز می‌کنه. -->
+          <div class="tab-panel" id="tabPanelPersons">
+            <div class="tab-scroll-area px-2 scrollbar">
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 bg-white">
+                <div class="relative md:col-span-2">
+                  <input type="text" id="personSearchInput" placeholder="جست و جوی نام شخص" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+                  <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-3.5-3.5"></path>
+                  </svg>
+                </div>
+                <div class="flex w-full justify-end">
+                  <button type="button" onclick="PersonsApp.resetFilter()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">بازنشانی</button>
+                </div>
+              </div>
+
+              <div class="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 grc gap-4 mt-2" id="personsList">
+                <p class="text-center text-gray-400 mt-6 col-span-full">در حال بارگذاری اشخاص...</p>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -454,6 +488,136 @@
           <button type="submit" id="loanSubmitBtn" class="main-btn px-4 py-2 rounded-lg">ثبت</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- مودال افزودن شخص جدید (دو مرحله‌ای: انتخاب/ساخت شخص، بعد اولین تراکنش) -->
+  <div id="personModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-2xl max-h-[90vh] lg:w-[32vw] w-full flex flex-col relative">
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <h3 class="font-bold text-lg text-zinc-800">افزودن حساب‌کتاب با شخص جدید</h3>
+        <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="personForm" class="flex flex-col flex-1 min-h-0">
+        <div class="modal-body overflow-y-auto flex flex-col gap-3 scrollbar px-6 py-4">
+          <div id="personModalFormError" class="hidden rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
+
+          <p class="text-sm text-zinc-500">اگه قبلاً با این شخص حساب‌کتاب داشتی، از پیشنهادها انتخابش کن؛ وگرنه فقط اسمشو بنویس تا به‌عنوان شخص جدید ساخته بشه.</p>
+          <div class="relative">
+            <input type="text" id="personNameInput" placeholder="نام شخص" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none" autocomplete="off">
+            <div id="personNameSuggestions" class="hidden absolute z-30 top-11 right-0 w-full max-h-40 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg"></div>
+          </div>
+          <div class="relative">
+            <input type="text" id="personNoteInput" placeholder="توضیح (اختیاری، مثلاً «همکار»)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100 mt-1">
+            <div id="personDirectionSelect" class="custom-select relative col-span-2">
+              <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
+                <span class="selected-value text-gray-700" data-placeholder="نوع رکورد">نوع رکورد</span>
+                <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </button>
+              <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
+                <div class="options max-h-52 overflow-y-auto">
+                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="they_owe">او به من بدهکار است (طلب من)</div>
+                  <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="i_owe">من به او بدهکارم (بدهی من)</div>
+                </div>
+              </div>
+            </div>
+            <div class="relative col-span-2">
+              <input type="number" min="0" step="1" id="personAmountInput" placeholder="مبلغ" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            </div>
+            <div class="relative col-span-2">
+              <input type="text" id="personDescriptionInput" placeholder="توضیح (اختیاری، مثلاً «قسط اول»)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+          <button type="submit" id="personSubmitBtn" class="main-btn px-4 py-2 rounded-lg">ثبت</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- مودال حساب‌کتاب یک شخص: مانده + افزودن رکورد + ریز رکوردها -->
+  <div id="personLedgerModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-3xl max-h-[90vh] lg:w-[40vw] w-full flex flex-col relative">
+      <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
+        <div class="flex items-center gap-2 flex-1 min-w-0">
+          <h3 id="personLedgerName" class="font-bold text-lg text-zinc-800 truncate">حساب‌کتاب</h3>
+          <button type="button" title="ویرایش نام" onclick="PersonsApp.togglePersonNameEdit()" class="bg-main-color p-1 rounded-md flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12.6142 2.46067L13.9984 1.07566C14.2869 0.787107 14.6783 0.625 15.0864 0.625C15.4944 0.625 15.8858 0.787107 16.1743 1.07566C16.4629 1.36421 16.625 1.75557 16.625 2.16364C16.625 2.57172 16.4629 2.96308 16.1743 3.25163L4.38454 15.0414C3.95076 15.475 3.41583 15.7936 2.82805 15.9686L0.625 16.625L1.2814 14.422C1.4564 13.8342 1.77504 13.2992 2.20857 12.8655L12.615 2.46067H12.6142ZM12.6142 2.46067L14.7787 4.62515" stroke="white" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button type="button" title="حذف شخص" onclick="PersonsApp.deletePerson()" class="bg-red-color p-1 rounded-md flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </button>
+        </div>
+        <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700 flex-shrink-0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- ویرایش نام/توضیح (پیش‌فرض مخفی) -->
+      <div id="personNameEditRow" class="hidden px-6 pt-3 flex gap-2">
+        <input type="text" id="personLedgerNameInput" class="flex-1 h-10 border border-main-color rounded-lg px-3 outline-none" placeholder="نام">
+        <input type="text" id="personLedgerNoteInput" class="flex-1 h-10 border border-main-color rounded-lg px-3 outline-none" placeholder="توضیح">
+        <button type="button" onclick="PersonsApp.savePersonName()" class="main-btn px-3 rounded-lg text-sm">ذخیره</button>
+      </div>
+
+      <div class="px-6 pt-3">
+        <div id="personLedgerNet" class="text-sm font-bold px-3 py-2 rounded-lg inline-block"></div>
+      </div>
+
+      <!-- فرم افزودن/ویرایش رکورد -->
+      <div class="px-6 pt-3">
+        <div id="personEntryFormError" class="hidden mb-2 rounded-lg px-4 py-2 text-sm bg-red-color-25 text-red-color"></div>
+        <form id="personEntryForm" class="grid grid-cols-2 md:grid-cols-4 gap-2 items-stretch">
+          <input type="hidden" id="personEntryId" value="">
+          <div id="personEntryDirectionSelect" class="custom-select relative">
+            <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-3 bg-white text-sm">
+              <span class="selected-value text-gray-700" data-placeholder="نوع">نوع</span>
+              <svg class="w-4 h-4 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">
+              <div class="options max-h-52 overflow-y-auto">
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="they_owe">طلب من</div>
+                <div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="i_owe">بدهی من</div>
+              </div>
+            </div>
+          </div>
+          <input type="number" min="0" step="1" id="personEntryAmountInput" placeholder="مبلغ" class="h-10 border border-main-color rounded-lg px-3 outline-none text-sm">
+          <input type="text" id="personEntryDescriptionInput" placeholder="توضیح (اختیاری)" class="h-10 border border-main-color rounded-lg px-3 outline-none text-sm">
+          <div class="flex gap-1.5">
+            <button type="submit" id="personEntrySubmitBtn" class="main-btn rounded-lg text-sm flex-1">افزودن</button>
+            <button type="button" id="personEntryCancelBtn" onclick="PersonsApp.cancelEntryEdit()" class="hidden px-2 rounded-lg border border-gray-300 text-gray-700 text-sm">لغو</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="overflow-y-auto flex-1 scrollbar px-6 py-4 mt-2 space-y-2.5" id="personLedgerList">
+        <p class="text-center text-gray-400 py-6">در حال بارگذاری...</p>
+      </div>
     </div>
   </div>
 
@@ -645,8 +809,8 @@
       document.querySelectorAll('.tab-btn').forEach((btn) => btn.classList.remove('active'));
       document.querySelectorAll('.tab-panel').forEach((panel) => panel.classList.remove('active'));
 
-      const panelIds = { debts: 'tabPanelDebts', receivables: 'tabPanelReceivables', loans: 'tabPanelLoans' };
-      const actionIds = { debts: 'tabActionsDebts', receivables: 'tabActionsReceivables', loans: 'tabActionsLoans' };
+      const panelIds = { debts: 'tabPanelDebts', receivables: 'tabPanelReceivables', loans: 'tabPanelLoans', persons: 'tabPanelPersons' };
+      const actionIds = { debts: 'tabActionsDebts', receivables: 'tabActionsReceivables', loans: 'tabActionsLoans', persons: 'tabActionsPersons' };
 
       const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
       const activePanel = document.getElementById(panelIds[tabName]);
@@ -661,6 +825,7 @@
     }
   </script>
   <script src="/JS/debts.js?v=<%= assetVersion %>" defer></script>
+  <script src="/JS/persons.js?v=<%= assetVersion %>" defer></script>
 </body>
 
 </html>

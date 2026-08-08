@@ -13,16 +13,6 @@
 
   <section class="scrollbar overflow-y-auto px-6 pb-6">
 
-    <div class="flex items-center justify-between flex-wrap gap-2 mt-2 mb-3">
-      <select id="reportRangeSelect" class="border border-gray-200 rounded-lg px-3 py-1.5 !text-sm bg-white">
-        <option value="month">این ماه</option>
-        <option value="3m">۳ ماه اخیر</option>
-        <option value="6m">۶ ماه اخیر</option>
-        <option value="year" selected>سال جاری</option>
-        <option value="all">کل تاریخچه</option>
-      </select>
-    </div>
-
     <!-- کارت‌های خلاصه‌ی کل بازه -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
       <div class="main-box-small border !border-main-color text-center">
@@ -127,7 +117,7 @@
           <thead>
             <tr class="text-zinc-500 border-b border-gray-100">
               <th class="py-2 px-2 font-medium">دسته</th>
-              <th class="py-2 px-2 font-medium">میانگین ماهانه</th>
+              <th class="py-2 px-2 font-medium" id="report-category-avg-header">میانگین ماهانه</th>
               <th class="py-2 px-2 font-medium">هزینه در بازه انتخابی</th>
               <th class="py-2 px-2 font-medium">مقایسه</th>
             </tr>

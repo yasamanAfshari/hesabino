@@ -473,7 +473,11 @@
   };
 
   document.addEventListener('DOMContentLoaded', async () => {
-    await loadAccounts();
-    loadTransfers();
+    try {
+      await loadAccounts();
+      await loadTransfers();
+    } finally {
+      window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader();
+    }
   });
 })();

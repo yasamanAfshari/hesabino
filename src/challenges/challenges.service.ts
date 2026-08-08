@@ -110,6 +110,29 @@ export class ChallengesService {
 
   // ===== شروع چالش جدید (چالش فعال قبلی در صورت وجود متوقف می‌شود) =====
   async create(userId: number, dto: CreateChallengeDto) {
+    const today = todayJalaliString();
+
+    // اگر کاربر همین امروز در این دسته هزینه‌ای ثبت کرده باشد، چالش از همان لحظه‌ی
+    // ثبت شکست‌خورده محسوب می‌شود (چون evaluate روز صفر را هم بررسی می‌کند) و در
+    // فراخوانی بعدی getOverview دیگر isActive نیست و از لیست ناپدید می‌شود؛ در نتیجه
+    // پیام «چالش ثبت شد» گمراه‌کننده بود. برای جلوگیری از این حالت، همینجا جلوی
+    // ثبت چالش را می‌گیریم.
+    const usedTodayInCategory = await this.transactionsRepository.findOne({
+      where: {
+        userId,
+        type: 'expense',
+        category: dto.avoidCategory,
+        date: today,
+      },
+    });
+    if (usedTodayInCategory) {
+      throw new BadRequestException(
+        `امروز در دستهٔ «${dto.avoidCategory}» هزینه ثبت کرده‌اید،
+برای همین شروع چالش پرهیز از این دسته از امروز ممکن نیست.
+می‌توانید فردا دوباره امتحان کنید یا دستهٔ دیگری را انتخاب کنید.`,
+      );
+    }
+
     const activeExisting = await this.challengesRepository.find({
       where: { userId, isActive: true },
     });
@@ -124,7 +147,7 @@ export class ChallengesService {
       avoidCategory: dto.avoidCategory,
       targetDays: dto.targetDays || 7,
       rewardPoints: dto.rewardPoints || 100,
-      startDate: todayJalaliString(),
+      startDate: today,
       isActive: true,
       isCompleted: false,
       result: 'in_progress',

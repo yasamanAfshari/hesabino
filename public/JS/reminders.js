@@ -98,5 +98,7 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', loadReminders);
+  document.addEventListener('DOMContentLoaded', () => {
+    loadReminders().finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
+  });
 })();

@@ -516,7 +516,7 @@
   };
 
   function onReady() {
-    loadSavings();
+    loadSavings().finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
   }
 
   if (document.readyState === 'loading') {

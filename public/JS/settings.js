@@ -335,7 +335,7 @@
   }
 
   function onReady() {
-    loadProfile();
+    loadProfile().finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
     setupProfileForm();
     setupAvatarUpload();
     setupPasswordForm();

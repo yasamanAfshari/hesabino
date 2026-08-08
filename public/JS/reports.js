@@ -353,7 +353,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     const period = window.HesabinoPeriod ? window.HesabinoPeriod.get() : 'month';
-    loadReport(mapGlobalPeriodToRange(period));
+    loadReport(mapGlobalPeriodToRange(period)).finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
 
     // ===== با تغییر فیلتر سراسری هدر، بازه‌ی گزارش هم همگام می‌شه =====
     document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', (e) => {
