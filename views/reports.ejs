@@ -39,12 +39,12 @@
       </div>
       <div class="main-box-small">
         <h2 class="font-bold text-lg text-zinc-800 mb-3 border-b border-gray-200 pb-3">هزینه به تفکیک دسته</h2>
-        <div class="grid grid-cols-2 gap-4 items-center">
+        <div class="grid gap-4 items-center md:grid-cols-2 grid-cols-1">
           <div id="report-category-legend" class="space-y-2">
             <p class="text-zinc-400 !text-sm">در حال بارگذاری...</p>
           </div>
           <div class="flex justify-center">
-            <div class="w-[180px] h-[180px]">
+            <div class="md:w-[200px] md:h-[200px] w-[150px] h-[150px]">
               <canvas id="reportDonutChart"></canvas>
             </div>
           </div>
@@ -63,7 +63,7 @@
       <div class="main-box-small">
         <h2 class="font-bold text-lg text-zinc-800 mb-3 border-b border-gray-200 pb-3">نسبت هزینه به درآمد</h2>
         <div class="overflow-x-auto scrollbar min-h-[140px] flex items-center">
-          <div id="report-ratio-rings" class="flex gap-4 justify-between min-w-max w-full">
+          <div id="report-ratio-rings" class="flex flex-row-reverse gap-4 min-w-max w-full">
             <p class="text-zinc-400 !text-sm">در حال بارگذاری...</p>
           </div>
         </div>
@@ -116,10 +116,10 @@
         <table class="w-full text-right !text-sm">
           <thead>
             <tr class="text-zinc-500 border-b border-gray-100">
-              <th class="py-2 px-2 font-medium">دسته</th>
-              <th class="py-2 px-2 font-medium" id="report-category-avg-header">میانگین ماهانه</th>
-              <th class="py-2 px-2 font-medium">هزینه در بازه انتخابی</th>
-              <th class="py-2 px-2 font-medium">مقایسه</th>
+              <th class="py-2 px-2 font-bold text-center">دسته</th>
+              <th class="py-2 px-2 font-bold text-center" id="report-category-avg-header">میانگین ماهانه</th>
+              <th class="py-2 px-2 font-bold text-center">هزینه در بازه انتخابی</th>
+              <th class="py-2 px-2 font-bold text-center">مقایسه</th>
             </tr>
           </thead>
           <tbody id="report-category-table">

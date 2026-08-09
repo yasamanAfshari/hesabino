@@ -150,22 +150,22 @@
           <div class="flex items-center gap-1 w-full justify-between mb-2 flex-wrap">
             <!-- دکمه‌های تب -->
             <div class="flex items-center gap-0">
-              <button class="tab-btn active px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="debts" onclick="switchTab('debts')">
+              <button class="tab-btn active px-1 md:px-4 md:py-2.5 py-0 text-sm text-zinc-400 transition-colors" data-tab="debts" onclick="switchTab('debts')">
                 بدهی‌ها
               </button>
-              <button class="tab-btn px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="receivables" onclick="switchTab('receivables')">
+              <button class="tab-btn px-1 md:px-4 md:py-2.5 py-0 text-sm text-zinc-400 transition-colors" data-tab="receivables" onclick="switchTab('receivables')">
                 طلب‌ها
               </button>
-              <button class="tab-btn px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="loans" onclick="switchTab('loans')">
+              <button class="tab-btn px-1 md:px-4 md:py-2.5 py-0 text-sm text-zinc-400 transition-colors" data-tab="loans" onclick="switchTab('loans')">
                 اقساط و وام‌ها
               </button>
-              <button class="tab-btn px-4 py-2.5 text-sm text-zinc-400 transition-colors" data-tab="persons" onclick="switchTab('persons')">
+              <button class="tab-btn px-1 md:px-4 md:py-2.5 py-0 text-sm text-zinc-400 transition-colors" data-tab="persons" onclick="switchTab('persons')">
                 حساب‌کتاب اشخاص
               </button>
             </div>
 
             <!-- دکمه‌های عملیات تب بدهی‌ها -->
-            <div class="flex items-center gap-3" id="tabActionsDebts">
+            <div class="flex items-center gap-3 md:mt-0 mt-2.5" id="tabActionsDebts">
               <button class="main-btn" onclick="DebtsApp.openAddModal('debt')">ثبت بدهی جدید</button>
               <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center" onclick="DebtsApp.openAlertsModal('debt')">
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -177,7 +177,7 @@
             </div>
 
             <!-- دکمه‌های عملیات تب طلب‌ها -->
-            <div class="flex items-center gap-3 hidden" id="tabActionsReceivables">
+            <div class="flex items-center gap-3 hidden md:mt-0 mt-2.5" id="tabActionsReceivables">
               <button class="main-btn" onclick="DebtsApp.openAddModal('receivable')">ثبت طلب جدید</button>
               <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center" onclick="DebtsApp.openAlertsModal('receivable')">
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -189,7 +189,7 @@
             </div>
 
             <!-- دکمه‌های عملیات تب اقساط -->
-            <div class="flex items-center gap-3 hidden" id="tabActionsLoans">
+            <div class="flex items-center gap-3 hidden md:mt-0 mt-2.5" id="tabActionsLoans">
               <button class="main-btn" onclick="DebtsApp.openLoanAddModal()">ثبت قسط جدید</button>
               <button class="bg-yellow-500 p-1 rounded-md w-10 flex justify-center" onclick="DebtsApp.openAlertsModal('loan')">
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -201,7 +201,7 @@
             </div>
 
             <!-- دکمه‌های عملیات تب اشخاص -->
-            <div class="flex items-center gap-3 hidden" id="tabActionsPersons">
+            <div class="flex items-center gap-3 hidden md:mt-0 mt-2.5" id="tabActionsPersons">
               <button class="main-btn" onclick="PersonsApp.openAddModal()">افزودن شخص جدید</button>
             </div>
           </div>

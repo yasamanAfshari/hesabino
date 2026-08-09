@@ -35,9 +35,19 @@ export class IncomeService {
         { userId, type: 'income', date: Like(`${monthKey}%`) },
         { userId, type: 'income', date: Like(`${persianMonthKey}%`) },
       ],
+      relations: { accountRef: true },
       order: { id: 'DESC' },
     });
     return transactions.filter((tx) => toEnglishDigits(tx.date || '').startsWith(monthKey));
+  }
+
+  // ===== خروجی استاندارد یک تراکنش درآمدی برای فرانت: amount عددی + نام حساب مرتبط =====
+  private serializeTransaction(tx: Transaction) {
+    return {
+      ...tx,
+      amount: Number(tx.amount),
+      accountName: tx.accountRef ? tx.accountRef.name : null,
+    };
   }
 
   // ===== لیست همه‌ی ماه‌هایی که حداقل یک تراکنش درآمد دارند، برای پر کردن سلکت انتخاب ماه =====
@@ -72,11 +82,21 @@ export class IncomeService {
     ]);
 
     const byCategory: Record<string, number> = {};
+    // ===== ریز درآمد به تفکیک حساب مقصد (کلید: accountId یا 'none' برای تراکنش‌های بدون حساب) =====
+    const byAccount: Record<string, { accountName: string; amount: number }> = {};
     let total = 0;
     for (const tx of transactions) {
       const amount = Number(tx.amount) || 0;
       const category = tx.category || 'سایر';
       byCategory[category] = (byCategory[category] || 0) + amount;
+
+      const accountKey = tx.accountId != null ? String(tx.accountId) : 'none';
+      const accountName = tx.accountRef ? tx.accountRef.name : 'بدون حساب';
+      if (!byAccount[accountKey]) {
+        byAccount[accountKey] = { accountName, amount: 0 };
+      }
+      byAccount[accountKey].amount += amount;
+
       total += amount;
     }
 
@@ -84,6 +104,15 @@ export class IncomeService {
       .sort((a, b) => b[1] - a[1])
       .map(([category, amount]) => ({
         category,
+        amount,
+        percent: total > 0 ? Math.round((amount / total) * 100) : 0,
+      }));
+
+    const accountBreakdown = Object.entries(byAccount)
+      .sort((a, b) => b[1].amount - a[1].amount)
+      .map(([accountId, { accountName, amount }]) => ({
+        accountId: accountId === 'none' ? null : Number(accountId),
+        accountName,
         amount,
         percent: total > 0 ? Math.round((amount / total) * 100) : 0,
       }));
@@ -98,8 +127,9 @@ export class IncomeService {
       isCurrentMonth: monthKey === currentKey,
       total,
       categoryBreakdown,
+      accountBreakdown,
       previousMonth: { month: this.prevMonthKey(monthKey), total: prevTotal, changePercent },
-      transactions: transactions.map((tx) => ({ ...tx, amount: Number(tx.amount) })),
+      transactions: transactions.map((tx) => this.serializeTransaction(tx)),
       availableMonths,
       categories: INCOME_CATEGORIES,
     };

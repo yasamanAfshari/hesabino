@@ -109,6 +109,10 @@ button:hover {
     color: var(--color-text-color);
 }
 
+.selected-value{
+    font-size: 12px !important;
+}
+
 /* اختیاری: استایل فوکوس */
 .custom-input:focus {
     border-color: var(--color-main-color-hover);
@@ -124,6 +128,7 @@ button:hover {
 
 input::placeholder{
     color: var(--color-gray-700);
+    font-size: 12px !important;
 }
 
 /* -------sidebar------- */
@@ -257,6 +262,7 @@ aside .theme-toggle {
 
 .user-profile {
     left: 3%;
+    top: 3%;
 }
 
 /* .ham-wrapper {
@@ -327,7 +333,7 @@ aside .theme-toggle {
 /* table */
 .scrollable-table-container {
     overflow: auto;
-    height: 70%;
+    height: 66%;
 }
 
 tr,
@@ -785,7 +791,7 @@ html.dark-theme[data-accent="green"] {
 
 @media (max-width: 768px) {
     .scrollable-table-container {
-        height: 45%;
+        height: 52%;
     }
 
     .menu-item {
@@ -828,7 +834,7 @@ html.dark-theme[data-accent="green"] {
 }
 
 .modal-body{
-    height: 55vh !important;
+    height: 70vh !important;
 }
 
 .modal.hidden {

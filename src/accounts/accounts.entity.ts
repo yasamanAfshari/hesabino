@@ -59,6 +59,10 @@ export class Account {
   @Column({ type: 'varchar', length: 50, nullable: true })
   icon: string | null;
 
+  // یادداشت اختیاری کاربر هنگام ساخت حساب (مثلاً توضیح کاربرد این حساب)
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  note: string | null;
+
   // آرشیو به‌جای حذف واقعی (Soft Delete)، تا سابقه‌ی تراکنش‌های مرتبط خراب نشود
   @Column({ type: 'boolean', default: false })
   isArchived: boolean;

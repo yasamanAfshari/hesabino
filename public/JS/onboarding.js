@@ -73,9 +73,9 @@
   ];
 
   var STEP_META = [
-    { icon: ICONS.walletPlus, eyebrow: 'STEP 1', label: 'نوع حساب' },
-    { icon: ICONS.clipboard, eyebrow: 'STEP 2', label: 'اطلاعات پایه' },
-    { icon: ICONS.bank, eyebrow: 'STEP 3', label: 'موجودی اولیه' },
+    { icon: ICONS.walletPlus, label: 'نوع حساب' },
+    { icon: ICONS.clipboard, label: 'اطلاعات پایه' },
+    { icon: ICONS.bank, label: 'موجودی اولیه' },
   ];
 
   function findOption(list, value) {
@@ -107,31 +107,81 @@
   }
 
   /* ---------------------------------------------------------------------
-   * سلکت‌باکس سفارشی — دقیقاً همون کامپوننتی که توی بقیه‌ی صفحات (تراکنش‌ها،
-   * چک‌ها، بدهی‌ها و…) استفاده می‌شه (کلاس‌های custom-select / select-btn /
-   * dropdown / options / option)، تا ظاهر و رفتارش با همه‌جای اپ یکی باشه.
-   * باز/بسته شدن، جستجو و جای‌گذاری دراپ‌داون توسط window.HesabinoUI.initCustomSelects
-   * (تعریف‌شده در public.js) هندل می‌شه؛ اینجا فقط مارک‌آپ رو می‌سازیم و برای
-   * آپدیت state، لیسنر جدا روی آپشن‌ها می‌ذاریم.
+   * تابع تبدیل عدد به حروف فارسی
+   * ------------------------------------------------------------------- */
+  function persianNumberToWords(num) {
+    if (num === 0) return 'صفر';
+    var units = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
+    var teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+    var tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
+    var hundreds = ['', 'صد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
+    var scales = ['', 'هزار', 'میلیون', 'میلیارد'];
+
+    function convertChunk(n) {
+      var result = '';
+      var h = Math.floor(n / 100);
+      if (h > 0) result += hundreds[h] + ' ';
+      var t = n % 100;
+      if (t >= 10 && t <= 19) {
+        result += teens[t - 10];
+      } else {
+        var d = Math.floor(t / 10);
+        var u = t % 10;
+        if (d > 0) result += tens[d] + (u > 0 ? ' و ' : '');
+        if (u > 0) result += units[u];
+      }
+      return result.trim();
+    }
+
+    var parts = [];
+    var scaleIndex = 0;
+    while (num > 0) {
+      var chunk = num % 1000;
+      if (chunk > 0) {
+        var chunkStr = convertChunk(chunk);
+        if (scaleIndex > 0) chunkStr += ' ' + scales[scaleIndex];
+        parts.unshift(chunkStr);
+      }
+      num = Math.floor(num / 1000);
+      scaleIndex++;
+    }
+    return parts.join(' و ');
+  }
+
+  /* ---------------------------------------------------------------------
+   * به‌روزرسانی متن راهنما (حروف + نام ارز)
+   * ------------------------------------------------------------------- */
+  function updateAmountHint(root) {
+    var input = q(root, '#hbObBalance');
+    var hint = q(root, '#hbObAmountHint');
+    if (!input || !hint) return;
+    var raw = input.value.replace(/[^0-9]/g, '');
+    var num = raw ? Number(raw) : 0;
+    var currencyLabel = findOption(CURRENCY_OPTIONS, state.currency).label;
+    hint.textContent = persianNumberToWords(num) + ' ' + currencyLabel;
+  }
+
+  /* ---------------------------------------------------------------------
+   * سلکت‌باکس سفارشی
    * ------------------------------------------------------------------- */
   function standardSelectMarkup(cfg) {
     var selected = findOption(cfg.options, cfg.value);
     return (
-      '<div class="hb-ob-field">' +
-      '  <label class="hb-ob-label">' + cfg.label + '</label>' +
+      '<div class="mb-4">' +
+      '  <label class="block text-sm font-bold text-[var(--color-text-color)] mb-2">' + cfg.label + '</label>' +
       '  <div id="' + cfg.id + '" class="custom-select relative">' +
-      '    <button type="button" class="select-btn w-full h-12 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">' +
-      '      <span class="selected-value text-gray-700" data-placeholder="' + cfg.placeholder + '">' + (selected ? selected.label : cfg.placeholder) + '</span>' +
-      '      <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>' +
+      '    <button type="button" class="select-btn w-full h-12 border border-[var(--color-border-color)] rounded-xl flex items-center justify-between px-4 bg-[var(--color-surface2-color)] text-sm">' +
+      '      <span class="selected-value text-[var(--color-text-color)]" data-placeholder="' + cfg.placeholder + '">' + (selected ? selected.label : cfg.placeholder) + '</span>' +
+      '      <svg class="w-5 h-5 transition text-[var(--color-text2-color)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>' +
       '    </button>' +
-      '    <div class="dropdown hidden absolute left-0 w-full border border-gray-400 bg-white rounded-lg shadow-lg z-50">' +
-      '      <div class="p-2 border-b border-main-color-25">' +
-      '        <input type="text" class="search-input w-full border border-main-color-25 rounded-md px-3 py-2 outline-none" placeholder="جستجو...">' +
+      '    <div class="dropdown hidden absolute left-0 w-full border border-gray-300 bg-white rounded-xl shadow-lg z-50 mt-1">' +
+      '      <div class="p-2 border-b border-gray-100">' +
+      '        <input type="text" class="search-input w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none" placeholder="جستجو...">' +
       '      </div>' +
       '      <div class="options max-h-52 overflow-y-auto">' +
       cfg.options
         .map(function (opt) {
-          return '<div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="' + opt.value + '">' + opt.label + '</div>';
+          return '<div class="option px-4 py-3 cursor-pointer hover:bg-gray-50 text-sm" data-value="' + opt.value + '">' + opt.label + '</div>';
         })
         .join('') +
       '      </div>' +
@@ -164,7 +214,6 @@
         '    <span class="hb-ob-step-icon">' + meta.icon + '</span>' +
         '    <span class="hb-ob-step-check">' + ICONS.check + '</span>' +
         '  </div>' +
-        '  <span class="hb-ob-step-eyebrow">' + meta.eyebrow + '</span>' +
         '  <span class="hb-ob-step-label">' + meta.label + '</span>' +
         '</div>';
       if (n < TOTAL_STEPS) {
@@ -177,56 +226,76 @@
   function cardMarkup() {
     return (
       '' +
+      // کارت اصلی
       '<div class="hb-ob-card" role="dialog" aria-modal="true" aria-labelledby="hbObTitle">' +
+      // glow تزئینی
       '  <div class="hb-ob-glow"></div>' +
+
+      // هدر
       '  <div class="hb-ob-header">' +
-      '    <div class="hb-ob-header-text">' +
-      '      <h2 class="hb-ob-title" id="hbObTitle">افزودن اولین حساب</h2>' +
-      '      <p class="hb-ob-subtitle">برای پیگیری تراکنش‌ها، بودجه و گزارش‌هات، اول باید یک حساب بسازی.</p>' +
+      '    <div>' +
+      '      <h2 class="text-lg font-extrabold text-[var(--color-text-color)]" id="hbObTitle">افزودن اولین حساب</h2>' +
+      '      <p class="text-xs text-[var(--color-text2-color)] mt-1 leading-relaxed">برای پیگیری تراکنش‌ها، بودجه و گزارش‌هات، اول باید یک حساب بسازی.</p>' +
       '    </div>' +
       '    <button type="button" class="hb-ob-close" id="hbObClose" aria-label="بستن">' + ICONS.close + '</button>' +
       '  </div>' +
+
+      // استپ‌ایندیکیتور (بیرون از کانتینر اصلی چون طراحی متفاوتی داره)
       '  <div class="hb-ob-steps" id="hbObSteps">' + stepsIndicatorMarkup() + '</div>' +
-      '  <div class="hb-ob-body">' +
-      '    <div class="hb-ob-panel is-active" data-panel="1">' +
-      '      <div id="hbObTypeSelectSlot">' + standardSelectMarkup(typeSelectCfg()) + '</div>' +
-      '    </div>' +
-      '    <div class="hb-ob-panel" data-panel="2">' +
-      '      <div class="hb-ob-error" id="hbObErrorName"></div>' +
-      '      <div class="hb-ob-field">' +
-      '        <label class="hb-ob-label" for="hbObName">نام حساب</label>' +
-      '        <input type="text" id="hbObName" class="hb-ob-input" placeholder="مثلاً بانک ملت، کیف پول نقدی...">' +
+
+      // کانتینر داخلی مشترک برای محتوای پنل‌ها و فوتر
+      '  <div class="hb-ob-inner">' +
+
+      // بدنه
+      '    <div class="hb-ob-body">' +
+      '      <div class="hb-ob-panel is-active" data-panel="1">' +
+      '        <div id="hbObTypeSelectSlot">' + standardSelectMarkup(typeSelectCfg()) + '</div>' +
       '      </div>' +
-      '      <div id="hbObCurrencySelectSlot">' + standardSelectMarkup(currencySelectCfg()) + '</div>' +
-      '      <p class="hb-ob-hint">این اطلاعات رو هر زمان بخوای می‌تونی از تنظیمات حساب‌ها ویرایش کنی.</p>' +
-      '    </div>' +
-      '    <div class="hb-ob-panel" data-panel="3">' +
-      '      <div class="hb-ob-error" id="hbObErrorBalance"></div>' +
-      '      <div class="hb-ob-field">' +
-      '        <label class="hb-ob-label">موجودی اولیه <span class="hb-ob-label-hint">اختیاری</span></label>' +
-      '        <div class="hb-ob-amount-wrap">' +
-      '          <input type="number" min="0" inputmode="decimal" id="hbObBalance" class="hb-ob-amount-input" placeholder="0">' +
-      '          <span class="hb-ob-amount-currency" id="hbObAmountCurrency"></span>' +
+      '      <div class="hb-ob-panel" data-panel="2">' +
+      '        <div class="hb-ob-error" id="hbObErrorName"></div>' +
+      '        <div class="mb-4">' +
+      '          <div class="relative">' +
+      '            <label class="block text-sm font-bold text-[var(--color-text-color)] mb-2">نام حساب </label>' +
+      '            <input type="text" id="hbObName" placeholder="مثلاً بانک ملت، کیف پول نقدی..." class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">' +
+      '          </div>' +
       '        </div>' +
-      '        <p class="hb-ob-hint">موجودی اولیه، نقطه‌ی شروع محاسبه‌ی موجودی حسابته و به‌عنوان درآمد ثبت نمی‌شه.</p>' +
+      '        <div id="hbObCurrencySelectSlot">' + standardSelectMarkup(currencySelectCfg()) + '</div>' +
+      '        <p class="text-xs text-[var(--color-text2-color)] mt-2 leading-relaxed">این اطلاعات رو هر زمان بخوای می‌تونی از تنظیمات حساب‌ها ویرایش کنی.</p>' +
       '      </div>' +
-      '      <div class="hb-ob-field">' +
-      '        <label class="hb-ob-label">یادداشت سریع <span class="hb-ob-label-hint">اختیاری · <span id="hbObNoteCount">۰</span>/۲۰۰</span></label>' +
-      '        <textarea id="hbObNote" maxlength="200" class="hb-ob-textarea" placeholder="مثلاً این حساب برای هزینه‌های مشترک با خانواده‌ست..."></textarea>' +
-      '      </div>' +
-      '    </div>' +
-      '    <div class="hb-ob-panel" data-panel="success">' +
-      '      <div class="hb-ob-success">' +
-      '        <div class="hb-ob-success-icon">' +
-      '          <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15"/><path d="M11 18.5l4.5 4.5L26 12"/></svg>' +
+      // *********** پنل ۳ با فیلد متنی و نمایش حروف ***********
+      '      <div class="hb-ob-panel" data-panel="3">' +
+      '        <div class="hb-ob-error" id="hbObErrorBalance"></div>' +
+      '        <div class="mb-4">' +
+      '          <label class="flex items-center justify-between text-sm font-bold text-[var(--color-text-color)] mb-2">موجودی اولیه <span class="text-xs font-medium text-[var(--color-text2-color)]">اختیاری</span></label>' +
+      '          <div class="relative">' +
+      '            <input type="text" min="0" step="1" id="hbObBalance" placeholder="0" ' +
+      '                   class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none" ' +
+      '                   inputmode="numeric" autocomplete="off">' +
+      '            <div class="amount-words-hint text-xs text-gray-400 mt-1 min-h-[1em]" id="hbObAmountHint">صفر تومان</div>' +
+      '          </div>' +
+      '          <p class="text-xs text-[var(--color-text2-color)] mt-2 leading-relaxed">موجودی اولیه، نقطه‌ی شروع محاسبه‌ی موجودی حسابته و به‌عنوان درآمد ثبت نمی‌شه.</p>' +
       '        </div>' +
-      '        <p class="hb-ob-success-title">حساب با موفقیت ساخته شد 🎉</p>' +
-      '        <p class="hb-ob-success-desc">حالا می‌تونی تراکنش‌هاتو ثبت کنی و از همه‌ی امکانات حسابینو استفاده کنی.</p>' +
-      '        <div class="hb-ob-summary" id="hbObSummary"></div>' +
+      '        <div class="mb-4">' +
+      '          <label class="flex items-center justify-between text-sm font-bold text-[var(--color-text-color)] mb-2">یادداشت سریع <span class="text-xs font-medium text-[var(--color-text2-color)]">اختیاری · <span id="hbObNoteCount">۰</span>/۲۰۰</span></label>' +
+      '          <textarea id="hbObNote" maxlength="200" class="hb-ob-textarea" placeholder="مثلاً این حساب برای هزینه‌های مشترک با خانواده‌ست..."></textarea>' +
+      '        </div>' +
+      '      </div>' +
+      '      <div class="hb-ob-panel" data-panel="success">' +
+      '        <div class="hb-ob-success">' +
+      '          <div class="hb-ob-success-icon">' +
+      '            <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15"/><path d="M11 18.5l4.5 4.5L26 12"/></svg>' +
+      '          </div>' +
+      '          <p class="text-lg font-extrabold text-[var(--color-text-color)] mt-5">حساب با موفقیت ساخته شد</p>' +
+      '          <p class="text-sm text-[var(--color-text2-color)] mt-2 leading-relaxed">حالا می‌تونی تراکنش‌هاتو ثبت کنی و از همه‌ی امکانات حسابینو استفاده کنی.</p>' +
+      '          <div class="hb-ob-summary" id="hbObSummary"></div>' +
+      '        </div>' +
       '      </div>' +
       '    </div>' +
+
+      // فوتر
+      '    <div class="hb-ob-footer" id="hbObFooter"></div>' +
+
       '  </div>' +
-      '  <div class="hb-ob-footer" id="hbObFooter"></div>' +
       '</div>'
     );
   }
@@ -255,6 +324,11 @@
     renderFooter(root);
     var body = q(root, '.hb-ob-body');
     if (body) body.scrollTop = 0;
+
+    // وقتی پنل ۳ فعال می‌شه، نمایش حروف را به‌روز کن
+    if (step === 3 && overlayEl) {
+      updateAmountHint(overlayEl);
+    }
   }
 
   function renderFooter(root) {
@@ -339,7 +413,8 @@
   function submitAccount(root, submitBtn) {
     clearError(root, 'hbObErrorBalance');
     var name = q(root, '#hbObName').value.trim();
-    var balanceRaw = q(root, '#hbObBalance').value;
+    // خواندن عدد از ورودی متنی (حذف کاراکترهای غیرعددی)
+    var balanceRaw = q(root, '#hbObBalance').value.replace(/[^0-9]/g, '');
     var note = q(root, '#hbObNote').value.trim();
     var openingBalance = balanceRaw ? Number(balanceRaw) : 0;
 
@@ -373,13 +448,13 @@
         var typeOpt = findOption(TYPE_OPTIONS, state.type);
         var summary = q(root, '#hbObSummary');
         summary.innerHTML =
-          '<div class="hb-ob-summary-left">' +
-          '<span class="hb-ob-option-icon">' + typeOpt.icon + '</span>' +
+          '<div class="flex items-center gap-3">' +
+          '<span class="hb-ob-option-icon-sm">' + typeOpt.icon + '</span>' +
           '<span>' +
-          '<div class="hb-ob-summary-name">' + escapeHtml(name) + '</div>' +
-          '<div class="hb-ob-summary-type">' + typeOpt.label + '</div>' +
+          '<div class="text-sm font-bold text-[var(--color-text-color)]">' + escapeHtml(name) + '</div>' +
+          '<div class="text-xs text-[var(--color-text2-color)]">' + typeOpt.label + '</div>' +
           '</span></div>' +
-          '<div class="hb-ob-summary-balance">' + formatAmount(openingBalance, state.currency) + '</div>';
+          '<div class="text-base font-extrabold text-[var(--color-green-color)]">' + formatAmount(openingBalance, state.currency) + '</div>';
         showPanel(root, 'success');
       })
       .catch(function (err) {
@@ -417,8 +492,8 @@
       onChange: function (value) {
         state.currency = value;
         setSelectedLabel(overlayEl, 'hbObCurrencySelect', CURRENCY_OPTIONS, value);
-        var amountCurrencyEl = q(overlayEl, '#hbObAmountCurrency');
-        if (amountCurrencyEl) amountCurrencyEl.textContent = findOption(CURRENCY_OPTIONS, value).label;
+        // به‌روزرسانی نمایش حروف با ارز جدید
+        if (overlayEl) updateAmountHint(overlayEl);
       },
     };
   }
@@ -444,10 +519,7 @@
     var closeBtn = q(root, '#hbObClose');
     var card = q(root, '.hb-ob-card');
     closeBtn.addEventListener('click', function () {
-      // این مودال قابل بسته‌شدن نیست؛ فقط یه تلنگر بصری میدیم که کاربر بفهمه
-      // باید مراحل رو تکمیل کنه.
       card.classList.remove('is-shake');
-      // reflow برای اینکه انیمیشن دوباره اجرا بشه
       void card.offsetWidth;
       card.classList.add('is-shake');
     });
@@ -459,12 +531,10 @@
     overlay.id = 'hbOnboardingOverlay';
     overlay.innerHTML = cardMarkup();
 
-    q(overlay, '#hbObAmountCurrency').textContent = findOption(CURRENCY_OPTIONS, state.currency).label;
+    // دیگر نیازی به تنظیم span قدیمی نیست (hbObAmountCurrency حذف شده)
     setSelectedLabel(overlay, 'hbObTypeSelect', TYPE_OPTIONS, state.type);
     setSelectedLabel(overlay, 'hbObCurrencySelect', CURRENCY_OPTIONS, state.currency);
 
-    // همون سلکت‌باکس سفارشی‌ای که توی بقیه‌ی صفحات استفاده می‌شه (باز/بسته شدن،
-    // جستجو، جای‌گذاری نسبت به دکمه و غیره از public.js میاد)
     if (window.HesabinoUI && typeof window.HesabinoUI.initCustomSelects === 'function') {
       window.HesabinoUI.initCustomSelects(overlay);
     }
@@ -473,8 +543,22 @@
     wireNoteCounter(overlay);
     wireClose(overlay);
 
-    showPanel(overlay, 1);
+    // اتصال رویداد ورودی برای به‌روزرسانی حین تایپ + فیلتر کردن غیر اعداد
+    var balanceInput = q(overlay, '#hbObBalance');
+    if (balanceInput) {
+      balanceInput.addEventListener('input', function () {
+        // حذف هر کاراکتر غیرعددی
+        var raw = this.value.replace(/[^0-9]/g, '');
+        if (this.value !== raw) {
+          this.value = raw;
+        }
+        updateAmountHint(overlay);
+      });
+      // مقدار اولیه
+      updateAmountHint(overlay);
+    }
 
+    showPanel(overlay, 1);
     return overlay;
   }
 
@@ -483,7 +567,6 @@
     overlayEl = buildModal();
     document.documentElement.classList.add('hb-ob-lock-scroll');
     document.body.appendChild(overlayEl);
-    // یک فریم صبر می‌کنیم تا انیمیشن ورود اجرا بشه
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         overlayEl.classList.add('is-open');
@@ -491,11 +574,6 @@
     });
   };
 
-  // ---------------------------------------------------------------------
-  // بررسیِ زودهنگام «آیا کاربر حسابی داره؟» که در main.ejs شروع شده رو دنبال
-  // می‌کنیم؛ به‌محض این‌که جواب مشخص شد (کاربر هیچ حسابی نداره)، مودال رو
-  // بدون نیاز به هیچ اکشن دیگه‌ای از سمت صفحه نشون می‌دیم.
-  // ---------------------------------------------------------------------
   if (HB.ready && typeof HB.ready.then === 'function') {
     HB.ready.then(function (shouldShow) {
       if (shouldShow) HB.show();

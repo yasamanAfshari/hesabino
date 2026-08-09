@@ -903,40 +903,6 @@
     return str;
   }
 
-  function exportTransactionsCsv() {
-    const list = lastFilteredList;
-    if (!list.length) {
-      showToast('تراکنشی برای خروجی گرفتن وجود ندارد', 'error');
-      return;
-    }
-
-    const header = ['تاریخ', 'ساعت', 'عنوان', 'دسته بندی', 'نوع مالی', 'مبلغ', 'حساب', 'یادداشت'];
-    const lines = [header.map(csvEscapeField).join(',')];
-    list.forEach((tx) => {
-      lines.push([
-        tx.date || '',
-        tx.time || '',
-        tx.title || '',
-        tx.category || '',
-        typeLabel(tx.type),
-        tx.amount != null ? tx.amount : '',
-        tx.accountName || '',
-        tx.description || '',
-      ].map(csvEscapeField).join(','));
-    });
-
-    // BOM اول فایل، برای این‌که اکسل حروف فارسی رو درست (نه به‌صورت جفنگ) نشون بده
-    const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
   // ===== خواندن csv بانکی (وارد کردن) =====
   // پارسر ساده و مقاوم csv: از کوتیشن، کاما/سِمی‌کالن به‌عنوان جداکننده، و \r\n/\n پشتیبانی می‌کنه
   function parseCsvText(text) {
@@ -1336,6 +1302,29 @@
     }
   }
 
+  // ===== وقتی از صفحه‌ی دیگری (مثل داشبورد) با لینک ?view=/?edit=/?delete=<id> به این صفحه
+  // میایم، همون مودالِ مربوطه رو خودکار باز می‌کنه؛ بعد پارامتر رو از URL پاک می‌کنه که
+  // با رفرش صفحه دوباره باز نشه =====
+  function openModalFromQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    const viewId = params.get('view');
+    const editId = params.get('edit');
+    const deleteId = params.get('delete');
+
+    if (viewId) openViewModal(Number(viewId));
+    else if (editId) openEditModal(Number(editId));
+    else if (deleteId) openDeleteModal(Number(deleteId));
+
+    if (viewId || editId || deleteId) {
+      params.delete('view');
+      params.delete('edit');
+      params.delete('delete');
+      const newQuery = params.toString();
+      const newUrl = window.location.pathname + (newQuery ? `?${newQuery}` : '');
+      window.history.replaceState({}, '', newUrl);
+    }
+  }
+
   function onReady() {
     setupSelectValueTracking();
 
@@ -1363,7 +1352,9 @@
     // ===== فیلتر سراسری بازه‌ی زمانی (هدر): با تغییرش، لیست همین‌جا (بدون درخواست جدید) دوباره فیلتر می‌شه =====
     document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', applyFilters);
 
-    loadTransactions().finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
+    loadTransactions()
+      .then(openModalFromQueryParams)
+      .finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
   }
 
   // توابعی که از HTML (onclick های داخل سطرهای داینامیک و دکمه‌ی بازنشانی) صدا زده می‌شن
@@ -1374,7 +1365,6 @@
     openEdit: openEditModal,
     openDelete: openDeleteModal,
     printList: printTransactionsList,
-    exportCsv: exportTransactionsCsv,
     triggerCsvImport,
     handleCsvFile,
     confirmCsvImport,

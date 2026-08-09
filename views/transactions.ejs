@@ -100,13 +100,12 @@
 
 <body class="bg-main-color overflow-hidden">
 
-  <%- include('partials/header' , { pageTitle: 'مدیریت تراکنش ها', showPeriodFilter: true } ) %>
+  <%- include('partials/header' , { pageTitle: 'تراکنش ها', showPeriodFilter: true } ) %>
 
   <section class="scrollbar overflow-y-auto px-6 pb-1">
     <div class="main-box-small">
       <div class="flex justify-between items-center">
         <div class="">
-          <button type="button" class="main-btn" onclick="TransactionsApp.exportCsv()">دریافت خروجی</button>
           <button type="button" class="main-btn" onclick="TransactionsApp.triggerCsvImport()">افزودن csv بانکی</button>
           <button type="button" class="main-btn" onclick="TransactionsApp.printList()">چاپ لیست</button>
           <input type="file" id="csvFileInput" accept=".csv,text/csv" class="hidden" onchange="TransactionsApp.handleCsvFile(this.files[0]); this.value = '';">
@@ -123,7 +122,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-7 gap-4 py-4 bg-white">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 py-4 bg-white">
           <!-- Search -->
           <div class="relative">
             <input type="text" id="filterSearchInput" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none" />
@@ -190,7 +189,7 @@
             </svg>
           </div>
 
-          <div class="col-span-2">
+          <div class="col-span-1 md:col-span-3 lg:col-span-2">
             <div class="flex w-full justify-end">
               <button onclick="resetFilter()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">بازنشانی</button>
             </div>
@@ -359,7 +358,9 @@
             </div>
 
             <div class="col-span-1">
-              <label class="text-xs text-zinc-500 mb-1 block">مبلغ</label>
+              <label class="text-xs text-zinc-500 mb-1 block">مبلغ
+                <span class="text-red-color">*</span>
+              </label>
               <div class="relative">
                 <input type="number" min="0" step="1" id="modalAmountInput" placeholder="قیمت " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
               </div>

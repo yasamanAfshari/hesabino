@@ -57,4 +57,9 @@ export class UpdateAccountDto {
   @Type(() => Number)
   @IsNumber()
   displayOrder?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  note?: string;
 }

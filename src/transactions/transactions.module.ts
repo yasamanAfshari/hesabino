@@ -6,12 +6,14 @@ import { TransactionsService } from './transactions.service';
 import { TransactionsController } from './transactions.controller';
 import { AuthModule } from '../auth/auth.module';
 import { AccountsModule } from '../accounts/accounts.module';
+import { BudgetModule } from '../budget/budget.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Transaction, Transfer]),
     AuthModule,
     AccountsModule,
+    BudgetModule,
   ],
   providers: [TransactionsService],
   controllers: [TransactionsController],

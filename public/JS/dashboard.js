@@ -135,29 +135,48 @@
     }
   }
 
+  // ===== وقتی مبلغ ماه قبل خیلی کوچیک باشه، درصد تغییر می‌تونه عددی نجومی (مثلاً ۱۱۱۷۵٪) بشه؛
+  // این تابع درصد رو به یک بازه‌ی معقول محدود می‌کنه تا فقط بزرگ‌تر از حد نمایش داده نشه =====
+  function capPercentChange(change) {
+    return Math.max(-999, Math.min(999, change));
+  }
+
+  // ===== برچسب «نسبت به ...» بر اساس بازه‌ی انتخابی فیلتر سراسری هدر =====
+  const PREV_PERIOD_LABELS = {
+    today: 'دیروز',
+    week: 'هفته قبل',
+    month: 'ماه قبل',
+    year: 'سال قبل',
+  };
+
   // ===== ردیف کارت‌های آماری بالا =====
   function renderStatCards(data) {
     const period = data.period || 'month';
     const periodLabel = (window.HesabinoPeriod && window.HesabinoPeriod.LABELS[period]) || 'این ماه';
+    const prevLabel = PREV_PERIOD_LABELS[period] || 'دوره قبل';
     setText('stat-income-label', `درآمد ${periodLabel}`);
     setText('stat-expense-label', `هزینه‌های ${periodLabel}`);
 
     setText('stat-accounts-count', `${toPersianDigits(data.accounts.accountsCount)} حساب`);
     setText('stat-balance', formatAmount(data.totals.balance));
 
+    // مقایسه با بازه‌ی «درست قبل از» بازه‌ی انتخابی؛ برای هر چهار فیلتر (روز/هفته/ماه/سال) کار می‌کند
+    const previousPeriod = data.previousPeriod || { income: 0, expense: 0 };
+
     setText('stat-income', formatAmount(data.totals.income));
     const incomeTrendEl = document.getElementById('stat-income-trend');
-    const expenseTrendEl = document.getElementById('stat-expense-trend');
-    if (period === 'month') {
-      // مقایسه با ماه قبل فقط برای بازه‌ی «ماه» معنا داره
-      const incomeChange = data.previousMonth.income > 0
-        ? Math.round(((data.totals.income - data.previousMonth.income) / data.previousMonth.income) * 100)
-        : (data.totals.income > 0 ? 100 : 0);
+    if (previousPeriod.income > 0 || data.totals.income > 0) {
+      const incomeChange = capPercentChange(
+        previousPeriod.income > 0
+          ? Math.round(((data.totals.income - previousPeriod.income) / previousPeriod.income) * 100)
+          : (data.totals.income > 0 ? 100 : 0),
+      );
       if (incomeTrendEl) {
         incomeTrendEl.className = incomeChange >= 0 ? 'trend-p flex justify-center items-center px-1.5' : 'trend-m flex justify-center items-center px-1.5';
-        incomeTrendEl.innerHTML = `<span>${toPersianDigits(Math.abs(incomeChange))}٪</span>`;
+        const incomeChangeText = Math.abs(incomeChange) >= 999 ? '+۹۹۹' : toPersianDigits(Math.abs(incomeChange));
+        incomeTrendEl.innerHTML = `<span>${incomeChangeText}٪</span>`;
       }
-      setText('stat-income-subtitle', incomeChange >= 0 ? 'نسبت به ماه قبل بهتر' : 'نسبت به ماه قبل کمتر');
+      setText('stat-income-subtitle', incomeChange >= 0 ? `نسبت به ${prevLabel} بهتر` : `نسبت به ${prevLabel} کمتر`);
     } else {
       if (incomeTrendEl) {
         incomeTrendEl.className = 'trend flex justify-center items-center px-1.5';
@@ -167,23 +186,30 @@
     }
 
     setText('stat-expense', formatAmount(data.totals.expense));
-    if (period === 'month') {
-      const expenseChange = data.previousMonth.expense > 0
-        ? Math.round(((data.totals.expense - data.previousMonth.expense) / data.previousMonth.expense) * 100)
-        : (data.totals.expense > 0 ? 100 : 0);
+    const expenseTrendEl = document.getElementById('stat-expense-trend');
+    if (previousPeriod.expense > 0 || data.totals.expense > 0) {
+      const expenseChange = capPercentChange(
+        previousPeriod.expense > 0
+          ? Math.round(((data.totals.expense - previousPeriod.expense) / previousPeriod.expense) * 100)
+          : (data.totals.expense > 0 ? 100 : 0),
+      );
       if (expenseTrendEl) {
         expenseTrendEl.className = expenseChange <= 0 ? 'trend-p flex justify-center items-center px-1.5' : 'trend-m flex justify-center items-center px-1.5';
-        expenseTrendEl.innerHTML = `<span>${toPersianDigits(Math.abs(expenseChange))}٪</span>`;
+        const expenseChangeText = Math.abs(expenseChange) >= 999 ? '+۹۹۹' : toPersianDigits(Math.abs(expenseChange));
+        expenseTrendEl.innerHTML = `<span>${expenseChangeText}٪</span>`;
       }
-      const budgetPercent = data.budget.totalBudget > 0
-        ? Math.round((data.totals.expense / data.budget.totalBudget) * 100)
-        : null;
-      setText('stat-expense-subtitle', budgetPercent !== null ? `${toPersianDigits(budgetPercent)}٪ از بودجه مصرف شد` : 'بدون بودجه تعیین‌شده');
     } else {
       if (expenseTrendEl) {
         expenseTrendEl.className = 'trend flex justify-center items-center px-1.5';
         expenseTrendEl.innerHTML = '<span>—</span>';
       }
+    }
+    if (period === 'month') {
+      const budgetPercent = data.budget.totalBudget > 0
+        ? Math.round((data.totals.expense / data.budget.totalBudget) * 100)
+        : null;
+      setText('stat-expense-subtitle', budgetPercent !== null ? `${toPersianDigits(budgetPercent)}٪ از بودجه مصرف شد` : 'بدون بودجه تعیین‌شده');
+    } else {
       setText('stat-expense-subtitle', `مجموع هزینه‌های ${periodLabel}`);
     }
 
@@ -193,6 +219,21 @@
     setText('stat-cheques-subtitle', cs.nearestDays !== null ? `نزدیک‌ترین: ${toPersianDigits(cs.nearestDays)} روز دیگر` : 'چک در انتظاری وجود ندارد');
 
     setText('stat-savings-rate', data.totals.hasIncomeData ? `${toPersianDigits(data.totals.savingsRatePercent)}٪` : '—');
+    const savingsTrendEl = document.getElementById('stat-savings-trend');
+    if (savingsTrendEl) {
+      if (data.totals.hasIncomeData && previousPeriod.income > 0) {
+        // مقایسه به‌صورت اختلاف نقطه‌ای (percentage point) انجام می‌شه، نه درصدِ درصد؛
+        // چون اگه نرخ پس‌انداز بازه‌ی قبل نزدیک صفر باشه، محاسبه‌ی درصدِ تغییر هم مثل باگ هزینه منفجر می‌شه
+        const prevBalance = previousPeriod.income - previousPeriod.expense;
+        const prevSavingsRatePercent = Math.round((prevBalance / previousPeriod.income) * 100);
+        const savingsPointsChange = data.totals.savingsRatePercent - prevSavingsRatePercent;
+        savingsTrendEl.className = savingsPointsChange >= 0 ? 'trend-p flex justify-center items-center px-1.5' : 'trend-m flex justify-center items-center px-1.5';
+        savingsTrendEl.innerHTML = `<span>${toPersianDigits(Math.abs(savingsPointsChange))}٪</span>`;
+      } else {
+        savingsTrendEl.className = 'trend flex justify-center items-center px-1.5';
+        savingsTrendEl.innerHTML = '<span>—</span>';
+      }
+    }
 
     setText('stat-health-score', data.health.score !== null ? `${toPersianDigits(data.health.score)}/۱۰۰` : '—');
     setText('stat-health-label', data.health.label);
@@ -765,7 +806,7 @@
       return `
         <div class="reminder-row ${meta.bg} rounded-lg p-2 transition-all">
           <div class="flex items-start gap-3">
-            <div class="flex flex-1 justify-between">
+            <div class="flex flex-1 justify-between flex-wrap">
               <p class="text-gray-800 text-base md:text-lg font-medium leading-relaxed">${escapeHtml(r.text)}</p>
               <div class="flex justify-end mt-1">
                 <span class="text-xs font-semibold ${meta.badge} px-2 py-0.5 rounded-full inline-block">${meta.label}${r.date ? ' · ' + toPersianDigits(r.date) : ''}</span>
@@ -784,6 +825,24 @@
     setText('debt-receivable', formatAmount(s.receivable));
     setText('debt-net', formatAmount(s.net));
   }
+
+  // ===== آیکون دکمه‌های عملیات هر سطر جدول «آخرین تراکنش‌ها» (مشابه صفحه‌ی تراکنش‌ها) =====
+  const TX_EYE_ICON = `<svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M8.99988 15.2025C11.6474 15.2025 14.1149 13.6425 15.8324 10.9425C16.5074 9.88501 16.5074 8.10751 15.8324 7.05001C14.1149 4.35001 11.6474 2.79001 8.99988 2.79001C6.35238 2.79001 3.88488 4.35001 2.16738 7.05001C1.49238 8.10751 1.49238 9.88501 2.16738 10.9425C3.88488 13.6425 6.35238 15.2025 8.99988 15.2025Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>`;
+
+  const TX_PENCIL_ICON = `<svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12.6142 2.46067L13.9984 1.07566C14.2869 0.787107 14.6783 0.625 15.0864 0.625C15.4944 0.625 15.8858 0.787107 16.1743 1.07566C16.4629 1.36421 16.625 1.75557 16.625 2.16364C16.625 2.57172 16.4629 2.96308 16.1743 3.25163L4.38454 15.0414C3.95076 15.475 3.41583 15.7936 2.82805 15.9686L0.625 16.625L1.2814 14.422C1.4564 13.8342 1.77504 13.2992 2.20857 12.8655L12.615 2.46067H12.6142ZM12.6142 2.46067L14.7787 4.62515" stroke="white" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>`;
+
+  const TX_TRASH_ICON = `<svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15.75 4.48499C13.2525 4.23749 10.74 4.10999 8.235 4.10999C6.75 4.10999 5.265 4.18499 3.78 4.33499L2.25 4.48499" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M6.375 3.7275L6.54 2.745C6.66 2.0325 6.75 1.5 8.0175 1.5H9.9825C11.25 1.5 11.3475 2.0625 11.46 2.7525L11.625 3.7275" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M14.1376 6.85498L13.6501 14.4075C13.5676 15.585 13.5 16.5 11.4075 16.5H6.59255C4.50005 16.5 4.43255 15.585 4.35005 14.4075L3.86255 6.85498" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M7.74756 12.375H10.2451" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>`;
 
   // ===== جدول آخرین تراکنش‌ها =====
   function renderTransactionsTable(data) {
@@ -807,7 +866,13 @@
           <td class="px-5 py-3.5"><span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-medium">${escapeHtml(t.category || 'سایر')}</span></td>
           <td class="px-5 py-3.5"><span class="${badgeClass} px-2.5 py-1 rounded-full text-xs font-medium">${badgeText}</span></td>
           <td class="px-5 py-3.5 font-mono font-medium text-gray-800 whitespace-nowrap">${formatNumber(t.amount)}</td>
-          <td></td>
+          <td>
+            <div class="flex justify-center gap-2">
+              <button type="button" class="bg-main-color p-1 rounded-md" title="جزئیات" onclick="location.href='/transactions?view=${t.id}'">${TX_EYE_ICON}</button>
+              ${t.type === 'transfer' ? '' : `<button type="button" class="bg-main-color p-1 rounded-md" title="ویرایش" onclick="location.href='/transactions?edit=${t.id}'">${TX_PENCIL_ICON}</button>`}
+              <button type="button" class="bg-main-color p-1 rounded-md" title="${t.type === 'transfer' ? 'حذف انتقال' : 'حذف'}" onclick="location.href='/transactions?delete=${t.id}'">${TX_TRASH_ICON}</button>
+            </div>
+          </td>
         </tr>
       `;
     }).join('');

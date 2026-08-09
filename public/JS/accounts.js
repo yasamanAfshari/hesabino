@@ -123,6 +123,9 @@
     const archivedBadge = account.isArchived
       ? '<span class="text-xs px-2 py-1 rounded-full bg-orange-color-25 text-orange-color">آرشیوشده</span>'
       : '';
+    const noteBlock = account.note
+      ? `<div class="text-xs text-zinc-500 border-t border-gray-100 pt-2 mt-1 leading-5">${escapeHtml(account.note)}</div>`
+      : '';
 
     return `
       <div class="main-box-small mb-0 border border-gray-100 rounded-xl p-4 flex flex-col gap-2">
@@ -135,6 +138,7 @@
           <div class="text-xs text-zinc-500 mb-1">موجودی لحظه‌ای</div>
           <div class="font-bold text-lg ${balanceClass}">${formatAmount(balance, account.currency)}</div>
         </div>
+        ${noteBlock}
         <div class="flex justify-end mt-2">
           <button class="text-sm px-3 py-1.5 rounded-lg border border-main-color text-main-color" onclick="AccountsApp.openEditModal(${account.id})">ویرایش</button>
         </div>
@@ -179,6 +183,7 @@
     document.getElementById('addAccountType').value = 'bank';
     document.getElementById('addAccountCurrency').value = 'IRR';
     document.getElementById('addAccountOpeningBalance').value = '';
+    document.getElementById('addAccountNote').value = '';
     window.AmountInput.refreshForm(document.getElementById('addAccount'));
     openModal('addAccount');
   }
@@ -188,6 +193,7 @@
     const type = document.getElementById('addAccountType').value;
     const currency = document.getElementById('addAccountCurrency').value;
     const openingBalance = window.AmountInput.parse(document.getElementById('addAccountOpeningBalance').value);
+    const note = document.getElementById('addAccountNote').value.trim();
     const errorBox = document.getElementById('addAccountError');
     errorBox.classList.add('hidden');
 
@@ -206,13 +212,14 @@
           type,
           currency,
           openingBalance: openingBalance ? Number(openingBalance) : 0,
+          note: note || undefined,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'ثبت حساب با خطا مواجه شد');
 
       closeModal();
-      showToast('حساب با موفقیت ثبت شد', 'success');
+      showToast('حساب با موفقیت ثبت شد');
       await loadAccounts();
     } catch (err) {
       errorBox.textContent = err.message;
@@ -231,6 +238,7 @@
     document.getElementById('editAccountType').value = account.type;
     document.getElementById('editAccountCurrency').value = account.currency;
     document.getElementById('editAccountOpeningBalance').value = account.openingBalance;
+    document.getElementById('editAccountNote').value = account.note || '';
     window.AmountInput.refresh(document.getElementById('editAccountOpeningBalance'));
 
     const archiveBtn = document.getElementById('editAccountArchiveBtn');
@@ -245,6 +253,7 @@
     const type = document.getElementById('editAccountType').value;
     const currency = document.getElementById('editAccountCurrency').value;
     const openingBalance = window.AmountInput.parse(document.getElementById('editAccountOpeningBalance').value);
+    const note = document.getElementById('editAccountNote').value.trim();
     const errorBox = document.getElementById('editAccountError');
     errorBox.classList.add('hidden');
 
@@ -263,13 +272,14 @@
           type,
           currency,
           openingBalance: openingBalance ? Number(openingBalance) : 0,
+          note,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'ویرایش حساب با خطا مواجه شد');
 
       closeModal();
-      showToast('حساب با موفقیت ویرایش شد', 'success');
+      showToast('حساب با موفقیت ویرایش شد');
       await loadAccounts();
     } catch (err) {
       errorBox.textContent = err.message;

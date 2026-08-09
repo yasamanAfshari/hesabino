@@ -106,8 +106,39 @@
 
     const incomeInput = document.getElementById('pageIncomeInput');
     if (incomeInput && document.activeElement !== incomeInput) {
-      incomeInput.value = data.income ? data.income : '';
+      // اگه برای این ماه هنوز بودجه‌ای (با درآمد دستی) ثبت نشده، اینپوت درآمد رو با
+      // همون مبلغی که از صفحه‌ی درآمد ثبت شده پر می‌کنیم؛ اگه بودجه از قبل با یک
+      // درآمد مشخص ذخیره شده، همون مقدار ذخیره‌شده رو نشون می‌دیم (رونویسی نمی‌شه)
+      incomeInput.value = data.income ? data.income : (data.registeredIncome || '');
     }
+
+    renderRegisteredIncomeHint(data);
+  }
+
+  // ===== یادآوری زیر اینپوت درآمد: مقدار واقعی ثبت‌شده در صفحه‌ی درآمد، برای وقتی
+  // که کاربر درآمد بودجه رو دستی با عددی متفاوت تنظیم کرده باشه =====
+  function renderRegisteredIncomeHint(data) {
+    const hintEl = document.getElementById('registeredIncomeHint');
+    if (!hintEl) return;
+
+    if (!data.registeredIncome) {
+      hintEl.classList.add('hidden');
+      return;
+    }
+
+    const differs = Number(data.income) > 0 && Number(data.income) !== Number(data.registeredIncome);
+    hintEl.classList.remove('hidden');
+    hintEl.innerHTML = differs
+      ? `درآمد ثبت‌شده‌ی این ماه: ${formatAmount(data.registeredIncome)} — <button type="button" class="text-main-color underline" onclick="BudgetApp.useRegisteredIncome()">استفاده از این مقدار</button>`
+      : `درآمد ثبت‌شده‌ی این ماه: ${formatAmount(data.registeredIncome)}`;
+  }
+
+  // ===== جایگزینی مقدار اینپوت درآمد صفحه با همون درآمد ثبت‌شده در صفحه‌ی درآمد =====
+  function useRegisteredIncome() {
+    if (!latestBudget || !latestBudget.registeredIncome) return;
+    const incomeInput = document.getElementById('pageIncomeInput');
+    if (incomeInput) incomeInput.value = latestBudget.registeredIncome;
+    renderRegisteredIncomeHint(latestBudget);
   }
 
   // ===== لیست وضعیت هر دسته (پروگرس‌بارها) =====
@@ -227,7 +258,7 @@
     }
 
     hideManualFormError();
-    const pageIncome = Number(document.getElementById('pageIncomeInput').value) || latestBudget.income || 0;
+    const pageIncome = Number(document.getElementById('pageIncomeInput').value) || latestBudget.income || latestBudget.registeredIncome || 0;
     document.getElementById('manualIncomeInput').value = pageIncome || '';
     buildManualRows(latestBudget.categories);
     recalcManualTotals();
@@ -494,6 +525,7 @@
     openManualModal,
     submitManual,
     openAlertsModal,
+    useRegisteredIncome,
   };
 
   function onReady() {

@@ -52,4 +52,9 @@ export class CreateAccountDto {
   @Type(() => Number)
   @IsNumber()
   displayOrder?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  note?: string;
 }

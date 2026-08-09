@@ -10,7 +10,7 @@
 
     <% if (typeof showPeriodFilter !== 'undefined' && showPeriodFilter) { %>
     <!-- فیلتر سراسری بازه‌ی زمانی؛ فقط توی داشبورد، گزارش‌ها و تراکنش‌ها نمایش داده می‌شه -->
-    <select id="global-period-select" title="بازه‌ی زمانی نمایش داده‌ها" class="text-sm border border-gray-200 !w-36 rounded-lg px-2 py-1 bg-white text-zinc-700 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400">
+    <select id="global-period-select" title="بازه‌ی زمانی نمایش داده‌ها" class="text-sm border border-gray-200 !w-30 rounded-lg px-2 py-1 bg-white text-zinc-700 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400">
       <option value="today">امروز</option>
       <option value="week">این هفته</option>
       <option value="month" selected>این ماه</option>
@@ -26,7 +26,7 @@
   </div>
 
   <!-- منوی پروفایل کاربر -->
-  <div class="fixed user-profile z-40" id="user-menu">
+  <div class="fixed user-profile z-40 df" id="user-menu">
     <button id="user-menu-button" type="button" class="flex items-center gap-3 rounded-full py-1 pl-1 pr-2 hover:bg-black/5 transition-colors cursor-pointer focus:outline-none">
       <span id="user-fullname" class="text-lg font-medium truncate max-w-[70px] sm:max-w-[120px] md:max-w-[140px]" dir="auto" title="در حال بارگذاری...">
         در حال بارگذاری...

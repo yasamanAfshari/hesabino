@@ -1,11 +1,9 @@
 /* ==========================================================================
    Onboarding Modal — راهنمای افزودن اولین حساب
-   وقتی کاربر هنوز هیچ حسابی نساخته، این مودال روی همه‌ی صفحات (قبل از هر
-   محتوای دیگه) نمایش داده می‌شه و تا تکمیل نشه بسته نمی‌شه.
-   استایل کاملاً مستقل نوشته شده (نه Tailwind) تا نیازی به build مجدد
-   output.css نداشته باشه.
+   استایل‌های حداقلی؛ هرجا ممکنه از تیلویند استفاده شده.
    ========================================================================== */
 
+/* ---------- Overlay ---------- */
 .hb-ob-overlay {
   position: fixed;
   inset: 0;
@@ -13,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 12px;
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -26,20 +24,22 @@
   opacity: 1;
 }
 
+/* ---------- Card ---------- */
 .hb-ob-card {
   position: relative;
   width: 100%;
-  max-width: 520px;
-  max-height: min(94vh, 760px);
+  max-width: 590px;
+  height: calc(98vh - 20vh);
   display: flex;
   flex-direction: column;
   background: var(--color-surface-color);
   color: var(--color-text-color);
-  border-radius: 28px;
+  border-radius: 14px;
   box-shadow: 0 30px 70px rgba(15, 23, 42, 0.3), 0 6px 18px rgba(15, 23, 42, 0.14);
   transform: translateY(20px) scale(0.96);
   opacity: 0;
   overflow: hidden;
+  top: -25px;
   transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.34s ease;
 }
 
@@ -48,35 +48,19 @@
   opacity: 1;
 }
 
+/* shake animation */
 .hb-ob-card.is-shake {
   animation: hbObShake 0.4s ease;
 }
 
 @keyframes hbObShake {
-
-  10%,
-  90% {
-    transform: translateX(-2px);
-  }
-
-  20%,
-  80% {
-    transform: translateX(4px);
-  }
-
-  30%,
-  50%,
-  70% {
-    transform: translateX(-7px);
-  }
-
-  40%,
-  60% {
-    transform: translateX(7px);
-  }
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-7px); }
+  40%, 60% { transform: translateX(7px); }
 }
 
-/* glow decoration behind the header */
+/* glow decoration */
 .hb-ob-glow {
   position: absolute;
   top: -80px;
@@ -90,33 +74,14 @@
 
 /* ---------- Header ---------- */
 .hb-ob-header {
-  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 26px 26px 20px;
+  padding: 22px 26px 18px;
   border-bottom: 1px solid var(--color-border-color);
   flex-shrink: 0;
-}
-
-.hb-ob-header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hb-ob-title {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--color-text-color);
-}
-
-.hb-ob-subtitle {
-  font-size: 0.8rem;
-  line-height: 1.8;
-  color: var(--color-text2-color);
-  max-width: 380px;
+  position: relative;
 }
 
 .hb-ob-close {
@@ -150,7 +115,7 @@
 .hb-ob-steps {
   display: flex;
   align-items: flex-start;
-  padding: 22px 26px 4px;
+  padding: 18px 26px 0;
   flex-shrink: 0;
 }
 
@@ -158,14 +123,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   width: 96px;
 }
 
 .hb-ob-step-line {
   flex: 1;
   height: 2px;
-  margin-top: 25px;
+  margin-top: 22px;
   border-radius: 2px;
   background: var(--color-border-color);
   position: relative;
@@ -191,8 +156,8 @@ html[dir='ltr'] .hb-ob-step-line::after {
 }
 
 .hb-ob-step-circle {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -205,8 +170,8 @@ html[dir='ltr'] .hb-ob-step-line::after {
 }
 
 .hb-ob-step-circle svg {
-  width: 21px;
-  height: 21px;
+  width: 20px;
+  height: 20px;
   stroke: currentColor;
   stroke-width: 1.7;
 }
@@ -236,20 +201,8 @@ html[dir='ltr'] .hb-ob-step-line::after {
   display: block;
 }
 
-.hb-ob-step-eyebrow {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  color: var(--color-text2-color);
-  text-transform: uppercase;
-}
-
-.hb-ob-step-col.is-active .hb-ob-step-eyebrow {
-  color: var(--color-main-color);
-}
-
 .hb-ob-step-label {
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 700;
   color: var(--color-text2-color);
   text-align: center;
@@ -261,12 +214,21 @@ html[dir='ltr'] .hb-ob-step-line::after {
   color: var(--color-text-color);
 }
 
+/* ---------- Inner container (padding مشترک) ---------- */
+.hb-ob-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 18px 26px 22px;
+}
+
 /* ---------- Body / panels ---------- */
 .hb-ob-body {
-  padding: 22px 26px 6px;
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  /* padding از کانتینر داخلی میاد */
 }
 
 .hb-ob-panel {
@@ -279,17 +241,11 @@ html[dir='ltr'] .hb-ob-step-line::after {
 }
 
 @keyframes hbObFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
+/* ---------- Error ---------- */
 .hb-ob-error {
   display: none;
   font-size: 0.78rem;
@@ -306,235 +262,14 @@ html[dir='ltr'] .hb-ob-step-line::after {
   display: block;
 }
 
-.hb-ob-field {
-  margin-bottom: 18px;
-  position: relative;
-}
-
-.hb-ob-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-text-color);
-  margin-bottom: 9px;
-}
-
-.hb-ob-label .hb-ob-label-hint {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--color-text2-color);
-}
-
-/* --- custom select / dropdown (à la "Select Treatment") --- */
-.hb-ob-select-trigger {
-  width: 100%;
-  height: 52px;
-  border-radius: 15px;
-  border: 1.5px solid var(--color-border-color);
-  background: var(--color-surface2-color);
-  color: var(--color-text-color);
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  cursor: pointer;
-  font-size: 0.88rem;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.hb-ob-select-trigger .hb-ob-select-placeholder {
-  color: var(--color-text2-color);
-}
-
-.hb-ob-select-trigger-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.hb-ob-select-trigger-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-main-color-25);
-  color: var(--color-main-color);
-}
-
-.hb-ob-select-trigger-icon svg {
-  width: 15px;
-  height: 15px;
-  stroke: currentColor;
-  stroke-width: 1.8;
-}
-
-.hb-ob-select-trigger span.hb-ob-select-value {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
-}
-
-.hb-ob-select-chevron {
-  width: 17px;
-  height: 17px;
-  color: var(--color-text2-color);
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.hb-ob-field.is-open .hb-ob-select-trigger {
-  border-color: var(--color-main-color);
-  box-shadow: 0 0 0 4px var(--color-main-color-25);
-}
-
-.hb-ob-field.is-open .hb-ob-select-chevron {
-  transform: rotate(180deg);
-}
-
-.hb-ob-select-panel {
-  position: absolute;
-  z-index: 5;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  background: var(--color-surface-color);
-  border: 1px solid var(--color-border-color);
-  border-radius: 16px;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
-  padding: 8px;
-  max-height: 240px;
-  overflow-y: auto;
-  display: none;
-}
-
-.hb-ob-field.is-open .hb-ob-select-panel {
-  display: block;
-  animation: hbObFadeUp 0.18s ease both;
-}
-
-.hb-ob-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 10px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.14s ease;
-}
-
-.hb-ob-option:hover {
-  background: var(--color-surface2-color);
-}
-
-.hb-ob-option.is-selected {
-  background: var(--color-main-color-25);
-}
-
-.hb-ob-option-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-main-color-25);
-  color: var(--color-main-color);
-}
-
-.hb-ob-option.is-selected .hb-ob-option-icon {
-  background: var(--color-main-color);
-  color: #fff;
-}
-
-.hb-ob-option-icon svg {
-  width: 17px;
-  height: 17px;
-  stroke: currentColor;
-  stroke-width: 1.8;
-}
-
-.hb-ob-option-text {
-  min-width: 0;
-}
-
-.hb-ob-option-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-text-color);
-}
-
-.hb-ob-option-desc {
-  font-size: 0.72rem;
-  color: var(--color-text2-color);
-  margin-top: 1px;
-}
-
-/* preview card once something is picked */
-.hb-ob-preview-card {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-inline-start: 3px solid var(--color-main-color);
-  background: var(--color-surface2-color);
-  border-radius: 13px;
-  padding: 12px 14px;
-}
-
-.hb-ob-preview-card .hb-ob-option-icon {
-  background: var(--color-main-color);
-  color: #fff;
-}
-
-/* --- plain text input --- */
-.hb-ob-input {
-  width: 100%;
-  height: 52px;
-  border-radius: 15px;
-  border: 1.5px solid var(--color-border-color);
-  background: var(--color-surface2-color);
-  color: var(--color-text-color);
-  padding: 0 16px;
-  font-size: 0.9rem;
-  outline: none;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-  font-family: inherit;
-}
-
-.hb-ob-input::placeholder {
-  color: var(--color-text2-color);
-}
-
-.hb-ob-input:focus {
-  border-color: var(--color-main-color);
-  box-shadow: 0 0 0 4px var(--color-main-color-25);
-}
-
-.hb-ob-hint {
-  margin-top: 8px;
-  font-size: 0.74rem;
-  color: var(--color-text2-color);
-  line-height: 1.7;
-}
-
-/* --- hero amount field (step 3) --- */
+/* ---------- Amount field ---------- */
 .hb-ob-amount-wrap {
-  position: relative;
   display: flex;
   align-items: center;
-  border-radius: 18px;
+  border-radius: 16px;
   border: 1.5px solid var(--color-border-color);
   background: var(--color-surface2-color);
-  padding: 6px 8px 6px 16px;
+  padding: 4px 6px 4px 14px;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -548,10 +283,10 @@ html[dir='ltr'] .hb-ob-step-line::after {
   border: none;
   background: transparent;
   outline: none;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--color-text-color);
-  padding: 10px 0;
+  padding: 8px 0;
   font-family: inherit;
   min-width: 0;
   direction: ltr;
@@ -567,22 +302,22 @@ html[dir='ltr'] .hb-ob-step-line::after {
   flex-shrink: 0;
   background: var(--color-main-color-25);
   color: var(--color-main-color);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 800;
-  border-radius: 12px;
-  padding: 9px 14px;
+  border-radius: 10px;
+  padding: 7px 12px;
   white-space: nowrap;
 }
 
-/* --- quick note textarea --- */
+/* ---------- Textarea ---------- */
 .hb-ob-textarea {
   width: 100%;
-  min-height: 84px;
-  border-radius: 15px;
+  min-height: 80px;
+  border-radius: 12px;
   border: 1.5px solid var(--color-border-color);
   background: var(--color-surface2-color);
   color: var(--color-text-color);
-  padding: 13px 16px;
+  padding: 12px 16px;
   font-size: 0.85rem;
   outline: none;
   resize: none;
@@ -600,21 +335,15 @@ html[dir='ltr'] .hb-ob-step-line::after {
   box-shadow: 0 0 0 4px var(--color-main-color-25);
 }
 
-.hb-ob-counter {
-  font-size: 0.7rem;
-  color: var(--color-text2-color);
-  font-weight: 600;
-}
-
 /* ---------- Success ---------- */
 .hb-ob-success {
   text-align: center;
-  padding: 18px 0 10px;
+  padding: 14px 0 8px;
 }
 
 .hb-ob-success-icon {
-  width: 88px;
-  height: 88px;
+  width: 80px;
+  height: 80px;
   margin: 0 auto;
   border-radius: 50%;
   background: var(--color-green-color-25);
@@ -624,8 +353,8 @@ html[dir='ltr'] .hb-ob-step-line::after {
 }
 
 .hb-ob-success-icon svg {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
 }
 
 .hb-ob-success-icon circle {
@@ -648,69 +377,38 @@ html[dir='ltr'] .hb-ob-step-line::after {
   animation: hbObDrawCheck 0.35s ease 0.45s forwards;
 }
 
-@keyframes hbObDrawCircle {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes hbObDrawCheck {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.hb-ob-success-title {
-  margin-top: 20px;
-  font-size: 1.08rem;
-  font-weight: 800;
-  color: var(--color-text-color);
-}
-
-.hb-ob-success-desc {
-  margin-top: 8px;
-  font-size: 0.85rem;
-  color: var(--color-text2-color);
-  line-height: 1.8;
-  padding: 0 12px;
-}
+@keyframes hbObDrawCircle { to { stroke-dashoffset: 0; } }
+@keyframes hbObDrawCheck { to { stroke-dashoffset: 0; } }
 
 .hb-ob-summary {
-  margin-top: 20px;
+  margin-top: 18px;
   background: var(--color-surface2-color);
   border: 1px solid var(--color-border-color);
-  border-radius: 16px;
-  padding: 16px 18px;
+  border-radius: 14px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  text-align: right;
 }
 
-.hb-ob-summary-left {
+.hb-ob-option-icon-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  background: var(--color-main-color-25);
+  color: var(--color-main-color);
 }
 
-.hb-ob-summary-name {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--color-text-color);
-}
-
-.hb-ob-summary-type {
-  font-size: 0.74rem;
-  color: var(--color-text2-color);
-  margin-top: 2px;
-}
-
-.hb-ob-summary-balance {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--color-green-color);
-  white-space: nowrap;
+.hb-ob-option-icon-sm svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 1.8;
 }
 
 /* ---------- Footer ---------- */
@@ -718,18 +416,19 @@ html[dir='ltr'] .hb-ob-step-line::after {
   flex-shrink: 0;
   display: flex;
   gap: 12px;
-  padding: 20px 26px 26px;
+  padding-top: 16px;
   border-top: 1px solid var(--color-border-color);
+  margin-top: auto;
 }
 
 .hb-ob-btn {
   border: none;
   cursor: pointer;
   font-family: inherit;
-  border-radius: 15px;
-  font-size: 0.88rem;
+  border-radius: 14px;
+  font-size: 0.86rem;
   font-weight: 700;
-  height: 50px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -759,7 +458,7 @@ html[dir='ltr'] .hb-ob-step-line::after {
 }
 
 .hb-ob-btn-secondary {
-  min-width: 112px;
+  min-width: 100px;
   background: transparent;
   color: var(--color-text-color);
   border: 1.5px solid var(--color-border-color);
@@ -770,6 +469,7 @@ html[dir='ltr'] .hb-ob-step-line::after {
   color: var(--color-main-color);
 }
 
+/* spinner */
 .hb-ob-spinner {
   width: 17px;
   height: 17px;
@@ -789,24 +489,31 @@ html[dir='ltr'] .hb-ob-step-line::after {
 }
 
 @keyframes hbObSpin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Dark theme ---------- */
+html.dark-theme .hb-ob-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+html.hb-ob-lock-scroll,
+html.hb-ob-lock-scroll body {
+  overflow: hidden !important;
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 560px) {
-
-  .hb-ob-header,
-  .hb-ob-body,
-  .hb-ob-footer {
-    padding-left: 18px;
-    padding-right: 18px;
+  .hb-ob-header {
+    padding: 18px 16px 14px;
   }
 
   .hb-ob-steps {
-    padding-left: 12px;
-    padding-right: 12px;
+    padding: 14px 12px 0;
+  }
+
+  .hb-ob-inner {
+    padding: 14px 16px 18px;
   }
 
   .hb-ob-step-col {
@@ -815,29 +522,92 @@ html[dir='ltr'] .hb-ob-step-line::after {
   }
 
   .hb-ob-step-circle {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
   }
 
   .hb-ob-step-circle svg {
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
   }
 
   .hb-ob-step-label {
-    font-size: 0.68rem;
+    font-size: 0.66rem;
+  }
+
+  .hb-ob-step-line {
+    margin-top: 19px;
   }
 
   .hb-ob-amount-input {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
   }
 }
 
-html.dark-theme .hb-ob-overlay {
-  background: rgba(0, 0, 0, 0.7);
+/* ---------- فیلد موجودی اولیه جدید ---------- */
+.hb-ob-amount-wrap {
+  display: flex;
+  align-items: flex-start;  /* تغییر از center به flex-start برای تطابق ارتفاع با hint */
+  gap: 8px;
+  border-radius: 16px;
+  border: 1.5px solid var(--color-border-color);
+  background: var(--color-surface2-color);
+  padding: 12px 14px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-html.hb-ob-lock-scroll,
-html.hb-ob-lock-scroll body {
-  overflow: hidden !important;
+.hb-ob-amount-wrap:focus-within {
+  border-color: var(--color-main-color);
+  box-shadow: 0 0 0 4px var(--color-main-color-25);
+}
+
+.hb-ob-amount-input-new {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text-color);
+  font-family: inherit;
+  text-align: right;
+  direction: ltr;
+  padding: 0;
+  line-height: 1.2;
+}
+
+.hb-ob-amount-input-new::placeholder {
+  color: var(--color-text2-color);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.amount-words-hint {
+  color: var(--color-text2-color);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.hb-ob-amount-currency {
+  flex-shrink: 0;
+  background: var(--color-main-color-25);
+  color: var(--color-main-color);
+  font-size: 0.76rem;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 7px 12px;
+  white-space: nowrap;
+  margin-top: 2px;  /* برای هم‌ترازی بهتر با input */
+}
+
+/* در حالت موبایل */
+@media (max-width: 560px) {
+  .hb-ob-amount-input-new {
+    font-size: 1.25rem;
+  }
+  .hb-ob-amount-currency {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+  }
 }

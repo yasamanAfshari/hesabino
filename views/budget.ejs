@@ -9,6 +9,11 @@
     .main-box {
       height: 60vh !important;
     }
+    @media (max-width: 576px) {
+      .main-box {
+        height: 52vh !important;
+      }
+    }
   </style>
 </head>
 
@@ -77,18 +82,23 @@
     </div>
 
     <div class="main-box-small my-2">
-      <div class="flex justify-between items-center flex-wrap gap-2">
-        <div class="">
-          <div class="relative">
-            <input type="text" id="pageIncomeInput" placeholder="درآمد این ماه " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
-          </div>
-        </div>
-        <div>
-          <button class="main-btn" id="autoCalculateBtn" onclick="BudgetApp.autoCalculate()">محاسبه خودکار</button>
-          <button class="main-btn" onclick="BudgetApp.openManualModal()">ویرایش دستی </button>
-        </div>
-      </div>
+  <div class="grid grid-cols-[auto_auto_auto] gap-2 items-center md:grid-cols-[1fr_auto_auto]">
+    <!-- اینپوت -->
+    <div class="relative">
+      <input
+        type="text"
+        id="pageIncomeInput"
+        placeholder="درآمد این ماه"
+        class="w-full max-w-[150px] md:max-w-none h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none"
+      />
     </div>
+
+    <!-- دکمه‌ها -->
+    <button class="main-btn" id="autoCalculateBtn" onclick="BudgetApp.autoCalculate()">محاسبه خودکار</button>
+    <button class="main-btn" onclick="BudgetApp.openManualModal()">ویرایش دستی</button>
+  </div>
+  <div id="registeredIncomeHint" class="hidden text-xs text-gray-500 mt-1"></div>
+</div>
 
     <div class="grid grid-cols-1 my-2">
       <div class="main-box">
@@ -120,7 +130,7 @@
 
   <!-- مودال ویرایش دستی -->
   <div id="editBudgetManual" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col relative">
+    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[95vh] flex flex-col relative">
       <!-- هدر ثابت -->
       <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
         <h3 class="font-bold text-lg text-zinc-800">ویرایش دستی بودجه</h3>

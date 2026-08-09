@@ -12,15 +12,17 @@ import {
   gregorianToJalali,
   jalaliToGregorian,
   normalizeJalaliDate,
+  parseJalaliDate,
   remainingDaysUntil,
   toEnglishDigits,
+  toPersianDigits,
   weekdayNameFromJalali,
 } from '../common/jalali.util';
 
 // «today» و «week» دقت روزانه دارن (دقیقاً هم‌راستا با فیلتر سراسری هدر)،
 // بقیه دقت ماهانه دارن (برای نمودارهای روند چند‌ماهه)
 export type ReportRange = 'today' | 'week' | 'month' | '3m' | '6m' | 'year' | 'all';
-type Granularity = 'day' | 'month';
+type Granularity = 'day' | 'week' | 'month';
 
 interface PeriodBucket {
   income: number;
@@ -63,8 +65,13 @@ export class ReportsService {
     return `${y}/${String(m).padStart(2, '0')}`;
   }
 
+  // «today» و «week» دقت روزانه دارن (هم‌راستا با فیلتر سراسری هدر)، «month» به ۴ بازه‌ی
+  // هفتگی (هفته ۱ تا ۴ همون ماه) شکسته می‌شه چون یک نقطه‌ی تکی برای کل ماه، «روند» معنایی نداره،
+  // بقیه (۳/۶ ماهه، سال، همه) دقت ماهانه دارن
   private resolveGranularity(range: ReportRange): Granularity {
-    return range === 'today' || range === 'week' ? 'day' : 'month';
+    if (range === 'today' || range === 'week') return 'day';
+    if (range === 'month') return 'week';
+    return 'month';
   }
 
   // ===== همه‌ی تراکنش‌های کاربر، یک‌بار خونده و بر اساس ماه (YYYY/MM) دسته‌بندی می‌شن =====
@@ -96,6 +103,37 @@ export class ReportsService {
     }
 
     return buckets;
+  }
+
+  // ===== تراکنش‌های «فقط ماه جاری»، بر اساس هفته‌ی داخل ماه (هفته ۱ تا ۴) دسته‌بندی می‌شن؛
+  // برای بازه‌ی «month» که خودش یک نقطه‌ی تکی نیست بلکه باید به روند هفتگی شکسته بشه.
+  // تقسیم: روز ۱ تا ۷ = هفته ۱، ۸ تا ۱۴ = هفته ۲، ۱۵ تا ۲۱ = هفته ۳، ۲۲ به بعد = هفته ۴
+  // (هفته‌ی آخر ممکنه بسته به تعداد روزهای ماه، ۸ تا ۱۰ روز باشه، نه دقیقاً ۷) =====
+  private async loadCurrentMonthWeekBuckets(userId: number): Promise<Map<string, PeriodBucket>> {
+    const transactions = await this.transactionsRepository.find({ where: { userId } });
+    const buckets = new Map<string, PeriodBucket>();
+    const today = currentJalaliDate();
+    const monthKey = this.monthKeyStr(today.y, today.m);
+
+    for (const tx of transactions) {
+      const normalizedDate = toEnglishDigits(tx.date || '');
+      const parsed = parseJalaliDate(normalizedDate);
+      if (!parsed) continue;
+      if (this.monthKeyStr(parsed.y, parsed.m) !== monthKey) continue;
+
+      const weekIndex = Math.min(4, Math.ceil(parsed.d / 7));
+      const key = `${monthKey}/W${weekIndex}`;
+      this.applyTxToBucket(buckets, key, tx);
+    }
+
+    return buckets;
+  }
+
+  // ===== لیست کلیدهای هفته‌ی ۱ تا ۴ ماه جاری، از قدیم به جدید =====
+  private resolveRangeWeekOfMonthKeys(): string[] {
+    const today = currentJalaliDate();
+    const monthKey = this.monthKeyStr(today.y, today.m);
+    return [1, 2, 3, 4].map((w) => `${monthKey}/W${w}`);
   }
 
   private applyTxToBucket(buckets: Map<string, PeriodBucket>, key: string, tx: Transaction): void {
@@ -163,6 +201,10 @@ export class ReportsService {
       if (range === 'today') return 'امروز';
       return weekdayNameFromJalali(key) || key;
     }
+    if (granularity === 'week') {
+      const weekNum = key.split('/W')[1] || '';
+      return `هفته ${toPersianDigits(weekNum)}`;
+    }
     return PERSIAN_MONTH_NAMES[Number(key.split('/')[1])] || key;
   }
 
@@ -173,6 +215,7 @@ export class ReportsService {
     granularity: Granularity,
     allBuckets: Map<string, PeriodBucket>,
     rangeKeys: string[],
+    allMonthBucketsForAverages: Map<string, PeriodBucket>,
   ) {
     const cashFlow = rangeKeys.map((key) => {
       const b = allBuckets.get(key) || emptyBucket();
@@ -212,15 +255,20 @@ export class ReportsService {
       }));
     const top5Categories = categoryBreakdown.slice(0, 5);
 
-    // ===== جدول میانگین هزینه‌ها: نرخ این بازه در برابر میانگین تاریخیِ واقعیِ هر دسته،
-    // با همون واحد زمانی (روزانه برای «امروز»/«این هفته»، ماهانه برای بقیه‌ی بازه‌ها) =====
-    const allKeysSorted = Array.from(allBuckets.keys()).sort();
+    // ===== جدول میانگین هزینه‌ها: نرخ این بازه در برابر میانگین تاریخیِ واقعیِ هر دسته.
+    // واحد مقایسه به دقتِ بازه بستگی داره: روزانه برای «امروز»/«این هفته»، ماهانه برای بقیه.
+    // نکته: برای «month» که نمایش (نمودار) به ۴ هفته شکسته شده، مقایسه‌ی میانگین همچنان
+    // «ماهانه» باقی می‌مونه (نه هفتگی) تا با گذشته قابل مقایسه بمونه؛ برای همین از
+    // allMonthBucketsForAverages (سطل‌های کامل تاریخی بر پایه‌ی ماه) استفاده می‌کنیم، نه
+    // سطل‌های هفتگیِ همین بازه =====
+    const averagesSource = granularity === 'week' ? allMonthBucketsForAverages : allBuckets;
+    const allKeysSorted = Array.from(averagesSource.keys()).sort();
     const categoryAverages = BUDGET_CATEGORIES
       .map((category) => {
         let allTimeTotal = 0;
         let allTimeActivePeriods = 0;
         for (const key of allKeysSorted) {
-          const amount = allBuckets.get(key)?.byCategory[category] || 0;
+          const amount = averagesSource.get(key)?.byCategory[category] || 0;
           if (amount > 0) {
             allTimeTotal += amount;
             allTimeActivePeriods += 1;
@@ -229,7 +277,11 @@ export class ReportsService {
         const periodAverage = allTimeActivePeriods > 0 ? Math.round(allTimeTotal / allTimeActivePeriods) : 0;
 
         const rangeExpense = categoryTotals[category] || 0;
-        const activePeriodsInRange = rangeKeys.filter((key) => (allBuckets.get(key)?.byCategory[category] || 0) > 0).length;
+        // برای granularity==='week' (بازه‌ی «month»)، کل بازه‌ی انتخابی خودش دقیقاً «یک ماه»
+        // است، پس نرخ این بازه باید مثل قبل «کل هزینه‌ی این یک ماه» باشه، نه میانگین روی هفته‌ها
+        const activePeriodsInRange = granularity === 'week'
+          ? (rangeExpense > 0 ? 1 : 0)
+          : rangeKeys.filter((key) => (allBuckets.get(key)?.byCategory[category] || 0) > 0).length;
         const periodRate = activePeriodsInRange > 0 ? rangeExpense / activePeriodsInRange : 0;
 
         let comparisonPercent: number | null = null;
@@ -262,12 +314,22 @@ export class ReportsService {
 
     const allBuckets = granularity === 'day'
       ? await this.loadAllDayBuckets(userId)
-      : await this.loadAllMonthBuckets(userId);
+      : granularity === 'week'
+        ? await this.loadCurrentMonthWeekBuckets(userId)
+        : await this.loadAllMonthBuckets(userId);
     const rangeKeys = granularity === 'day'
       ? this.resolveRangeDayKeys(range as 'today' | 'week')
-      : this.resolveRangeMonthKeys(range, allBuckets);
+      : granularity === 'week'
+        ? this.resolveRangeWeekOfMonthKeys()
+        : this.resolveRangeMonthKeys(range, allBuckets);
 
-    const computed = this.buildReportFromBuckets(range, granularity, allBuckets, rangeKeys);
+    // فقط وقتی granularity === 'week' لازمه جدا بار بشه؛ در بقیه‌ی حالت‌ها allBuckets
+    // خودش از قبل بر پایه‌ی ماهه (یا اصلاً لازم نیست، چون granularity روزانه‌ست)
+    const allMonthBucketsForAverages = granularity === 'week'
+      ? await this.loadAllMonthBuckets(userId)
+      : allBuckets;
+
+    const computed = this.buildReportFromBuckets(range, granularity, allBuckets, rangeKeys, allMonthBucketsForAverages);
 
     const [debtsOverview, chequesOverview] = await Promise.all([
       this.debtsService.getOverview(userId),

@@ -6,6 +6,7 @@ import { Transfer } from '../transfers/transfer.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { AccountsService } from '../accounts/accounts.service';
+import { BudgetService } from '../budget/budget.service';
 
 export interface TransactionQuery {
   search?: string;
@@ -22,7 +23,20 @@ export class TransactionsService {
     @InjectRepository(Transfer)
     private transfersRepository: Repository<Transfer>,
     private accountsService: AccountsService,
+    private budgetService: BudgetService,
   ) {}
+
+  // ===== هر بار که یک تراکنش درآمدی ثبت/ویرایش/حذف می‌شه، بودجه‌ی ماه جاری رو با
+  // درآمد جدید هماهنگ می‌کنیم تا کاربر مجبور نباشه خودش دستی «محاسبه خودکار» بزنه.
+  // اگه به هر دلیلی این هماهنگ‌سازی خطا بده، نباید کل عملیات ثبت/ویرایش/حذف تراکنش
+  // رو با شکست مواجه کنه، پس فقط لاگ می‌کنیم.
+  private async syncBudgetIfIncome(userId: number) {
+    try {
+      await this.budgetService.syncIncomeForMonth(userId);
+    } catch (err) {
+      console.error('خطا در هماهنگ‌سازی خودکار بودجه با درآمد:', err);
+    }
+  }
 
   // ===== خروجی استاندارد: تبدیل amount (که از دیتابیس به صورت رشته می‌آید) به عدد
   // و افزودن نام حساب مرتبط (از روی رابطه‌ی accountRef) برای نمایش در فرانت =====
@@ -61,6 +75,11 @@ export class TransactionsService {
       userId,
     });
     const saved = await this.transactionsRepository.save(transaction);
+
+    if (dto.type === 'income') {
+      await this.syncBudgetIfIncome(userId);
+    }
+
     return this.findOne(userId, saved.id);
   }
 
@@ -130,6 +149,7 @@ export class TransactionsService {
     const finalType = dto.type || transaction.type;
     const finalAmount =
       dto.amount !== undefined ? dto.amount : Number(transaction.amount);
+    const previousType = transaction.type;
 
     if (finalAccountId && finalType === 'expense') {
       // موجودی فعلی حساب مقصد را می‌گیریم؛ اگر همین تراکنش قبلاً روی همین حساب
@@ -155,12 +175,18 @@ export class TransactionsService {
 
     Object.assign(transaction, dto);
     const saved = await this.transactionsRepository.save(transaction);
+
+    if (finalType === 'income' || previousType === 'income') {
+      await this.syncBudgetIfIncome(userId);
+    }
+
     return this.findOne(userId, saved.id);
   }
 
   // ===== حذف تراکنش =====
   async remove(userId: number, id: number): Promise<void> {
     const transaction = await this.findOneOwned(userId, id);
+    const wasIncome = transaction.type === 'income';
 
     // این رکورد آینه‌ی یک انتقال بین حساب‌هاست؛ برای حذف درست، خودِ رکورد Transfer
     // حذف می‌شود (که با CASCADE همین رکورد نمایشی رو هم خودکار پاک می‌کنه)
@@ -170,5 +196,9 @@ export class TransactionsService {
     }
 
     await this.transactionsRepository.remove(transaction);
+
+    if (wasIncome) {
+      await this.syncBudgetIfIncome(userId);
+    }
   }
 }

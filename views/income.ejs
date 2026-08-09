@@ -45,7 +45,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg">نسبت به ماه قبل</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5" id="incomeChangePercent">۰٪</div>
+              <div class="text-zinc-500 !text-md my-2.5" id="incomeChangePercent">۰٪</div>
             </div>
           </div>
         </div>
@@ -61,7 +61,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg">تعداد تراکنش</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5" id="incomeTxCount">۰</div>
+              <div class="text-zinc-500 !text-md my-2.5" id="incomeTxCount">۰</div>
             </div>
           </div>
         </div>
@@ -79,12 +79,12 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 my-2">
-      <!-- ریز درآمد به تفکیک دسته -->
+      <!-- ریز درآمد به تفکیک حساب مقصد -->
       <div class="main-box">
         <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3">
-          <h2 class="font-bold text-lg text-zinc-800">ریز درآمد به تفکیک منبع</h2>
+          <h2 class="font-bold text-lg text-zinc-800">ریز درآمد به تفکیک حساب</h2>
         </div>
-        <div class="h-[85%] overflow-auto scrollbar px-2" id="incomeCategoryList">
+        <div class="h-[85%] overflow-auto scrollbar px-2" id="incomeAccountList">
           <p class="text-center text-gray-400 mt-6">در حال بارگذاری...</p>
         </div>
       </div>
@@ -101,11 +101,11 @@
     </div>
   </section>
 
-  <!-- مودال افزودن دستی درآمد -->
+  <!-- مودال افزودن/ویرایش دستی درآمد -->
   <div id="addIncomeModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col relative">
       <div class="flex items-center justify-between px-6 pt-6 pb-3 border-b border-gray-200">
-        <h3 class="font-bold text-lg text-zinc-800">افزودن درآمد</h3>
+        <h3 class="font-bold text-lg text-zinc-800" id="incomeModalTitle">افزودن درآمد</h3>
         <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6L6 18M6 6l12 12" />
@@ -115,6 +115,7 @@
 
       <div class="modal-body overflow-y-auto scrollbar px-6 py-4 flex flex-col gap-4">
         <div id="addIncomeError" class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2"></div>
+        <input type="hidden" id="incomeEditId" value="">
 
         <div>
           <label class="text-sm text-zinc-600 mb-1 block">عنوان (اختیاری)</label>
@@ -127,6 +128,13 @@
             <% incomeCategories.forEach((cat) => { %>
             <option value="<%= cat %>"><%= cat %></option>
             <% }) %>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-sm text-zinc-600 mb-1 block">حساب مقصد</label>
+          <select id="incomeAccountSelect" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white">
+            <option value="">بدون حساب</option>
           </select>
         </div>
 
@@ -148,7 +156,23 @@
 
       <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
         <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
-        <button class="main-btn px-4 py-2 rounded-lg" id="addIncomeSubmitBtn" onclick="IncomeApp.submitAdd()">ثبت درآمد</button>
+        <button class="main-btn px-4 py-2 rounded-lg" id="addIncomeSubmitBtn" onclick="IncomeApp.submitForm()">ثبت درآمد</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال تایید حذف درآمد -->
+  <div id="deleteIncomeModal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-sm flex flex-col relative">
+      <div class="px-6 pt-6 pb-3">
+        <h3 class="font-bold text-lg text-zinc-800">حذف درآمد</h3>
+        <p class="text-sm text-gray-500 mt-2">آیا از حذف این تراکنش درآمدی مطمئن هستید؟ این عملیات از موجودی حساب مرتبط هم کسر می‌شود.</p>
+        <div id="deleteIncomeError" class="hidden text-sm text-red-color bg-red-color-25 border border-red-color rounded-lg px-3 py-2 mt-3"></div>
+        <input type="hidden" id="incomeDeleteId" value="">
+      </div>
+      <div class="flex justify-end gap-2 px-6 pb-6 pt-4 border-t border-gray-200">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700">انصراف</button>
+        <button class="px-4 py-2 rounded-lg bg-red-color text-white" id="confirmDeleteIncomeBtn" onclick="IncomeApp.confirmDelete()">حذف</button>
       </div>
     </div>
   </div>

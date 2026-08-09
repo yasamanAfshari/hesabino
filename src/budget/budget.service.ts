@@ -71,6 +71,22 @@ export class BudgetService {
     return spent;
   }
 
+  // ===== جمع درآمد ثبت‌شده‌ی ماه جاری (از تراکنش‌های صفحه‌ی درآمد)؛ برای پیش‌فرض
+  // زدن اینپوت «درآمد این ماه» توی صفحه‌ی بودجه، به‌جای اینکه کاربر دوباره دستی
+  // همون عددی که قبلاً توی صفحه‌ی درآمد ثبت کرده رو تایپ کنه =====
+  private async getRegisteredIncome(userId: number, monthKey: string): Promise<number> {
+    const persianMonthKey = toPersianDigits(monthKey);
+    const incomes = await this.transactionsRepository.find({
+      where: [
+        { userId, type: 'income', date: Like(`${monthKey}%`) },
+        { userId, type: 'income', date: Like(`${persianMonthKey}%`) },
+      ],
+    });
+    return incomes
+      .filter((tx) => toEnglishDigits(tx.date || '').startsWith(monthKey))
+      .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
+  }
+
   private async findCurrentBudget(userId: number): Promise<Budget | null> {
     const month = currentJalaliMonthKey();
     return this.budgetRepository.findOne({ where: { userId, month } });
@@ -79,8 +95,11 @@ export class BudgetService {
   // ===== خروجی استاندارد صفحه‌ی بودجه: کارت‌های بالا + وضعیت هر دسته =====
   async getOverview(userId: number) {
     const month = currentJalaliMonthKey();
-    const budget = await this.findCurrentBudget(userId);
-    const spentByCategory = await this.getSpentByCategory(userId, month);
+    const [budget, spentByCategory, registeredIncome] = await Promise.all([
+      this.findCurrentBudget(userId),
+      this.getSpentByCategory(userId, month),
+      this.getRegisteredIncome(userId, month),
+    ]);
 
     const income = budget ? Number(budget.income) : 0;
     const categoriesSource: { category: string; percentage: number; amount: number }[] = budget
@@ -115,6 +134,7 @@ export class BudgetService {
     return {
       month,
       income,
+      registeredIncome,
       totalBudget,
       spent: totalSpent,
       remaining: totalBudget - totalSpent,
@@ -137,6 +157,34 @@ export class BudgetService {
 
     await this.saveBudget(userId, income, categories);
     return this.getOverview(userId);
+  }
+
+  // ===== هماهنگ‌سازی خودکار بودجه با درآمد ثبت‌شده: هر بار که یک تراکنش درآمدی این
+  // ماه ثبت/ویرایش/حذف می‌شه صدا زده می‌شه تا کاربر مجبور نباشه خودش دستی روی
+  // «محاسبه خودکار» بزنه. اگه بودجه‌ای برای این ماه هنوز ثبت نشده، با درصدهای
+  // پیش‌فرض یکی می‌سازه؛ اگه از قبل بودجه‌ای با درصد دلخواه کاربر ثبت شده،
+  // همون درصدها رو نگه می‌داره و فقط مبلغ هر دسته رو با درآمد جدید متناسب می‌کنه.
+  async syncIncomeForMonth(userId: number): Promise<void> {
+    const month = currentJalaliMonthKey();
+    const registeredIncome = await this.getRegisteredIncome(userId, month);
+    const budget = await this.budgetRepository.findOne({ where: { userId, month }, relations: { categories: true } });
+
+    if (!budget) {
+      if (registeredIncome > 0) {
+        await this.calculate(userId, { income: registeredIncome } as CalculateBudgetDto);
+      }
+      return;
+    }
+
+    if (Number(budget.income) === registeredIncome) return;
+
+    const categories = (budget.categories || []).map((c) => ({
+      category: c.category,
+      percentage: Number(c.percentage),
+      amount: Math.round((registeredIncome * Number(c.percentage)) / 100),
+    }));
+
+    await this.saveBudget(userId, registeredIncome, categories);
   }
 
   // ===== ثبت/ویرایش دستی هر دسته =====

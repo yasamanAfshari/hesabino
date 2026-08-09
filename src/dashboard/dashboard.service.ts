@@ -18,6 +18,7 @@ import {
   currentJalaliMonthKey,
   daysInJalaliMonth,
   matchesPeriod,
+  matchesPreviousPeriod,
   remainingDaysUntil,
   toEnglishDigits,
   toPersianDigits,
@@ -241,6 +242,33 @@ export class DashboardService {
     return result;
   }
 
+  // ===== جمع درآمد/هزینه‌ی «بازه‌ی درست قبل از بازه‌ی انتخابی» فیلتر سراسری هدر؛
+  // برای محاسبه‌ی روند (٪ تغییر نسبت به بازه‌ی قبل) روی کارت‌های آماری، برای هر چهار بازه =====
+  private async getPreviousPeriodTotals(
+    userId: number,
+    period: DashboardPeriod,
+    prevMonthTotals: MonthTotals,
+  ): Promise<{ income: number; expense: number }> {
+    if (period === 'month') {
+      return { income: prevMonthTotals.income, expense: prevMonthTotals.expense };
+    }
+
+    const transactions = await this.transactionsRepository.find({ where: { userId } });
+    const result = { income: 0, expense: 0 };
+
+    for (const tx of transactions) {
+      if (!matchesPreviousPeriod(tx.date || '', period)) continue;
+      const amount = Number(tx.amount) || 0;
+      if (tx.type === 'income') {
+        result.income += amount;
+      } else if (tx.type === 'expense') {
+        result.expense += amount;
+      }
+    }
+
+    return result;
+  }
+
   // ===== خروجی یک‌جای همه‌ی داده‌های داشبورد؛ period فیلتر سراسری هدر است (امروز/هفته/ماه/سال) =====
   // توجه: بخش‌هایی مثل پیش‌بینی پایان ماه، سلامت مالی، بودجه و نمودار جریان مالی ذاتاً ماهانه‌اند
   // و همیشه بر اساس «ماه جاری واقعی» محاسبه می‌شوند؛ period فقط روی کارت‌های آماری درآمد/هزینه/تراز
@@ -260,6 +288,9 @@ export class DashboardService {
 
     // ===== جمع درآمد/هزینه/دسته‌بندی برای بازه‌ی انتخابیِ فیلتر سراسری هدر =====
     const periodTotals = await this.getPeriodTotals(userId, normalizedPeriod, thisMonth);
+
+    // ===== جمع درآمد/هزینه‌ی بازه‌ی «درست قبل از» بازه‌ی انتخابی، برای روند کارت‌های آماری =====
+    const previousPeriodTotals = await this.getPreviousPeriodTotals(userId, normalizedPeriod, prevMonth);
 
     // ===== ۶ ماه اخیر برای نمودار جریان مالی و نسبت هزینه به درآمد =====
     const cashFlow: { month: string; income: number; expense: number; hasData: boolean }[] = [];
@@ -451,6 +482,7 @@ export class DashboardService {
         hasIncomeData: periodTotals.income > 0,
       },
       previousMonth: { income: prevMonth.income, expense: prevMonth.expense },
+      previousPeriod: { income: previousPeriodTotals.income, expense: previousPeriodTotals.expense },
       accounts: accountsSummary,
       categoryBreakdown,
       topCategory: topCategory ? { ...topCategory, changePercent: topCategoryChangePercent } : null,

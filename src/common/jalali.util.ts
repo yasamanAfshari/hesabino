@@ -197,6 +197,48 @@ export function matchesPeriod(
   return d.startsWith(monthKey) || d.startsWith(toPersianDigits(monthKey));
 }
 
+// آیا یک تاریخ شمسی داخل «بازه‌ی درست قبل از بازه‌ی فعلی» قرار می‌گیرد؟ برای محاسبه‌ی
+// روند (درصد تغییر نسبت به بازه‌ی قبل) روی هر چهار فیلتر سراسری هدر (روز/هفته/ماه/سال)،
+// نه فقط ماه. هر بازه با بازه‌ی «بلافاصله قبل از خودش» (نه لزوماً ماه/سال تقویمی) مقایسه می‌شود:
+// - امروز → دیروز
+// - هفته (۷ روز اخیر) → ۷ روز قبل از آن (روز ۷ تا ۱۳ پیش)
+// - ماه جاری → ماه شمسی قبل
+// - سال جاری → سال شمسی قبل
+export function matchesPreviousPeriod(
+  dateStr: string,
+  period: DashboardPeriod,
+  from: Date = new Date(),
+): boolean {
+  const d = toEnglishDigits(dateStr || '');
+  if (!d) return false;
+
+  const todayStr = todayJalaliString(from);
+
+  if (period === 'today') {
+    const diff = daysBetweenJalali(d, todayStr);
+    return diff === 1;
+  }
+  if (period === 'week') {
+    const diff = daysBetweenJalali(d, todayStr);
+    return diff !== null && diff >= 7 && diff <= 13;
+  }
+  if (period === 'year') {
+    const { y } = currentJalaliDate(from);
+    return d.startsWith(`${y - 1}/`);
+  }
+  // month (پیش‌فرض)
+  const monthKey = currentJalaliMonthKey(from);
+  const [yStr, mStr] = monthKey.split('/');
+  let py = Number(yStr);
+  let pm = Number(mStr) - 1;
+  if (pm < 1) {
+    pm = 12;
+    py -= 1;
+  }
+  const prevMonthKey = `${py}/${String(pm).padStart(2, '0')}`;
+  return d.startsWith(prevMonthKey) || d.startsWith(toPersianDigits(prevMonthKey));
+}
+
 // نام فارسی روز هفته برای یک تاریخ میلادی (برای «پرخرج‌ترین روز هفته» در تحلیل رفتار خرج)
 const WEEKDAY_NAMES_FA = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
 export function weekdayNameFromJalali(dateStr: string): string | null {
