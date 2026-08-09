@@ -9,6 +9,15 @@
     .main-box {
       height: 60vh !important;
     }
+
+    .main-box-compact {
+      background-color: white;
+      border-radius: 12px;
+      border: 1px solid #E4E4E4;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      padding: 12px;
+      height: stretch !important;
+    }
   </style>
 </head>
 
@@ -30,7 +39,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg" id="incomeMonthLabel">درآمد این ماه</div>
-              <div class="text-zinc-500 !text-md text-center my-2.5" id="incomeTotalAmount">۰ تومان</div>
+              <div class="text-zinc-500 !text-md my-2.5" id="incomeTotalAmount">۰ تومان</div>
             </div>
           </div>
         </div>
@@ -45,7 +54,7 @@
             </div>
             <div>
               <div class="text-zinc-700 font-bold !text-lg">نسبت به ماه قبل</div>
-              <div class="text-zinc-500 !text-md my-2.5" id="incomeChangePercent">۰٪</div>
+              <div class="text-zinc-500 !text-md text-center my-2.5" id="incomeChangePercent">۰٪</div>
             </div>
           </div>
         </div>
@@ -79,13 +88,24 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 my-2">
-      <!-- ریز درآمد به تفکیک حساب مقصد -->
-      <div class="main-box">
-        <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3">
-          <h2 class="font-bold text-lg text-zinc-800">ریز درآمد به تفکیک حساب</h2>
+      <!-- ریز درآمد به تفکیک حساب مقصد + وضعیت برداشت/باقی‌مونده‌ی هر حساب -->
+      <div class="flex flex-col gap-2">
+        <div class="main-box-compact">
+          <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3">
+            <h2 class="font-bold text-lg text-zinc-800">ریز درآمد به تفکیک حساب</h2>
+          </div>
+          <div class="h-[80%] overflow-auto scrollbar px-2" id="incomeAccountList">
+            <p class="text-center text-gray-400 mt-6">در حال بارگذاری...</p>
+          </div>
         </div>
-        <div class="h-[85%] overflow-auto scrollbar px-2" id="incomeAccountList">
-          <p class="text-center text-gray-400 mt-6">در حال بارگذاری...</p>
+
+        <div class="main-box-compact">
+          <div class="flex items-center justify-between mb-1 border-b border-gray-200 pb-3">
+            <h2 class="font-bold text-lg text-zinc-800">برداشت و باقی‌مونده‌ی هر حساب</h2>
+          </div>
+          <div class="h-[80%] overflow-auto scrollbar px-2" id="incomeAccountWithdrawalsList">
+            <p class="text-center text-gray-400 mt-6">در حال بارگذاری...</p>
+          </div>
         </div>
       </div>
 
@@ -139,13 +159,13 @@
         </div>
 
         <div>
-          <label class="text-sm text-zinc-600 mb-1 block">مبلغ (تومان) <span class="text-red-color">*</span></label>
-          <input type="number" min="0" step="1" id="incomeAmountInput" placeholder="مبلغ" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <label class="text-sm text-zinc-600 mb-1 block">مبلغ (تومان)</label>
+          <input type="number" min="0" step="1" id="incomeAmountInput" placeholder="مبلغ" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div>
-          <label class="text-sm text-zinc-600 mb-1 block">تاریخ <span class="text-red-color">*</span></label>
-          <input type="text" id="incomeDatePicker" required class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
+          <label class="text-sm text-zinc-600 mb-1 block">تاریخ</label>
+          <input type="text" id="incomeDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
         </div>
 
         <div>

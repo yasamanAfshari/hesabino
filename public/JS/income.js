@@ -159,10 +159,27 @@
           <span class="inline-block w-2.5 h-2.5 rounded-full" style="background-color: ${colorForAccount(a.accountId ?? 'none')}"></span>
           ${escapeHtml(a.accountName)}
         </span>
-        <span class="text-left">
-          <span class="block text-sm font-medium text-zinc-800">${formatAmount(a.amount)}</span>
-          <span class="block text-xs text-gray-500">${toPersianDigits(a.percent)}٪</span>
-        </span>
+        <span class="text-sm font-medium text-zinc-800">${formatAmount(a.amount)}</span>
+      </div>`).join('');
+  }
+
+  // ===== وضعیت کلی هر حساب: مجموع کل برداشت (هزینه) ازش و موجودی فعلی‌اش =====
+  function renderAccountWithdrawalsList(data) {
+    const container = document.getElementById('incomeAccountWithdrawalsList');
+    if (!container) return;
+
+    if (!data.accountWithdrawals || !data.accountWithdrawals.length) {
+      container.innerHTML = '<p class="text-center text-gray-400 mt-6">حسابی ثبت نشده</p>';
+      return;
+    }
+
+    container.innerHTML = data.accountWithdrawals.map((a) => `
+      <div class="py-2.5 border-b border-gray-100 last:border-0">
+        <div class="text-sm text-zinc-800 mb-1">${escapeHtml(a.accountName)}</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-gray-500">کل برداشت: <span class="text-red-color font-medium">${formatAmount(a.withdrawn)}</span></span>
+          <span class="text-gray-500">باقی‌مونده: <span class="${a.remaining < 0 ? 'text-red-color' : 'text-green-color'} font-medium">${formatAmount(a.remaining)}</span></span>
+        </div>
       </div>`).join('');
   }
 
@@ -208,6 +225,7 @@
       populateMonthSelect(data.availableMonths, data.month);
       renderStatCards(data);
       renderAccountList(data);
+      renderAccountWithdrawalsList(data);
       renderTransactionList(data);
     } catch (err) {
       console.error('Income load network error:', err);

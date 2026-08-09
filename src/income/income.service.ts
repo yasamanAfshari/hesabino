@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { Transaction } from '../transactions/transactions.entity';
 import { TransactionsService } from '../transactions/transactions.service';
+import { AccountsService } from '../accounts/accounts.service';
 import { INCOME_CATEGORIES } from '../transactions/income-categories.constant';
 import { AddIncomeDto } from './dto/add-income.dto';
 import { currentJalaliMonthKey, toEnglishDigits, toPersianDigits } from '../common/jalali.util';
@@ -13,6 +14,7 @@ export class IncomeService {
     @InjectRepository(Transaction)
     private transactionsRepository: Repository<Transaction>,
     private transactionsService: TransactionsService,
+    private accountsService: AccountsService,
   ) {}
 
   // ===== یک ماه شمسی را یک ماه به عقب می‌برد (برای مقایسه‌ی روند با ماه قبل) =====
@@ -67,6 +69,49 @@ export class IncomeService {
     return Array.from(months).sort().reverse();
   }
 
+  // ===== جمع هزینه‌های یک ماه مشخص، به تفکیک حساب برداشت‌شده =====
+  private async getMonthExpenseByAccount(userId: number, monthKey: string): Promise<Map<number, number>> {
+    const persianMonthKey = toPersianDigits(monthKey);
+    const expenses = await this.transactionsRepository.find({
+      where: [
+        { userId, type: 'expense', date: Like(`${monthKey}%`) },
+        { userId, type: 'expense', date: Like(`${persianMonthKey}%`) },
+      ],
+    });
+
+    const map = new Map<number, number>();
+    for (const tx of expenses) {
+      if (!toEnglishDigits(tx.date || '').startsWith(monthKey)) continue;
+      if (tx.accountId == null) continue;
+      map.set(tx.accountId, (map.get(tx.accountId) || 0) + (Number(tx.amount) || 0));
+    }
+    return map;
+  }
+
+  // ===== وضعیت هر حساب در همین ماه: کل برداشت (هزینه) ازش و باقی‌مونده (درآمدی که
+  // همین ماه به این حساب واریز شده منهای برداشتی که همین ماه ازش شده) =====
+  private async getAccountWithdrawals(
+    userId: number,
+    monthKey: string,
+    incomeByAccount: Record<string, { accountName: string; amount: number }>,
+  ) {
+    const accounts = await this.accountsService.findAll(userId, false);
+    if (!accounts.length) return [];
+
+    const withdrawnByAccount = await this.getMonthExpenseByAccount(userId, monthKey);
+
+    return accounts.map((a) => {
+      const income = incomeByAccount[String(a.id)]?.amount || 0;
+      const withdrawn = withdrawnByAccount.get(a.id) || 0;
+      return {
+        accountId: a.id,
+        accountName: a.name,
+        withdrawn,
+        remaining: income - withdrawn,
+      };
+    });
+  }
+
   // ===== خروجی کامل و منحصر به هر ماه: جمع درآمد، ریزِ درآمد به تفکیک دسته، مقایسه با
   // ماه قبل، لیست تراکنش‌های درآمدیِ همون ماه و لیست ماه‌هایی که می‌شود بینشان جابه‌جا شد =====
   async getOverview(userId: number, month?: string) {
@@ -100,6 +145,8 @@ export class IncomeService {
       total += amount;
     }
 
+    const accountWithdrawals = await this.getAccountWithdrawals(userId, monthKey, byAccount);
+
     const categoryBreakdown = Object.entries(byCategory)
       .sort((a, b) => b[1] - a[1])
       .map(([category, amount]) => ({
@@ -114,7 +161,6 @@ export class IncomeService {
         accountId: accountId === 'none' ? null : Number(accountId),
         accountName,
         amount,
-        percent: total > 0 ? Math.round((amount / total) * 100) : 0,
       }));
 
     const prevTotal = prevTransactions.reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
@@ -128,6 +174,7 @@ export class IncomeService {
       total,
       categoryBreakdown,
       accountBreakdown,
+      accountWithdrawals,
       previousMonth: { month: this.prevMonthKey(monthKey), total: prevTotal, changePercent },
       transactions: transactions.map((tx) => this.serializeTransaction(tx)),
       availableMonths,
