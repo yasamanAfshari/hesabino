@@ -203,7 +203,7 @@
         </div>
 
         <div class="relative">
-          <input type="text" id="addAccountName" placeholder="نام حساب (مثلاً بانک ملت)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <input type="text" id="addAccountName" placeholder="نام حساب (مثلاً بانک ملت) *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div class="relative">
@@ -321,23 +321,23 @@
         </div>
 
         <div class="relative">
-          <label class="text-xs text-zinc-500 mb-1 block">از حساب</label>
-          <select id="transferFromAccount" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
+          <label class="text-xs text-zinc-500 mb-1 block">از حساب <span class="text-red-color">*</span></label>
+          <select id="transferFromAccount" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
         </div>
 
         <div class="relative">
-          <label class="text-xs text-zinc-500 mb-1 block">به حساب</label>
-          <select id="transferToAccount" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
+          <label class="text-xs text-zinc-500 mb-1 block">به حساب <span class="text-red-color">*</span></label>
+          <select id="transferToAccount" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none bg-white"></select>
         </div>
 
         <div class="relative">
-          <label class="text-xs text-zinc-500 mb-1 block">مبلغ (تومان)</label>
-          <input type="number" min="0" step="1" id="transferAmount" placeholder="مثلاً ۵۰۰۰۰۰۰" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+          <label class="text-xs text-zinc-500 mb-1 block">مبلغ (تومان) <span class="text-red-color">*</span></label>
+          <input type="number" min="0" step="1" id="transferAmount" placeholder="مثلاً ۵۰۰۰۰۰۰" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
         </div>
 
         <div class="relative">
-          <label class="text-xs text-zinc-500 mb-1 block">تاریخ</label>
-          <input type="text" id="transferDate" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
+          <label class="text-xs text-zinc-500 mb-1 block">تاریخ <span class="text-red-color">*</span></label>
+          <input type="text" id="transferDate" required class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ" autocomplete="off">
         </div>
 
         <div class="relative">

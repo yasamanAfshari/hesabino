@@ -525,9 +525,9 @@ html.dark-theme {
     --color-yellow-color-20: rgba(142, 137, 115, 0.18);
 
     /* ----- سطح/متن/بوردر سفارشی پروژه ----- */
-    --color-surface-color: #27292a;
-    --color-surface2-color: #4e5156;
-    --color-border-color: #37393d;
+    --color-surface-color: #353637;
+    --color-surface2-color: #3f4144;
+    --color-border-color: #232323;
     --color-text-color: #E5E7EB;
     --color-text2-color: #94A3B8;
 
@@ -537,8 +537,8 @@ html.dark-theme {
        صفحات بدون نیاز به کلاس dark: هماهنگ بشن. */
     --color-white: #27292a;
     --color-gray-50: #1A2332;
-    --color-gray-100: #51555b;
-    --color-gray-200: #72777f;
+    --color-gray-100: #222323;
+    --color-gray-200: #4a4a4a;
     --color-gray-300: #717478;
     --color-gray-400: #93A4BA;
     --color-gray-500: #9FB0C3;
@@ -548,8 +548,8 @@ html.dark-theme {
     --color-gray-900: #FFFFFF;
     --color-gray-950: #FFFFFF;
     --color-zinc-50: #1A2332;
-    --color-zinc-100: #51555b;
-    --color-zinc-200: #72777f;
+    --color-zinc-100: #222323;
+    --color-zinc-200: #4a4a4a;
     --color-zinc-300: #717478;
     --color-zinc-400: #93A4BA;
     --color-zinc-500: #9FB0C3;
@@ -567,7 +567,7 @@ html.dark-theme {
        ----------------------------------------------------------------- */
 
     /* آبی (هدر جدول، بج‌های دسته) */
-    --color-blue-50: #4e5156;
+    --color-blue-50: #262627;
     --color-blue-100: #1e3a8a;
     --color-blue-200: #1e40af;
     --color-blue-400: #93c5fd;

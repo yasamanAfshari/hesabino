@@ -214,7 +214,7 @@
           <div class="tab-panel active" id="tabPanelDebts">
             <div class="tab-scroll-area px-2">
 
-              <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4 bg-white">
+              <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4">
                 <!-- Search -->
                 <div class="relative">
                   <input type="text" id="debtSearchInput" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
@@ -295,7 +295,7 @@
                       </th>
                     </tr>
                   </thead>
-                  <tbody id="debtsTableBody" class="bg-white divide-y divide-gray-100">
+                  <tbody id="debtsTableBody" class="divide-y divide-gray-100">
                     <tr>
                       <td colspan="6" class="px-5 py-6 text-center text-gray-400">در حال بارگذاری بدهی‌ها...</td>
                     </tr>
@@ -309,7 +309,7 @@
           <div class="tab-panel" id="tabPanelReceivables">
             <div class="tab-scroll-area px-2">
 
-              <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4 bg-white">
+              <div class="grid grid-cols-2 md:grid-cols-6 gap-4 py-4">
                 <!-- Search -->
                 <div class="relative">
                   <input type="text" id="demandSearchInput" placeholder="جست و جو" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
@@ -390,7 +390,7 @@
                       </th>
                     </tr>
                   </thead>
-                  <tbody id="demandsTableBody" class="bg-white divide-y divide-gray-100">
+                  <tbody id="demandsTableBody" class="divide-y divide-gray-100">
                     <tr>
                       <td colspan="6" class="px-5 py-6 text-center text-gray-400">در حال بارگذاری طلب‌ها...</td>
                     </tr>
@@ -416,7 +416,7 @@
           <div class="tab-panel" id="tabPanelPersons">
             <div class="tab-scroll-area px-2 scrollbar">
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 bg-white">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
                 <div class="relative md:col-span-2">
                   <input type="text" id="personSearchInput" placeholder="جست و جوی نام شخص" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
                   <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -458,17 +458,17 @@
           <div id="loanModalFormError" class="hidden rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
 
           <div class="relative">
-            <input type="text" id="loanTitleInput" placeholder="عنوان وام (مثلاً وام خرید خودرو)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            <input type="text" id="loanTitleInput" placeholder="عنوان وام (مثلاً وام خرید خودرو) *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
           </div>
 
           <!-- مبلغ/تعداد اقساط/سررسید فقط موقع ثبتِ وام جدید نمایش داده می‌شن؛ چون بعد از
                ساخته‌شدنِ اقساط، این‌ها دیگه قابل ویرایش نیستن (فقط عنوان قابل تغییره) -->
           <div id="loanExtraFieldsGrid" class="grid grid-cols-2 gap-3">
             <div class="relative">
-              <input type="number" min="1" id="loanTotalAmountInput" placeholder="مبلغ کل وام (تومان)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+              <input type="number" min="1" id="loanTotalAmountInput" placeholder="مبلغ کل وام (تومان) *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
             </div>
             <div class="relative">
-              <input type="number" min="1" id="loanInstallmentsCountInput" data-unit="قسط" placeholder="تعداد کل اقساط" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+              <input type="number" min="1" id="loanInstallmentsCountInput" data-unit="قسط" placeholder="تعداد کل اقساط *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
             </div>
             <div class="relative">
               <input type="number" min="0" id="loanAlreadyPaidInput" data-unit="قسط" placeholder="اقساط پرداخت‌شده‌ی قبلی" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
@@ -509,7 +509,7 @@
 
           <p class="text-sm text-zinc-500">اگه قبلاً با این شخص حساب‌کتاب داشتی، از پیشنهادها انتخابش کن؛ وگرنه فقط اسمشو بنویس تا به‌عنوان شخص جدید ساخته بشه.</p>
           <div class="relative">
-            <input type="text" id="personNameInput" placeholder="نام شخص" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none" autocomplete="off">
+            <input type="text" id="personNameInput" placeholder="نام شخص *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none" autocomplete="off">
             <div id="personNameSuggestions" class="hidden absolute z-30 top-11 right-0 w-full max-h-40 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg"></div>
           </div>
           <div class="relative">
@@ -519,7 +519,7 @@
           <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100 mt-1">
             <div id="personDirectionSelect" class="custom-select relative col-span-2">
               <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-4 bg-white">
-                <span class="selected-value text-gray-700" data-placeholder="نوع رکورد">نوع رکورد</span>
+                <span class="selected-value text-gray-700" data-placeholder="نوع رکورد *">نوع رکورد *</span>
                 <svg class="w-5 h-5 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path d="m6 9 6 6 6-6"></path>
                 </svg>
@@ -532,7 +532,7 @@
               </div>
             </div>
             <div class="relative col-span-2">
-              <input type="number" min="0" step="1" id="personAmountInput" placeholder="مبلغ" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+              <input type="number" min="0" step="1" id="personAmountInput" placeholder="مبلغ *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
             </div>
             <div class="relative col-span-2">
               <input type="text" id="personDescriptionInput" placeholder="توضیح (اختیاری، مثلاً «قسط اول»)" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
@@ -594,7 +594,7 @@
           <input type="hidden" id="personEntryId" value="">
           <div id="personEntryDirectionSelect" class="custom-select relative">
             <button type="button" class="select-btn w-full h-10 border border-main-color rounded-lg flex items-center justify-between px-3 bg-white text-sm">
-              <span class="selected-value text-gray-700" data-placeholder="نوع">نوع</span>
+              <span class="selected-value text-gray-700" data-placeholder="نوع *">نوع *</span>
               <svg class="w-4 h-4 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path d="m6 9 6 6 6-6"></path>
               </svg>
@@ -606,7 +606,7 @@
               </div>
             </div>
           </div>
-          <input type="number" min="0" step="1" id="personEntryAmountInput" placeholder="مبلغ" class="h-10 border border-main-color rounded-lg px-3 outline-none text-sm">
+          <input type="number" min="0" step="1" id="personEntryAmountInput" placeholder="مبلغ *" required class="h-10 border border-main-color rounded-lg px-3 outline-none text-sm">
           <input type="text" id="personEntryDescriptionInput" placeholder="توضیح (اختیاری)" class="h-10 border border-main-color rounded-lg px-3 outline-none text-sm">
           <div class="flex gap-1.5">
             <button type="submit" id="personEntrySubmitBtn" class="main-btn rounded-lg text-sm flex-1">افزودن</button>
@@ -662,16 +662,16 @@
           <div id="debtModalFormError" class="hidden rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
 
           <div class="relative">
-            <input type="text" id="debtCounterpartyInput" placeholder="طرف حساب" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            <input type="text" id="debtCounterpartyInput" placeholder="طرف حساب *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
           </div>
           <div class="grid grid-cols-2 gap-3">
 
             <div class="relative">
-              <input type="number" min="0" step="1" id="debtAmountInput" placeholder="مبلغ " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+              <input type="number" min="0" step="1" id="debtAmountInput" placeholder="مبلغ *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
             </div>
 
             <div class="relative">
-              <input type="text" id="debtDueDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ سررسید" autocomplete="off">
+              <input type="text" id="debtDueDatePicker" required class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ سررسید *" autocomplete="off">
               <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <path d="M16 2v4M8 2v4M3 10h18"></path>
@@ -733,16 +733,16 @@
           <div id="demandModalFormError" class="hidden rounded-lg px-4 py-2.5 text-sm bg-red-color-25 text-red-color"></div>
 
           <div class="relative">
-            <input type="text" id="demandCounterpartyInput" placeholder="طرف حساب" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+            <input type="text" id="demandCounterpartyInput" placeholder="طرف حساب *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
           </div>
           <div class="grid grid-cols-2 gap-3">
 
             <div class="relative">
-              <input type="number" min="0" step="1" id="demandAmountInput" placeholder="مبلغ " class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+              <input type="number" min="0" step="1" id="demandAmountInput" placeholder="مبلغ *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
             </div>
 
             <div class="relative">
-              <input type="text" id="demandDueDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ سررسید" autocomplete="off">
+              <input type="text" id="demandDueDatePicker" required class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="تاریخ سررسید *" autocomplete="off">
               <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <path d="M16 2v4M8 2v4M3 10h18"></path>
