@@ -8,29 +8,6 @@
 
   // لیست حساب‌های فعال کاربر؛ برای پر کردن سلکت‌باکس «حساب» در فرم ثبت/ویرایش تراکنش
   let userAccounts = [];
-
-  function authHeaders(extra) {
-    const token = localStorage.getItem('access_token');
-    return Object.assign({ Authorization: `Bearer ${token}` }, extra || {});
-  }
-
-  function escapeHtml(str) {
-    if (str === null || str === undefined) return '';
-    return String(str).replace(/[&<>"']/g, (ch) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-    }[ch]));
-  }
-
-  function toPersianDigits(str) {
-    const digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    return String(str).replace(/[0-9]/g, (d) => digits[+d]);
-  }
-
-  function toEnglishDigits(str) {
-    const persian = '۰۱۲۳۴۵۶۷۸۹';
-    return String(str || '').replace(/[۰-۹]/g, (d) => String(persian.indexOf(d)));
-  }
-
   // برای مقایسه‌ی درست فیلتر تاریخ: چه رقم فارسی/انگلیسی باشه و چه بدون صفرِ ابتدایی
   // (مثلاً «۱۴۰۵/۵/۱» و «1405/05/01»)، هر دو باید یکی حساب بشن.
   function normalizeDateForCompare(str) {
@@ -55,51 +32,6 @@
   }
 
   // ===== پیام گوشه‌ی صفحه (toast) برای موفقیت/خطا =====
-  function ensureToastContainer() {
-    let el = document.getElementById('hesabinoToastContainer');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'hesabinoToastContainer';
-      el.style.position = 'fixed';
-      el.style.bottom = '20px';
-      el.style.left = '20px';
-      el.style.zIndex = '9999';
-      el.style.display = 'flex';
-      el.style.flexDirection = 'column';
-      el.style.gap = '10px';
-      el.style.maxWidth = '320px';
-      document.body.appendChild(el);
-    }
-    return el;
-  }
-
-  function showToast(message, type) {
-    const container = ensureToastContainer();
-    const isSuccess = type !== 'error';
-    const toast = document.createElement('div');
-    toast.textContent = message;
-    toast.className =
-      'px-4 py-3 rounded-lg shadow-lg text-sm font-medium border ' +
-      (isSuccess
-        ? 'bg-green-color-25 text-green-color border-green-color'
-        : 'bg-red-color-25 text-red-color border-red-color');
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
-    toast.style.transition = 'opacity .25s ease, transform .25s ease';
-    container.appendChild(toast);
-
-    requestAnimationFrame(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateY(0)';
-    });
-
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(10px)';
-      setTimeout(() => toast.remove(), 250);
-    }, 3200);
-  }
-
   // ===== آیکون دکمه‌های عملیات هر سطر =====
   const EYE_ICON = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M11.6849 9C11.6849 10.485 10.4849 11.685 8.99994 11.685C7.51494 11.685 6.31494 10.485 6.31494 9C6.31494 7.515 7.51494 6.315 8.99994 6.315C10.4849 6.315 11.6849 7.515 11.6849 9Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>

@@ -103,6 +103,10 @@
       }
     }
   </style>
+
+  <!-- public.js شامل توابع مشترک بین اسکریپت‌های صفحاته؛ برای همین باید با defer اما
+       زودتر از اسکریپت‌های خود صفحه (که پایین‌تر توی body می‌آن) لود بشه -->
+  <script src="/JS/public.js?v=<%= assetVersion %>" defer></script>
 </head>
 
 <body class="bg-main-color overflow-hidden">
@@ -129,7 +133,6 @@
   <script src="/JS/period-filter.js?v=<%= assetVersion %>" defer></script>
   <script src="/JS/amount-format.js?v=<%= assetVersion %>" defer></script>
   <script src="/JS/onboarding.js?v=<%= assetVersion %>" defer></script>
-  <script src="/JS/public.js?v=<%= assetVersion %>" defer></script>
   <script src="/JS/sidebar.js?v=<%= assetVersion %>" defer></script>
   <script src="/JS/user-menu.js?v=<%= assetVersion %>" defer></script>
   <script src="/JS/theme.js?v=<%= assetVersion %>" defer></script>

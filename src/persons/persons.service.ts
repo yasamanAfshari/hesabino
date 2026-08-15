@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Person } from './person.entity';
+import { findOwnedOrThrow } from '../common/find-owned.util';
 import { PersonLedgerEntry } from './person-ledger-entry.entity';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
@@ -40,8 +41,12 @@ export class PersonsService {
   // یعنی برخلاف رکوردهای معمولِ بدهی/طلب، این‌جا فقط خالص هر شخص مهمه، نه
   // تک‌تک تراکنش‌های خردش.
   private buildOverallSummary(peopleNets: number[]) {
-    const debt = peopleNets.filter((n) => n < 0).reduce((sum, n) => sum + Math.abs(n), 0);
-    const receivable = peopleNets.filter((n) => n > 0).reduce((sum, n) => sum + n, 0);
+    const debt = peopleNets
+      .filter((n) => n < 0)
+      .reduce((sum, n) => sum + Math.abs(n), 0);
+    const receivable = peopleNets
+      .filter((n) => n > 0)
+      .reduce((sum, n) => sum + n, 0);
     return { debt, receivable, net: receivable - debt };
   }
 
@@ -73,12 +78,13 @@ export class PersonsService {
     };
   }
 
-  private async findOwnedPerson(userId: number, id: number): Promise<Person> {
-    const person = await this.personsRepository.findOne({ where: { id, userId } });
-    if (!person) {
-      throw new NotFoundException('شخص مورد نظر یافت نشد');
-    }
-    return person;
+  private findOwnedPerson(userId: number, id: number): Promise<Person> {
+    return findOwnedOrThrow(
+      this.personsRepository,
+      userId,
+      id,
+      'شخص مورد نظر یافت نشد',
+    );
   }
 
   // ===== ثبت شخص جدید =====
@@ -112,12 +118,15 @@ export class PersonsService {
   // ===== جزئیات یک شخص: اطلاعات + لیست تراکنش‌های خرد + مانده‌ی روبه‌رو =====
   async getPersonDetail(userId: number, id: number) {
     const person = await this.findOwnedPerson(userId, id);
-    const entries = await this.entriesRepository.find({ where: { userId, personId: id } });
+    const entries = await this.entriesRepository.find({
+      where: { userId, personId: id },
+    });
     const sorted = this.sortEntries(entries);
 
     let running = 0;
     const items = sorted.map((e) => {
-      const signedAmount = e.direction === 'they_owe' ? Number(e.amount) : -Number(e.amount);
+      const signedAmount =
+        e.direction === 'they_owe' ? Number(e.amount) : -Number(e.amount);
       running += signedAmount;
       return {
         id: e.id,
@@ -151,8 +160,14 @@ export class PersonsService {
     return this.getPersonDetail(userId, personId);
   }
 
-  private async findOwnedEntry(userId: number, personId: number, entryId: number): Promise<PersonLedgerEntry> {
-    const entry = await this.entriesRepository.findOne({ where: { id: entryId, userId, personId } });
+  private async findOwnedEntry(
+    userId: number,
+    personId: number,
+    entryId: number,
+  ): Promise<PersonLedgerEntry> {
+    const entry = await this.entriesRepository.findOne({
+      where: { id: entryId, userId, personId },
+    });
     if (!entry) {
       throw new NotFoundException('تراکنش مورد نظر یافت نشد');
     }
@@ -160,11 +175,17 @@ export class PersonsService {
   }
 
   // ===== ویرایش یک تراکنش خرد =====
-  async updateEntry(userId: number, personId: number, entryId: number, dto: UpdateLedgerEntryDto) {
+  async updateEntry(
+    userId: number,
+    personId: number,
+    entryId: number,
+    dto: UpdateLedgerEntryDto,
+  ) {
     const entry = await this.findOwnedEntry(userId, personId, entryId);
     if (dto.direction !== undefined) entry.direction = dto.direction;
     if (dto.amount !== undefined) entry.amount = dto.amount;
-    if (dto.description !== undefined) entry.description = dto.description || null;
+    if (dto.description !== undefined)
+      entry.description = dto.description || null;
     await this.entriesRepository.save(entry);
     return this.getPersonDetail(userId, personId);
   }

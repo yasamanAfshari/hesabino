@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Loan } from './loan.entity';
+import { findOwnedOrThrow } from '../common/find-owned.util';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import { TransactionsService } from '../transactions/transactions.service';
@@ -28,12 +29,16 @@ export class InstallmentsService {
     const installmentAmount = Number(loan.installmentAmount);
     const remainingCount = Math.max(loan.installmentsCount - loan.paidCount, 0);
     const remainingAmount = remainingCount * installmentAmount;
-    const progressPercent = loan.installmentsCount > 0
-      ? Math.round((loan.paidCount / loan.installmentsCount) * 100)
-      : 0;
+    const progressPercent =
+      loan.installmentsCount > 0
+        ? Math.round((loan.paidCount / loan.installmentsCount) * 100)
+        : 0;
 
-    const daysUntilNext = loan.nextDueDate ? remainingDaysUntil(loan.nextDueDate) : null;
-    const isOverdue = !loan.isCompleted && daysUntilNext !== null && daysUntilNext < 0;
+    const daysUntilNext = loan.nextDueDate
+      ? remainingDaysUntil(loan.nextDueDate)
+      : null;
+    const isOverdue =
+      !loan.isCompleted && daysUntilNext !== null && daysUntilNext < 0;
 
     return {
       ...loan,
@@ -58,16 +63,23 @@ export class InstallmentsService {
 
     return {
       activeCount: active.length,
-      totalRemainingAmount: active.reduce((sum, l) => sum + l.remainingAmount, 0),
+      totalRemainingAmount: active.reduce(
+        (sum, l) => sum + l.remainingAmount,
+        0,
+      ),
       overdueCount: active.filter((l) => l.isOverdue).length,
       loans: serialized,
     };
   }
 
   async create(userId: number, dto: CreateLoanDto) {
-    const installmentAmount = Math.round(dto.totalAmount / dto.installmentsCount);
+    const installmentAmount = Math.round(
+      dto.totalAmount / dto.installmentsCount,
+    );
 
-    let firstDue = dto.firstDueDate ? normalizeJalaliDate(dto.firstDueDate) : null;
+    let firstDue = dto.firstDueDate
+      ? normalizeJalaliDate(dto.firstDueDate)
+      : null;
     if (!firstDue) {
       const today = currentJalaliDate();
       const next = addOneJalaliMonth(today.y, today.m, today.d);
@@ -114,17 +126,34 @@ export class InstallmentsService {
     return this.getOverview(userId);
   }
 
-  private async findOwned(userId: number, id: number): Promise<Loan> {
-    const loan = await this.loansRepository.findOne({ where: { id, userId } });
-    if (!loan) {
-      throw new NotFoundException('وام یافت نشد');
-    }
-    return loan;
+  private findOwned(userId: number, id: number): Promise<Loan> {
+    return findOwnedOrThrow(this.loansRepository, userId, id, 'وام یافت نشد');
   }
 
   async update(userId: number, id: number, dto: UpdateLoanDto) {
     const loan = await this.findOwned(userId, id);
-    Object.assign(loan, dto);
+
+    if (dto.paidCount > dto.installmentsCount) {
+      throw new BadRequestException(
+        'تعداد اقساط پرداخت‌شده نمی‌تواند از تعداد کل اقساط بیشتر باشد',
+      );
+    }
+
+    loan.title = dto.title;
+    loan.totalAmount = dto.totalAmount;
+    loan.installmentsCount = dto.installmentsCount;
+    // مبلغ هر قسط از روی مبلغ کل و تعداد اقساط مشتق می‌شه؛ پس هر بار این دو تا عوض بشن باید دوباره حساب بشه
+    loan.installmentAmount = Math.round(dto.totalAmount / dto.installmentsCount);
+    loan.paidCount = dto.paidCount;
+
+    if (dto.paidCount >= dto.installmentsCount) {
+      loan.isCompleted = true;
+      loan.nextDueDate = null;
+    } else {
+      loan.isCompleted = false;
+      loan.nextDueDate = normalizeJalaliDate(dto.nextDueDate) || dto.nextDueDate;
+    }
+
     await this.loansRepository.save(loan);
     return this.getOverview(userId);
   }

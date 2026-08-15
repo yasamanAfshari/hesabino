@@ -6,11 +6,6 @@
   let pendingAvatarFile = null;
   let originalAvatarUrl = '';  // آدرس عکس فعلی، برای برگرداندن در صورت خطا
 
-  function authHeaders(extra) {
-    const token = localStorage.getItem('access_token');
-    return Object.assign({ Authorization: `Bearer ${token}` }, extra || {});
-  }
-
   function showMessage(el, text, type) {
     el.textContent = text;
     el.classList.remove('hidden', 'bg-green-color-25', 'text-green-color', 'bg-red-color-25', 'text-red-color');

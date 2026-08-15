@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subscription } from './subscription.entity';
+import { findOwnedOrThrow } from '../common/find-owned.util';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import {
@@ -88,12 +89,13 @@ export class SubscriptionsService {
     return this.getOverview(userId);
   }
 
-  private async findOwned(userId: number, id: number): Promise<Subscription> {
-    const sub = await this.subscriptionsRepository.findOne({ where: { id, userId } });
-    if (!sub) {
-      throw new NotFoundException('اشتراک یافت نشد');
-    }
-    return sub;
+  private findOwned(userId: number, id: number): Promise<Subscription> {
+    return findOwnedOrThrow(
+      this.subscriptionsRepository,
+      userId,
+      id,
+      'اشتراک یافت نشد',
+    );
   }
 
   async update(userId: number, id: number, dto: UpdateSubscriptionDto) {
@@ -111,7 +113,9 @@ export class SubscriptionsService {
 
   // ===== برای استفاده‌ی داخلی داشبورد =====
   async getActiveMonthlyTotal(userId: number): Promise<number> {
-    const subs = await this.subscriptionsRepository.find({ where: { userId, isActive: true } });
+    const subs = await this.subscriptionsRepository.find({
+      where: { userId, isActive: true },
+    });
     return subs.reduce((sum, s) => sum + Number(s.amount), 0);
   }
 }

@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cheque } from './cheque.entity';
+import { findOwnedOrThrow } from '../common/find-owned.util';
 import { CreateChequeDto } from './dto/create-cheque.dto';
 import { UpdateChequeDto } from './dto/update-cheque.dto';
 
@@ -88,14 +89,13 @@ export class ChequesService {
   }
 
   // ===== یک چک خاص (فقط اگر متعلق به همین کاربر باشد) =====
-  private async findOwned(userId: number, id: number): Promise<Cheque> {
-    const cheque = await this.chequesRepository.findOne({
-      where: { id, userId },
-    });
-    if (!cheque) {
-      throw new NotFoundException('چک مورد نظر یافت نشد');
-    }
-    return cheque;
+  private findOwned(userId: number, id: number): Promise<Cheque> {
+    return findOwnedOrThrow(
+      this.chequesRepository,
+      userId,
+      id,
+      'چک مورد نظر یافت نشد',
+    );
   }
 
   async findOne(userId: number, id: number) {

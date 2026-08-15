@@ -6,24 +6,6 @@
   let latestData = null;
   let selectedMonth = null; // اگه null باشه یعنی «ماه جاری»
   let userAccounts = []; // حساب‌های فعال کاربر؛ برای پر کردن سلکت «حساب مقصد»
-
-  function authHeaders(extra) {
-    const token = localStorage.getItem('access_token');
-    return Object.assign({ Authorization: `Bearer ${token}` }, extra || {});
-  }
-
-  function escapeHtml(str) {
-    if (str === null || str === undefined) return '';
-    return String(str).replace(/[&<>"']/g, (ch) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-    }[ch]));
-  }
-
-  function toPersianDigits(str) {
-    const digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    return String(str).replace(/[0-9]/g, (d) => digits[+d]);
-  }
-
   function formatAmount(amount) {
     const grouped = Math.round(Number(amount || 0)).toLocaleString('en-US');
     return toPersianDigits(grouped) + ' تومان';
@@ -77,50 +59,6 @@
   }
 
   // ===== توست ساده برای پیام موفقیت/خطا =====
-  function ensureToastContainer() {
-    let el = document.getElementById('hesabinoToastContainer');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'hesabinoToastContainer';
-      el.style.position = 'fixed';
-      el.style.bottom = '20px';
-      el.style.left = '20px';
-      el.style.zIndex = '9999';
-      el.style.display = 'flex';
-      el.style.flexDirection = 'column';
-      el.style.gap = '10px';
-      el.style.maxWidth = '320px';
-      document.body.appendChild(el);
-    }
-    return el;
-  }
-
-  function showToast(message, type) {
-    const container = ensureToastContainer();
-    const isSuccess = type !== 'error';
-    const toast = document.createElement('div');
-    toast.textContent = message;
-    toast.className =
-      'px-4 py-3 rounded-lg shadow-lg text-sm font-medium border ' +
-      (isSuccess
-        ? 'bg-green-color-25 text-green-color border-green-color'
-        : 'bg-red-color-25 text-red-color border-red-color');
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
-    toast.style.transition = 'opacity .25s ease, transform .25s ease';
-    container.appendChild(toast);
-
-    requestAnimationFrame(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateY(0)';
-    });
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(10px)';
-      setTimeout(() => toast.remove(), 250);
-    }, 3200);
-  }
-
   // ===== سلکت انتخاب ماه: از availableMonths پر می‌شه، بدون بازسازی هر بار مقدار انتخابی رو گم نکنه =====
   function populateMonthSelect(availableMonths, currentMonth) {
     const select = document.getElementById('incomeMonthSelect');

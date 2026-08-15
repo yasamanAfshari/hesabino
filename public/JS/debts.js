@@ -12,29 +12,6 @@
   // بالای صفحه مجموعِ این دوتاست چون شخص هم می‌تونه توی «بدهی من»/«طلب از دیگران» سهم داشته باشه.
   let lastDebtsSummary = { myDebt: 0, receivable: 0, net: 0 };
   let lastPersonsSummary = { debt: 0, receivable: 0, net: 0 };
-
-  function authHeaders(extra) {
-    const token = localStorage.getItem('access_token');
-    return Object.assign({ Authorization: `Bearer ${token}` }, extra || {});
-  }
-
-  function escapeHtml(str) {
-    if (str === null || str === undefined) return '';
-    return String(str).replace(/[&<>"']/g, (ch) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-    }[ch]));
-  }
-
-  function toPersianDigits(str) {
-    const digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    return String(str).replace(/[0-9]/g, (d) => digits[+d]);
-  }
-
-  function toEnglishDigits(str) {
-    const persian = '۰۱۲۳۴۵۶۷۸۹';
-    return String(str || '').replace(/[۰-۹]/g, (d) => String(persian.indexOf(d)));
-  }
-
   // نرمال‌سازی تاریخ شمسی به «YYYY/MM/DD» با ارقام انگلیسی، برای مقایسه‌ی صحیح متنی
   function normalizeDate(str) {
     const normalized = toEnglishDigits(str).trim();
@@ -65,51 +42,6 @@
   }
 
   // ===== toast =====
-  function ensureToastContainer() {
-    let el = document.getElementById('hesabinoToastContainer');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'hesabinoToastContainer';
-      el.style.position = 'fixed';
-      el.style.bottom = '20px';
-      el.style.left = '20px';
-      el.style.zIndex = '9999';
-      el.style.display = 'flex';
-      el.style.flexDirection = 'column';
-      el.style.gap = '10px';
-      el.style.maxWidth = '320px';
-      document.body.appendChild(el);
-    }
-    return el;
-  }
-
-  function showToast(message, type) {
-    const container = ensureToastContainer();
-    const isSuccess = type !== 'error';
-    const toast = document.createElement('div');
-    toast.textContent = message;
-    toast.className =
-      'px-4 py-3 rounded-lg shadow-lg text-sm font-medium border ' +
-      (isSuccess
-        ? 'bg-green-color-25 text-green-color border-green-color'
-        : 'bg-red-color-25 text-red-color border-red-color');
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
-    toast.style.transition = 'opacity .25s ease, transform .25s ease';
-    container.appendChild(toast);
-
-    requestAnimationFrame(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateY(0)';
-    });
-
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(10px)';
-      setTimeout(() => toast.remove(), 250);
-    }, 3200);
-  }
-
   const PENCIL_ICON = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M12.6142 2.46067L13.9984 1.07566C14.2869 0.787107 14.6783 0.625 15.0864 0.625C15.4944 0.625 15.8858 0.787107 16.1743 1.07566C16.4629 1.36421 16.625 1.75557 16.625 2.16364C16.625 2.57172 16.4629 2.96308 16.1743 3.25163L4.38454 15.0414C3.95076 15.475 3.41583 15.7936 2.82805 15.9686L0.625 16.625L1.2814 14.422C1.4564 13.8342 1.77504 13.2992 2.20857 12.8655L12.615 2.46067H12.6142ZM12.6142 2.46067L14.7787 4.62515" stroke="white" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
     </svg>`;

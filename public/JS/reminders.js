@@ -3,23 +3,6 @@
 
   const API_BASE = '/api';
 
-  function authHeaders(extra) {
-    const token = localStorage.getItem('access_token');
-    return Object.assign({ Authorization: `Bearer ${token}` }, extra || {});
-  }
-
-  function toPersianDigits(str) {
-    const digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    return String(str).replace(/[0-9]/g, (d) => digits[+d]);
-  }
-
-  function escapeHtml(str) {
-    if (str === null || str === undefined) return '';
-    return String(str).replace(/[&<>"']/g, (ch) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-    }[ch]));
-  }
-
   function formatAmount(amount) {
     if (amount === null || amount === undefined) return null;
     return toPersianDigits(Math.round(amount).toLocaleString('en-US')) + ' تومان';

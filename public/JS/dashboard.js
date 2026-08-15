@@ -2,24 +2,6 @@
   'use strict';
 
   const API_BASE = '/api';
-
-  function authHeaders(extra) {
-    const token = localStorage.getItem('access_token');
-    return Object.assign({ Authorization: `Bearer ${token}` }, extra || {});
-  }
-
-  function escapeHtml(str) {
-    if (str === null || str === undefined) return '';
-    return String(str).replace(/[&<>"']/g, (ch) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-    }[ch]));
-  }
-
-  function toPersianDigits(str) {
-    const digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    return String(str).replace(/[0-9]/g, (d) => digits[+d]);
-  }
-
   function formatAmount(amount) {
     const n = Math.round(Number(amount || 0));
     const grouped = Math.abs(n).toLocaleString('en-US');

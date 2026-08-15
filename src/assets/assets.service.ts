@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Asset } from './asset.entity';
+import { findOwnedOrThrow } from '../common/find-owned.util';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 
@@ -29,18 +30,34 @@ export class AssetsService {
     return {
       ...asset,
       value: Number(asset.value),
-      quantity: asset.quantity !== null && asset.quantity !== undefined ? Number(asset.quantity) : null,
-      unitPrice: asset.unitPrice !== null && asset.unitPrice !== undefined ? Number(asset.unitPrice) : null,
+      quantity:
+        asset.quantity !== null && asset.quantity !== undefined
+          ? Number(asset.quantity)
+          : null,
+      unitPrice:
+        asset.unitPrice !== null && asset.unitPrice !== undefined
+          ? Number(asset.unitPrice)
+          : null,
       typeLabel: TYPE_LABELS[asset.type] || asset.type,
       isQuantityBased: QUANTITY_BASED_TYPES.includes(asset.type),
     };
   }
 
   // ===== برای طلا/ارز، ارزش کل از روی مقدار × نرخ واحد محاسبه می‌شود؛ برای بقیه، همان مقدار وارد شده استفاده می‌شود =====
-  private resolveValue(type: string, dto: { value?: number; quantity?: number; unitPrice?: number }) {
+  private resolveValue(
+    type: string,
+    dto: { value?: number; quantity?: number; unitPrice?: number },
+  ) {
     if (QUANTITY_BASED_TYPES.includes(type)) {
-      if (dto.quantity === undefined || dto.quantity === null || dto.unitPrice === undefined || dto.unitPrice === null) {
-        throw new BadRequestException('برای طلا/ارز باید مقدار و نرخ واحد وارد شود');
+      if (
+        dto.quantity === undefined ||
+        dto.quantity === null ||
+        dto.unitPrice === undefined ||
+        dto.unitPrice === null
+      ) {
+        throw new BadRequestException(
+          'برای طلا/ارز باید مقدار و نرخ واحد وارد شود',
+        );
       }
       return {
         value: Math.round(dto.quantity * dto.unitPrice),
@@ -69,7 +86,11 @@ export class AssetsService {
       byType[a.type] = (byType[a.type] || 0) + a.value;
     }
     const breakdown = Object.entries(byType)
-      .map(([type, value]) => ({ type, typeLabel: TYPE_LABELS[type] || type, value }))
+      .map(([type, value]) => ({
+        type,
+        typeLabel: TYPE_LABELS[type] || type,
+        value,
+      }))
       .sort((a, b) => b.value - a.value);
 
     return {
@@ -93,12 +114,13 @@ export class AssetsService {
     return this.getOverview(userId);
   }
 
-  private async findOwned(userId: number, id: number): Promise<Asset> {
-    const asset = await this.assetsRepository.findOne({ where: { id, userId } });
-    if (!asset) {
-      throw new NotFoundException('دارایی یافت نشد');
-    }
-    return asset;
+  private findOwned(userId: number, id: number): Promise<Asset> {
+    return findOwnedOrThrow(
+      this.assetsRepository,
+      userId,
+      id,
+      'دارایی یافت نشد',
+    );
   }
 
   async update(userId: number, id: number, dto: UpdateAssetDto) {
@@ -106,10 +128,22 @@ export class AssetsService {
     const finalType = dto.type ?? asset.type;
 
     if (QUANTITY_BASED_TYPES.includes(finalType)) {
-      const finalQuantity = dto.quantity ?? (asset.quantity !== null ? Number(asset.quantity) : undefined);
-      const finalUnitPrice = dto.unitPrice ?? (asset.unitPrice !== null ? Number(asset.unitPrice) : undefined);
-      const resolved = this.resolveValue(finalType, { quantity: finalQuantity, unitPrice: finalUnitPrice });
-      Object.assign(asset, { title: dto.title ?? asset.title, note: dto.note ?? asset.note, type: finalType, ...resolved });
+      const finalQuantity =
+        dto.quantity ??
+        (asset.quantity !== null ? Number(asset.quantity) : undefined);
+      const finalUnitPrice =
+        dto.unitPrice ??
+        (asset.unitPrice !== null ? Number(asset.unitPrice) : undefined);
+      const resolved = this.resolveValue(finalType, {
+        quantity: finalQuantity,
+        unitPrice: finalUnitPrice,
+      });
+      Object.assign(asset, {
+        title: dto.title ?? asset.title,
+        note: dto.note ?? asset.note,
+        type: finalType,
+        ...resolved,
+      });
     } else {
       Object.assign(asset, {
         title: dto.title ?? asset.title,

@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DebtRecord } from './debt-record.entity';
+import { findOwnedOrThrow } from '../common/find-owned.util';
 import { CreateDebtRecordDto } from './dto/create-debt-record.dto';
 import { UpdateDebtRecordDto } from './dto/update-debt-record.dto';
 import { remainingDaysUntil } from './date.util';
@@ -87,12 +88,13 @@ export class DebtsService {
     return this.getOverview(userId);
   }
 
-  private async findOwned(userId: number, id: number): Promise<DebtRecord> {
-    const record = await this.debtsRepository.findOne({ where: { id, userId } });
-    if (!record) {
-      throw new NotFoundException('رکورد مورد نظر یافت نشد');
-    }
-    return record;
+  private findOwned(userId: number, id: number): Promise<DebtRecord> {
+    return findOwnedOrThrow(
+      this.debtsRepository,
+      userId,
+      id,
+      'رکورد مورد نظر یافت نشد',
+    );
   }
 
   async findOne(userId: number, id: number) {

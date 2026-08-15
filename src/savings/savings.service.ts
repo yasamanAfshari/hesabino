@@ -1,12 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SavingGoal } from './saving-goal.entity';
+import { findOwnedOrThrow } from '../common/find-owned.util';
 import { SavingDeposit } from './saving-deposit.entity';
 import { CreateSavingGoalDto } from './dto/create-saving-goal.dto';
 import { UpdateSavingGoalDto } from './dto/update-saving-goal.dto';
 import { AddSavingAmountDto } from './dto/add-saving-amount.dto';
-import { currentJalaliDate, monthsBetween, parseJalaliDate } from '../budget/date.util';
+import {
+  currentJalaliDate,
+  monthsBetween,
+  parseJalaliDate,
+} from '../budget/date.util';
 
 @Injectable()
 export class SavingsService {
@@ -29,7 +34,8 @@ export class SavingsService {
     const currentAmount = Number(goal.currentAmount);
     const remaining = Math.max(targetAmount - currentAmount, 0);
     const isAchieved = currentAmount >= targetAmount;
-    const rawPercent = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
+    const rawPercent =
+      targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
     const progressPercent = Math.round(rawPercent);
     const progressBarPercent = Math.min(100, Math.max(0, progressPercent));
 
@@ -74,12 +80,13 @@ export class SavingsService {
     };
   }
 
-  private async findOwned(userId: number, id: number): Promise<SavingGoal> {
-    const goal = await this.savingGoalRepository.findOne({ where: { id, userId } });
-    if (!goal) {
-      throw new NotFoundException('هدف پس‌انداز یافت نشد');
-    }
-    return goal;
+  private findOwned(userId: number, id: number): Promise<SavingGoal> {
+    return findOwnedOrThrow(
+      this.savingGoalRepository,
+      userId,
+      id,
+      'هدف پس‌انداز یافت نشد',
+    );
   }
 
   // ===== لیست اهداف + خلاصه‌ی آماری بالای صفحه =====
