@@ -9,7 +9,7 @@
     if (!nameEl) return;
 
     const token = localStorage.getItem('access_token');
-    if (!token) return; // گارد main.ejs خودش کاربر رو به لاگین می‌فرسته
+    if (!token) return; 
 
     try {
       const response = await fetch(`${API_BASE}/users/profile`, {
@@ -52,8 +52,6 @@
     }
   }
 
-  // در دسترس قرار دادن این تابع برای صفحه‌ی تنظیمات، تا بعد از آپلود عکس یا
-  // ویرایش نام، هدر بدون نیاز به رفرش کل صفحه آپدیت بشه
   window.HesabinoHeader = { refresh: loadUserProfile, apply: applyUserToHeader };
 
   // ===== باز و بسته شدن دراپ‌داون پروفایل =====

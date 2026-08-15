@@ -319,16 +319,12 @@
       renderStatusCards(data);
       renderCategoryTable(data);
 
-      // تحلیل هوشمند جدا و بعد از نمایش بقیه‌ی گزارش خونده می‌شه، چون ممکنه
-      // چند ثانیه طول بکشه و نباید نمایش نمودارها/اعداد رو معطل نگه داره
       loadInsights(range);
     } catch (err) {
       console.error(err);
     }
   }
 
-  // ===== فیلتر سراسری هدر (امروز/هفته/ماه/سال) مستقیماً همون بازه‌ی گزارشه؛ چون
-  // الان گزارش هم دقت روزانه (امروز/این‌هفته) و هم ماهانه (این‌ماه/امسال) رو پشتیبانی می‌کنه =====
   function mapGlobalPeriodToRange(period) {
     return period;
   }
@@ -337,7 +333,6 @@
     const period = window.HesabinoPeriod ? window.HesabinoPeriod.get() : 'month';
     loadReport(mapGlobalPeriodToRange(period)).finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
 
-    // ===== با تغییر فیلتر سراسری هدر، بازه‌ی گزارش هم همگام می‌شه =====
     document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', (e) => {
       loadReport(mapGlobalPeriodToRange(e.detail.period));
     });

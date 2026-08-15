@@ -4,15 +4,13 @@
   const API_BASE = '/api';
 
   let latestData = null;
-  let selectedMonth = null; // اگه null باشه یعنی «ماه جاری»
-  let userAccounts = []; // حساب‌های فعال کاربر؛ برای پر کردن سلکت «حساب مقصد»
+  let selectedMonth = null; 
+  let userAccounts = []; 
   function formatAmount(amount) {
     const grouped = Math.round(Number(amount || 0)).toLocaleString('en-US');
     return toPersianDigits(grouped) + ' تومان';
   }
 
-  // رنگ هر منبع درآمد؛ عمداً پالت جدا از دسته‌های هزینه (budget.js) تا با نگاه اول
-  // قابل تشخیص باشه این نمودار مربوط به درآمده، نه هزینه
   const CATEGORY_COLORS = {
     'حقوق و دستمزد': '#2E9E63',
     'پاداش و هدیه': '#55B5B1',
@@ -25,8 +23,6 @@
     return CATEGORY_COLORS[category] || '#94A3B8';
   }
 
-  // رنگ هر حساب؛ چون اسم حساب‌ها دلخواه و پویاست (برخلاف دسته‌های درآمد)، از یک پالت
-  // ثابت به‌ترتیب استفاده می‌شه تا هر حساب رنگ ثابتی داشته باشه
   const ACCOUNT_COLOR_PALETTE = ['#2E9E63', '#4EA1D3', '#E5A83B', '#9D6BD8', '#DB5E6B', '#55B5B1', '#8AAE3E'];
   function colorForAccount(accountKey) {
     let hash = 0;
@@ -298,8 +294,6 @@
 
       showToast(editId ? 'درآمد با موفقیت ویرایش شد' : 'درآمد با موفقیت ثبت شد', 'success');
       closeModal();
-      // اگه تاریخ ثبت‌شده توی همون ماهی هست که الان نمایش داده می‌شه، دوباره‌ی همون ماه لود می‌شه؛
-      // وگرنه ماه مربوط به تاریخ ثبت‌شده رو نشون می‌ده (تا کاربر بلافاصله نتیجه رو ببینه)
       const newMonth = (date.match(/^(\d{3,4}\/\d{1,2})/) || [])[1];
       await loadIncome(newMonth ? newMonth.replace(/\/(\d)$/, '/0$1') : selectedMonth);
     } catch (err) {

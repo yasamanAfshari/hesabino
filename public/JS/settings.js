@@ -4,7 +4,7 @@
   const API_BASE = '';
 
   let pendingAvatarFile = null;
-  let originalAvatarUrl = '';  // آدرس عکس فعلی، برای برگرداندن در صورت خطا
+  let originalAvatarUrl = '';  
 
   function showMessage(el, text, type) {
     el.textContent = text;
@@ -57,7 +57,7 @@
       const imgEl = document.getElementById('settings-avatar-img');
       const containerEl = document.getElementById('settings-avatar');
       setAvatarPreview(imgEl, containerEl, user.avatarUrl);
-      originalAvatarUrl = user.avatarUrl || '';   // برای بازگشت در صورت خطای آپلود
+      originalAvatarUrl = user.avatarUrl || '';   
     } catch (err) {
       console.warn('خطا در دریافت پروفایل:', err);
     }
@@ -141,7 +141,6 @@
     const formData = new FormData();
     formData.append('avatar', pendingAvatarFile);
 
-    // آزاد کردن URL.createObjectURL قبلی (که برای پیش‌نمایش ساخته بودیم)
     if (imgEl.src.startsWith('blob:')) {
       URL.revokeObjectURL(imgEl.src);
     }
@@ -169,7 +168,6 @@
       setHeaderAvatar(data.avatarUrl);
       pendingAvatarFile = null;
       if (noteEl) noteEl.classList.add('hidden');
-      // به‌روزرسانی آدرس اصلی برای دفعات بعد
       originalAvatarUrl = data.avatarUrl;
 
       return { ok: true, user: data };
@@ -189,7 +187,6 @@
     let input = document.getElementById('avatarInput');
     if (!input) return;
 
-    // حذف هرگونه event listener قبلی (مثلاً در هدر) که ممکن است هدر را تغییر دهد
     const newInput = input.cloneNode(true);
     input.parentNode.replaceChild(newInput, input);
     input = newInput;
@@ -218,15 +215,12 @@
         return;
       }
 
-      // ذخیره فایل و نمایش پیش‌نمایش در تنظیمات
       pendingAvatarFile = file;
       if (noteEl) noteEl.classList.remove('hidden');
 
-      // نمایش پیش‌نمایش محلی (فقط در settings-avatar-img)
       const localUrl = URL.createObjectURL(file);
       setAvatarPreview(imgEl, containerEl, localUrl);
 
-      // پاک کردن مقدار input تا بتوان دوباره همان فایل را انتخاب کرد
       input.value = '';
     });
   }

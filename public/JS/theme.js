@@ -135,7 +135,6 @@
     init();
   }
 
-  // API عمومی
   window.HesabinoTheme = {
     setTheme,
     toggleTheme,

@@ -9,9 +9,7 @@
   let currentPersonId = null;
   // آیتم‌های ریز حساب‌کتاب شخصِ باز شده
   let currentEntries = [];
-  // شناسه‌ی تراکنشی که در حال ویرایشه (null یعنی داریم تراکنش جدید اضافه می‌کنیم)
   let editingEntryId = null;
-  // توی مرحله‌ی ۱ مودال «شخص جدید»، اگه کاربر روی یکی از پیشنهادها کلیک کنه، اینجا ست می‌شه
   let selectedExistingPersonId = null;
   function formatAmount(amount) {
     const grouped = Number(amount || 0).toLocaleString('en-US');
@@ -196,7 +194,6 @@
     }
   }
 
-  // ===== مودال «افزودن شخص جدید» (تک‌مرحله‌ای: نام + اولین رکورد بدهی/طلب) =====
   function renderNameSuggestions(list) {
     const box = document.getElementById('personNameSuggestions');
     if (!list.length) {
@@ -319,7 +316,6 @@
     }
   }
 
-  // ===== مودال «حساب‌کتاب یک شخص»: باکس‌های بدهی/طلب (بدون جدول) =====
   function renderLedgerBox(entry) {
     return `
       <div class="flex items-center justify-between gap-3 p-3 rounded-xl border ${entry.direction === 'they_owe' ? 'border-green-color' : 'border-red-color'}" data-id="${entry.id}">

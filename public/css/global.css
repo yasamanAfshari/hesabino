@@ -1,14 +1,14 @@
 :root {
     --bg-color: #f3f4f6;
 
-    /* توکن‌های سطح/متن/بوردر - مقادیر پیش‌فرض روشن */
+    /*  سطح/متن/بوردر - مقادیر پیش‌فرض روشن */
     --color-surface-color: #FFFFFF;
     --color-surface2-color: #F5F7FA;
     --color-border-color: #E4E4E4;
     --color-text-color: #1F2937;
     --color-text2-color: #6B7280;
 
-    /* توکن‌های مخصوص نمودارها */
+    /*   نمودارها */
     --color-chart-income: #0062AE;
     --color-chart-expense: #BDD7EA;
     --color-chart-track: #D7E4EF;
@@ -95,13 +95,9 @@ button:hover {
 .custom-input {
     width: 100%;
     height: 34px;
-    /* 12 = 3rem */
     border: 1px solid var(--color-main-color);
-    /* رنگ main-color؛ با اکسنت انتخابی و تم روشن/تیره هماهنگ می‌مونه */
     border-radius: 0.5rem;
-    /* 8px = rounded-lg */
     padding-right: 1rem;
-    /* 4 = 1rem */
     padding-left: 1rem;
     outline: none;
     background-color: var(--color-surface-color);
@@ -113,13 +109,11 @@ button:hover {
     font-size: 12px !important;
 }
 
-/* اختیاری: استایل فوکوس */
 .custom-input:focus {
     border-color: var(--color-main-color-hover);
     box-shadow: 0 0 0 3px var(--color-main-color-25);
 }
 
-/* اختیاری: استایل placeholder */
 .custom-input::placeholder {
     color: #9ca3af;
     /* gray-400 */
@@ -132,7 +126,6 @@ input::placeholder{
 }
 
 /* -------sidebar------- */
-/* سایدبار همیشه پس‌زمینه‌ی آبی برند داره، پس متنش صرف‌نظر از تم روشن/تیره همیشه سفید می‌مونه */
 #sidebar {
     color: #fff;
 }
@@ -257,7 +250,7 @@ aside .theme-toggle {
 
 .theme-toggle.dark .toggle-ball {
     inset-inline-start: calc(100% - 28px);
-    /* حرکت توپ به سمت مخالف */
+    /* حرکت توپ   */
 }
 
 .user-profile {
@@ -355,24 +348,20 @@ td {
     padding: 8px !important;
 }
 
-/* تنظیم حداقل عرض برای جدول تا اسکرول افقی فعال بماند */
+/* تنظیم حداقل عرض برای جدول برای اسکرول افقی */
 .scrollable-table-container table {
     min-width: 750px;
-    /* می‌توانید بر اساس محتوای خود تنظیم کنید */
 }
 
-/* جلوگیری از شکسته شدن متن در تمام سلول‌ها */
 .scrollable-table-container th,
 .scrollable-table-container td {
     white-space: nowrap;
 }
 
-/* برای ستون توضیحات اگر نیاز به فضای بیشتر است، عرض حداقل تعیین کنید */
 .scrollable-table-container td:nth-child(2) {
     min-width: 180px;
     max-width: 250px;
     white-space: normal;
-    /* اگر ترجیح می‌دهید توضیحات بلند در چند خط نشان داده شود، این خط را فعال کنید */
 }
 
 /* button */
@@ -476,13 +465,6 @@ textarea:focus {
 
 /* =========================================================
    تم تیره (Dark Mode) + رنگ‌های تاکیدی (Accent Colors)
-   =========================================================
-   منطق کار: توکن‌های رنگی (main-color, back-color, gray-*, zinc-*, white, ...)
-   همه از طریق متغیرهای CSS تعریف می‌شن (خروجی تیلویند هم از همین متغیرها استفاده
-   می‌کنه). با override کردن این متغیرها زیر html.dark-theme، تقریباً کل ظاهر
-   برنامه (کارت‌ها، جدول‌ها، حاشیه‌ها، متن‌ها) بدون دست‌زدن به EJSها هماهنگ
-   با تم تیره می‌شه. کلاس dark-theme و اتریبیوت data-accent روی <html> توسط
-   public/JS/theme.js مدیریت می‌شن.
    ========================================================= */
 
 /* ترنزیشن نرم برای عوض شدن تم روی سطوح اصلی */
@@ -503,12 +485,7 @@ html.dark-theme {
     color-scheme: dark;
     --table-txt: #c8c8c8;
 
-    /* ----- برند / وضعیت‌ها -----
-       رنگ main-color در تم تیره باید هم روی پس‌زمینه‌ی تیره خوش‌خوان باشه و هم
-       زیر متن سفید (روی دکمه‌ها) کنتراست کافی داشته باشه؛ برای همین به‌جای
-       رنگ‌های خیلی روشن/پاستیلی، از سایه‌ای متعادل استفاده شده که هر دو شرط
-       رو برآورده می‌کنه (کنتراست متن سفید ≥ 4.5:1). */
-    --color-back-color: #1b1c1f;
+    /* ----- برند / وضعیت‌ها ----- */
     --color-main-color: #2563EB;
     --color-main-color-hover: #3B82F6;
     --color-main-color-25: #2563EB40;
@@ -531,10 +508,7 @@ html.dark-theme {
     --color-text-color: #E5E7EB;
     --color-text2-color: #94A3B8;
 
-    /* ----- پالت خنثی پیش‌فرض تیلویند (white/gray/zinc) -----
-       چون خیلی از کلاس‌های پروژه (bg-white, text-gray-700, border-gray-200, ...)
-       مستقیم از این متغیرها استفاده می‌کنن، override کردن‌شون باعث می‌شه اکثر
-       صفحات بدون نیاز به کلاس dark: هماهنگ بشن. */
+    /* ----- پالت خنثی پیش‌فرض تیلویند (white/gray/zinc) ----- */
     --color-white: #27292a;
     --color-gray-50: #1A2332;
     --color-gray-100: #222323;
@@ -559,12 +533,6 @@ html.dark-theme {
     --color-zinc-900: #FFFFFF;
     --color-zinc-950: #FFFFFF;
 
-    /* -----------------------------------------------------------------
-       پالت‌های پیش‌فرض تیلویند که مستقیم در ویوها استفاده شده‌اند
-       (بج‌های دسته‌بندی، هدر جدول، کارت‌های هشدار مالی و ...).
-       این‌ها بخشی از توکن‌های سفارشی پروژه نبودن، برای همین بدون این
-       بخش، تو حالت تیره همون رنگ‌های روشن رو نشون می‌دادن و تو ذوق می‌زدن.
-       ----------------------------------------------------------------- */
 
     /* آبی (هدر جدول، بج‌های دسته) */
     --color-blue-50: #262627;
@@ -624,7 +592,7 @@ html.dark-theme {
     --color-slate-700: #cbd5e1;
     --color-yellow-500: #facc15;
 
-    /* توکن‌های نمودار در حالت تیره */
+    /* نمودار در حالت تیره */
     --color-chart-income: var(--color-main-color);
     --color-chart-expense: #3B5169;
     --color-chart-track: var(--color-surface2-color);
@@ -719,8 +687,6 @@ html.dark-theme #page-loader {
 
 /* =========================================================
    رنگ‌های تاکیدی (Accent Colors)
-   چهار پیش‌فرض محبوب؛ فقط main-color و مشتقاتش عوض می‌شن.
-   "آبی" همون رنگ برند فعلیه و نیازی به override نداره.
    ========================================================= */
 
 /* سبز */
@@ -744,9 +710,6 @@ html[data-accent="orange"] {
     --color-main-color-25: #C2410C40;
 }
 
-/* آبی (پیش‌فرض) — این بلوک صرفاً برای وضوح ثبت شده؛ چون آبی رنگ برندِ
-   پیش‌فرضِ توکن --color-main-color (در input.css و بلوک dark-theme) هست،
-   بدون data-accent هم به‌درستی اعمال می‌شه. */
 html[data-accent="blue"] {
     --color-main-color: #005DAA;
     --color-main-color-hover: #1D83D1;
@@ -762,7 +725,6 @@ html.dark-theme[data-accent="green"] {
     --color-main-color-25: #1515178c;
 }
 
-/* نمایه‌ی رنگ روی سواچ‌های انتخاب تم (صفحه‌ی تنظیمات) */
 .accent-swatch {
     position: relative;
     width: 40px;
@@ -809,10 +771,6 @@ html.dark-theme[data-accent="green"] {
     }
 }
 
-/* ===== بک‌دراپ یکسان برای همه‌ی مودال‌های اپ ===== */
-/* هر عنصری که کلاس modal رو داره (والدِ مستقیم کارت مودال) خودش هم backdrop
-   تیره‌ی بلوردار می‌کشه و هم کارت داخلیش رو وسط صفحه نگه می‌داره؛ دیگه نیازی
-   به لایه‌ی جدای #modalOverlay نیست. */
 .modal {
     position: fixed;
     inset: 0;

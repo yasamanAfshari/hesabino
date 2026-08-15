@@ -1,15 +1,3 @@
-// ===== فرمت‌دهی خودکار اینپوت‌های عددی (type="number") توی کل اپ =====
-// هر اینپوتی که type="number" داره، در لحظه‌ی لود صفحه به یه اینپوت متنی تبدیل می‌شه که:
-//   ۱) مقدار اولیه نداره (فقط placeholder)
-//   ۲) موقع تایپ، هر سه رقم با کاما جدا می‌شه (مثلاً ۳,۰۰۰,۰۰۰)
-//   ۳) زیرش عدد رو به حروف فارسی می‌نویسه (مثلاً «سه میلیون تومان»)
-//
-// واحدِ زیرنویس پیش‌فرض «تومان»‌ه؛ برای اینپوت‌هایی که مبلغ پول نیستن (مثل تعداد قسط یا روز)
-// با data-unit="واحد دلخواه" رو input ست می‌شه (data-unit="" یعنی بدون واحد، فقط عدد به حروف).
-//
-// نکته‌ی مهم برای بقیه‌ی فایل‌های جاوااسکریپت پروژه: چون اینپوت الان type="text" هست و مقدارش
-// با کاما نمایش داده می‌شه، هر جای دیگه‌ای که می‌خواد این مقدار رو به عدد تبدیل کنه (Number(...))
-// باید اول از AmountInput.parse() رد بشه تا کاماها حذف بشن.
 (function () {
   'use strict';
 
@@ -39,7 +27,7 @@
     return Number(digitsOnly).toLocaleString('en-US');
   }
 
-  // ===== عدد به حروف فارسی (تا کوادریلیون، برای مبالغ تومانی به‌مراتب کافیه) =====
+  // ===== عدد به حروف فارسی) =====
   const ONES = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
   const TEENS = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
   const TENS = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
@@ -65,7 +53,7 @@
   function numberToPersianWords(input) {
     const num = Math.floor(Math.abs(Number(input) || 0));
     if (num === 0) return 'صفر';
-    if (num > 999999999999999) return toPersianDigits(String(num)); // خارج از بازه‌ی پشتیبانی‌شده
+    if (num > 999999999999999) return toPersianDigits(String(num)); // خارج از بازه‌ی 
 
     const groups = [];
     let n = num;
@@ -80,7 +68,7 @@
       if (!g) return;
       const scaleIdx = offset - i;
       if (scaleIdx === 1 && g === 1) {
-        parts.push(SCALES[1]); // «هزار» به‌جای «یک هزار»
+        parts.push(SCALES[1]); 
         return;
       }
       const words = threeDigitsToWords(g);
@@ -106,7 +94,6 @@
     return hint;
   }
 
-  // ===== یک اینپوت رو با مقدار فعلیِ خودش (که ممکنه از بیرون ست شده باشه) دوباره فرمت می‌کنه =====
   function refresh(input) {
     if (!input) return;
     const digitsOnly = parse(input.value);
@@ -115,7 +102,6 @@
     hint.textContent = hintText(input, digitsOnly);
   }
 
-  // ===== همه‌ی اینپوت‌های عددیِ فرمت‌شده‌ی داخل یه ظرف (مودال/فرم/کل صفحه) رو رفرش می‌کنه =====
   // بعد از form.reset() یا پرکردن دستیِ مقادیر (حالت ویرایش) صدا زده می‌شه
   function refreshForm(container) {
     const scope = container || document;
@@ -128,7 +114,7 @@
     input.setAttribute('type', 'text');
     input.setAttribute('inputmode', 'numeric');
     input.setAttribute('autocomplete', 'off');
-    input.value = ''; // بدون مقدار اولیه؛ فقط placeholder
+    input.value = ''; 
 
     const hint = ensureHintEl(input);
     hint.textContent = hintText(input, '');
@@ -139,7 +125,7 @@
       const grouped = group(digitsOnly);
       input.value = grouped;
       const pos = Math.max(0, grouped.length - cursorFromEnd);
-      try { input.setSelectionRange(pos, pos); } catch (e) { /* برای برخی مرورگرها لازم نیست */ }
+      try { input.setSelectionRange(pos, pos); } catch (e) {  }
       ensureHintEl(input).textContent = hintText(input, digitsOnly);
     });
   }

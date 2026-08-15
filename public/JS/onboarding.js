@@ -1,14 +1,3 @@
-/**
- * مودال «افزودن اولین حساب»
- * -------------------------------------------------------------------------
- * تا وقتی کاربر حداقل یک حساب نساخته، این مودال روی هر صفحه‌ای (فارغ از
- * اینکه داشبورد باشه یا هر صفحه‌ی دیگه) نمایش داده می‌شه و راهی برای
- * بستنش بدون تکمیل فرم وجود نداره.
- *
- * بررسیِ «آیا کاربر حساب داره یا نه» خیلی زودتر (داخل main.ejs، هم‌زمان با
- * لود شدن صفحه) شروع می‌شه تا وقتی page-loader محو می‌شه، جواب آماده باشه؛
- * این‌طوری محتوای داشبورد هیچ‌وقت قبل از این مودال به کاربر دیده نمی‌شه.
- */
 (function () {
   'use strict';
 
@@ -201,9 +190,7 @@
     });
   }
 
-  /* ---------------------------------------------------------------------
-   * ساخت مارک‌آپ کلی مودال
-   * ------------------------------------------------------------------- */
+
   function stepsIndicatorMarkup() {
     var out = '';
     STEP_META.forEach(function (meta, idx) {
@@ -228,10 +215,8 @@
       '' +
       // کارت اصلی
       '<div class="hb-ob-card" role="dialog" aria-modal="true" aria-labelledby="hbObTitle">' +
-      // glow تزئینی
       '  <div class="hb-ob-glow"></div>' +
 
-      // هدر
       '  <div class="hb-ob-header">' +
       '    <div>' +
       '      <h2 class="text-lg font-extrabold text-[var(--color-text-color)]" id="hbObTitle">افزودن اولین حساب</h2>' +
@@ -240,13 +225,10 @@
       '    <button type="button" class="hb-ob-close" id="hbObClose" aria-label="بستن">' + ICONS.close + '</button>' +
       '  </div>' +
 
-      // استپ‌ایندیکیتور (بیرون از کانتینر اصلی چون طراحی متفاوتی داره)
       '  <div class="hb-ob-steps" id="hbObSteps">' + stepsIndicatorMarkup() + '</div>' +
 
-      // کانتینر داخلی مشترک برای محتوای پنل‌ها و فوتر
       '  <div class="hb-ob-inner">' +
 
-      // بدنه
       '    <div class="hb-ob-body">' +
       '      <div class="hb-ob-panel is-active" data-panel="1">' +
       '        <div id="hbObTypeSelectSlot">' + standardSelectMarkup(typeSelectCfg()) + '</div>' +
@@ -262,7 +244,6 @@
       '        <div id="hbObCurrencySelectSlot">' + standardSelectMarkup(currencySelectCfg()) + '</div>' +
       '        <p class="text-xs text-[var(--color-text2-color)] mt-2 leading-relaxed">این اطلاعات رو هر زمان بخوای می‌تونی از تنظیمات حساب‌ها ویرایش کنی.</p>' +
       '      </div>' +
-      // *********** پنل ۳ با فیلد متنی و نمایش حروف ***********
       '      <div class="hb-ob-panel" data-panel="3">' +
       '        <div class="hb-ob-error" id="hbObErrorBalance"></div>' +
       '        <div class="mb-4">' +
@@ -292,7 +273,6 @@
       '      </div>' +
       '    </div>' +
 
-      // فوتر
       '    <div class="hb-ob-footer" id="hbObFooter"></div>' +
 
       '  </div>' +
@@ -413,7 +393,6 @@
   function submitAccount(root, submitBtn) {
     clearError(root, 'hbObErrorBalance');
     var name = q(root, '#hbObName').value.trim();
-    // خواندن عدد از ورودی متنی (حذف کاراکترهای غیرعددی)
     var balanceRaw = q(root, '#hbObBalance').value.replace(/[^0-9]/g, '');
     var note = q(root, '#hbObNote').value.trim();
     var openingBalance = balanceRaw ? Number(balanceRaw) : 0;
@@ -492,7 +471,6 @@
       onChange: function (value) {
         state.currency = value;
         setSelectedLabel(overlayEl, 'hbObCurrencySelect', CURRENCY_OPTIONS, value);
-        // به‌روزرسانی نمایش حروف با ارز جدید
         if (overlayEl) updateAmountHint(overlayEl);
       },
     };
@@ -531,7 +509,6 @@
     overlay.id = 'hbOnboardingOverlay';
     overlay.innerHTML = cardMarkup();
 
-    // دیگر نیازی به تنظیم span قدیمی نیست (hbObAmountCurrency حذف شده)
     setSelectedLabel(overlay, 'hbObTypeSelect', TYPE_OPTIONS, state.type);
     setSelectedLabel(overlay, 'hbObCurrencySelect', CURRENCY_OPTIONS, state.currency);
 
@@ -543,18 +520,15 @@
     wireNoteCounter(overlay);
     wireClose(overlay);
 
-    // اتصال رویداد ورودی برای به‌روزرسانی حین تایپ + فیلتر کردن غیر اعداد
     var balanceInput = q(overlay, '#hbObBalance');
     if (balanceInput) {
       balanceInput.addEventListener('input', function () {
-        // حذف هر کاراکتر غیرعددی
         var raw = this.value.replace(/[^0-9]/g, '');
         if (this.value !== raw) {
           this.value = raw;
         }
         updateAmountHint(overlay);
       });
-      // مقدار اولیه
       updateAmountHint(overlay);
     }
 

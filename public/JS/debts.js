@@ -3,16 +3,12 @@
 
   const API_BASE = '/api';
 
-  // همه‌ی رکوردهای کاربر (بدهی + طلب) که از سرور خونده شده
   let allItems = [];
   // لیست وام/اقساط که از همون API داشبورد (/api/installments) خونده می‌شه
   let allLoans = [];
 
-  // خلاصه‌ی رکوردهای معمولِ بدهی/طلب + خلاصه‌ی حساب‌کتاب اشخاص (تب جدا)؛ کارت‌های
-  // بالای صفحه مجموعِ این دوتاست چون شخص هم می‌تونه توی «بدهی من»/«طلب از دیگران» سهم داشته باشه.
   let lastDebtsSummary = { myDebt: 0, receivable: 0, net: 0 };
   let lastPersonsSummary = { debt: 0, receivable: 0, net: 0 };
-  // نرمال‌سازی تاریخ شمسی به «YYYY/MM/DD» با ارقام انگلیسی، برای مقایسه‌ی صحیح متنی
   function normalizeDate(str) {
     const normalized = toEnglishDigits(str).trim();
     const match = normalized.match(/^(\d{3,4})[/-](\d{1,2})[/-](\d{1,2})$/);
@@ -26,7 +22,6 @@
     return toPersianDigits(grouped);
   }
 
-  // نمایش مبلغ به تومان با علامت منفی در انتها (رسم رایج فارسی)، مثلاً «۸,۰۰۰,۰۰۰- تومان»
   function formatSignedToman(amount) {
     const abs = Math.abs(Number(amount || 0));
     const sign = Number(amount || 0) < 0 ? '-' : '';
@@ -54,8 +49,6 @@
       <path d="M7.125 9.375H10.875" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
     </svg>`;
 
-  // وضعیت همیشه فقط «پرداخت شده» یا «پرداخت نشده/وصول نشده»ست؛ سررسید گذشته یک
-  // برچسب جداست (isOverdue) که فقط رنگ بج رو قرمز می‌کنه، نه متنش رو.
   function statusLabel(status, type) {
     if (status === 'paid') return 'پرداخت شده';
     return type === 'receivable' ? 'وصول نشده' : 'پرداخت نشده';
@@ -67,8 +60,6 @@
     return 'bg-orange-50 text-orange-600';
   }
 
-  // برای رکوردهای سررسید گذشته، به‌جای عدد منفیِ گیج‌کننده («-۵ روز»)، واضح می‌گیم
-  // «۵ روز گذشته» (رسم رایج فارسی، مثل formatSignedToman که همین‌جوری کار می‌کنه)
   function remainingDaysLabel(remainingDays) {
     if (remainingDays === null || remainingDays === undefined) return '-';
     if (remainingDays < 0) return `${toPersianDigits(Math.abs(remainingDays))} روز گذشته`;
@@ -163,7 +154,6 @@
     });
   }
 
-  // صدا زده می‌شه از persons.js، هر بار خلاصه‌ی حساب‌کتاب اشخاص تغییر کنه
   function setPersonsSummary(summary) {
     lastPersonsSummary = summary || { debt: 0, receivable: 0, net: 0 };
     renderCombinedSummary();
@@ -210,9 +200,6 @@
     document.querySelectorAll('.custom-select').forEach((select) => {
       select.querySelectorAll('.option').forEach((opt) => {
         opt.addEventListener('click', () => {
-          // نکته‌ی مهم: نباید از || استفاده کرد، چون گزینه‌ی «همه» عمداً data-value=""
-          // داره؛ رشته‌ی خالی falsy هست و || اونو با متن نمایشی («همه») جایگزین می‌کرد
-          // و در نتیجه فیلتر «همه» هیچ‌وقت با هیچ رکوردی مچ نمی‌شد.
           select.dataset.value = 'value' in opt.dataset ? opt.dataset.value : opt.textContent.trim();
         });
       });
@@ -232,9 +219,6 @@
     if (el) el.classList.add('hidden');
   }
 
-  // ===== نگاشتِ نوع رکورد (debt/receivable) به پیشوند شناسه‌های فرم =====
-  // فرم بدهی همیشه با «debt» و فرم طلب همیشه با «demand» شروع می‌شه؛ با این helper
-  // به‌جای تکرار «isDebt ? 'debtX' : 'demandX'» در هر خط، فقط اسم فیلد رو می‌دیم.
   const FORM_PREFIX = { debt: 'debt', receivable: 'demand' };
   function fid(kind, suffix) {
     return `${FORM_PREFIX[kind]}${suffix}`;
@@ -397,8 +381,6 @@
       filtered = filtered.filter((it) => (it.counterparty || '').toLowerCase().includes(search));
     }
     if (opts.status) {
-      // «سررسید گذشته» دیگه یک status نیست (status فقط paid/unpaid هست)؛
-      // پس این گزینه رو از روی فیلد isOverdue فیلتر می‌کنیم.
       if (opts.status === 'overdue') {
         filtered = filtered.filter((it) => it.isOverdue);
       } else {
@@ -587,8 +569,6 @@
     }
   }
 
-  // شناسه‌ی وامی که در حال ویرایشه؛ null یعنی مودال در حالت «ثبت وام جدید»ه.
-  // بعد از ساخته‌شدنِ اقساط فقط عنوان قابل ویرایشه (مبلغ/تعداد/سررسید ثابت می‌مونن)
   let editingLoanId = null;
 
   function openLoanAddModal() {
@@ -732,7 +712,6 @@
   }
 
   // جلوگیری از ارسال چندباره‌ی درخواست پرداخت قسط با کلیک‌های پشت‌سرهم روی دکمه
-  // (باعث ۴۲۹/Too Many Requests و پرداخت تکراری می‌شد)
   const payingLoanIds = new Set();
 
   async function payLoan(id) {
@@ -788,7 +767,7 @@
     loan: 'یادآوری‌ها و تحلیل اقساط و وام‌ها',
   };
 
-  // ===== متن‌های اختصاصیِ هشدار برای بدهی در برابر طلب (بقیه‌ی منطق مشترکه) =====
+  // ===== متن‌های اختصاصیِ هشدار برای بدهی در برابر طلب =====
   const RECORD_ALERT_COPY = {
     debt: {
       empty: { title: 'هنوز بدهی‌ای ثبت نکردی', message: 'با دکمه‌ی «ثبت بدهی جدید» می‌تونی بدهی‌هات رو با سررسید ثبت کنی.' },

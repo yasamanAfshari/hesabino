@@ -3,7 +3,7 @@
 
   const API_BASE = '/api';
 
-  // آخرین داده‌ی بودجه که از سرور خونده شده (برای دوباره‌سازی مودال و جمع‌ها استفاده می‌شه)
+  // آخرین داده‌ی بودجه که از سرور خونده شده
   let latestBudget = null;
   function formatAmount(amount) {
     const grouped = Math.round(Number(amount || 0)).toLocaleString('en-US');
@@ -14,8 +14,6 @@
     return toPersianDigits(Math.round(Number(value || 0) * 100) / 100) + '٪';
   }
 
-  // همون رنگ‌بندیِ دقیق دسته‌ها که توی نمودار «هزینه به تفکیک دسته» در داشبورد
-  // استفاده می‌شه، تا رنگ هر دسته توی همه‌جای اپ یکی باشه.
   const CATEGORY_COLORS = {
     'خوراک': '#FF9B44',
     'خرید و پوشاک': '#FF9EE7',
@@ -78,7 +76,7 @@
     renderRegisteredIncomeHint(latestBudget);
   }
 
-  // ===== لیست وضعیت هر دسته (پروگرس‌بارها) =====
+  // ===== (پروگرس‌بارها) =====
   function renderStatusList(categories) {
     const container = document.getElementById('budgetStatusList');
     if (!container) return;
@@ -187,7 +185,6 @@
       `مجموع بودجه: ${formatAmount(totalAmount)} (${toPersianDigits(incomePercent)}٪ از درآمد)`;
   }
 
-  // ===== باز کردن مودال ویرایش دستی =====
   function openManualModal() {
     if (!latestBudget) {
       showToast('داده‌ی بودجه هنوز بارگذاری نشده، کمی صبر کنید', 'error');
@@ -337,7 +334,6 @@
     }
   }
 
-  // ===== مودال یادآوری‌ها، هشدارها و تحلیل بودجه =====
   const ALERT_STYLES = {
     danger: { bg: 'bg-red-color-25', border: 'border-red-color', text: 'text-red-color', icon: '⚠️' },
     warning: { bg: 'bg-orange-color-25', border: 'border-orange-color', text: 'text-orange-color', icon: '⚠️' },

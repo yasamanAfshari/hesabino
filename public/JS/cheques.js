@@ -3,7 +3,7 @@
 
   const API_BASE = '/api';
 
-  // لیست کامل چک‌های کاربر که از سرور خونده شده (فیلترها روی همین آرایه اعمال می‌شن)
+  // لیست کامل چک‌های کاربر که از سرور خونده شده 
   let allCheques = [];
   function formatAmount(amount) {
     const grouped = Number(amount || 0).toLocaleString('en-US');
@@ -56,7 +56,7 @@
     return 'bg-orange-50 text-orange-600';
   }
 
-  // ===== ساخت یک سطر جدول برای یک چک (داینامیک) =====
+  // ===== ساخت یک سطر جدول برای یک چک  =====
   function renderRow(c) {
     return `
       <tr class="transition-all duration-150 hover:bg-gray-50" data-id="${c.id}">
@@ -93,7 +93,7 @@
     document.getElementById('chequesPendingCount').textContent = formatCount(summary.pending);
   }
 
-  // ===== خواندن/نوشتن مقدار سلکت‌باکس‌های سفارشی (که input واقعی نیستن) =====
+  // ===== خواندن/نوشتن مقدار سلکت‌باکس‌های سفارشی =====
   function getCustomSelectValue(containerId) {
     const container = document.getElementById(containerId);
     return container ? (container.dataset.value || '') : '';
@@ -135,9 +135,6 @@
     document.querySelectorAll('.custom-select').forEach((select) => {
       select.querySelectorAll('.option').forEach((opt) => {
         opt.addEventListener('click', () => {
-          // نکته‌ی مهم: نباید از || استفاده کرد، چون گزینه‌ی «همه» عمداً data-value=""
-          // داره؛ رشته‌ی خالی falsy هست و || اونو با متن نمایشی («همه») جایگزین می‌کرد
-          // و در نتیجه فیلتر «همه» هیچ‌وقت با هیچ رکوردی مچ نمی‌شد.
           select.dataset.value = 'value' in opt.dataset ? opt.dataset.value : opt.textContent.trim();
         });
       });
@@ -403,8 +400,8 @@
     }
   }
 
-  // ===== ابزارهای تاریخ شمسی برای تشخیص چک‌های نزدیک به سررسید/گذشته =====
-  const toEnglishDigitsLocal = toEnglishDigits; // از common.js
+  // ===== تشخیص چک‌های نزدیک به سررسید/گذشته =====
+  const toEnglishDigitsLocal = toEnglishDigits; 
 
   function parseJalaliParts(str) {
     const clean = toEnglishDigitsLocal(str).trim();
@@ -413,8 +410,6 @@
     return { y: Number(m[1]), m: Number(m[2]), d: Number(m[3]) };
   }
 
-  // برای مقایسه‌ی درست فیلتر تاریخ: چه رقم فارسی/انگلیسی باشه و چه بدون صفرِ ابتدایی
-  // (مثلاً «۱۴۰۵/۵/۱» و «1405/05/01»)، هر دو باید یکی حساب بشن.
   function normalizeDateForCompare(str) {
     const p = parseJalaliParts(str);
     if (!p) return null;
@@ -426,7 +421,7 @@
       if (typeof persianDate === 'function') {
         return parseJalaliParts(new persianDate().format('YYYY/MM/DD'));
       }
-    } catch (e) { /* کتابخانه در دسترس نبود */ }
+    } catch (e) { "not found" }
     return null;
   }
 
@@ -437,7 +432,6 @@
     return toLinear(toParts) - toLinear(fromParts);
   }
 
-  // ===== مودال یادآوری‌ها، هشدارها و تحلیل چک‌ها =====
   const ALERT_STYLES = {
     danger: { bg: 'bg-red-color-25', border: 'border-red-color', text: 'text-red-color', icon: '⚠️' },
     warning: { bg: 'bg-orange-color-25', border: 'border-orange-color', text: 'text-orange-color', icon: '⚠️' },

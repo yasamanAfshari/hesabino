@@ -1,6 +1,3 @@
-// ===== توابع مشترک بین صفحات؛ چون این فایل زودتر از اسکریپت‌های هر صفحه لود می‌شه
-// (نگاه کن به main.ejs)، این توابع سراسری (global) در دسترس بقیه‌ی اسکریپت‌ها هم هستن =====
-
 // هدر Authorization رو از روی توکن ذخیره‌شده توی localStorage می‌سازه
 function authHeaders(extra) {
   const token = localStorage.getItem('access_token');
@@ -76,14 +73,7 @@ function showToast(message, type) {
 (function () {
   'use strict';
 
-  // ===== ۱. لودر صفحه =====
-  // قبلاً این لودر فقط با یک تایمر ثابت (800ms) بعد از رویداد window load مخفی می‌شد؛
-  // یعنی ربطی به اینکه دیتای واقعی صفحه (داشبورد/تراکنش‌ها/حساب‌ها و...) از سرور
-  // fetch شده باشه یا نه نداشت. اگه درخواست کندتر از 800ms طول می‌کشید، لودر محو
-  // می‌شد ولی محتوا هنوز خالی بود (چشمک خالی/پرش لایوت). حالا هر صفحه بعد از اینکه
-  // اولین fetch دیتای خودش تموم شد (چه موفق چه ناموفق)، صریحاً hidePageLoader رو
-  // صدا می‌زنه؛ یک سقف زمانی (safety net) هم هست تا اگه صفحه‌ای فراموش کرد صدا
-  // بزنه، لودر برای همیشه روی صفحه نمونه.
+  // ===== لودر صفحه =====
   function setupLoader() {
     const loader = document.getElementById('page-loader');
     window.HesabinoUI = window.HesabinoUI || {};
@@ -94,7 +84,7 @@ function showToast(message, type) {
     }
 
     const minVisible = 400;   // حداقل زمان نمایش، برای جلوگیری از چشمک خیلی سریع
-    const safetyNet = 8000;   // اگه هیچ صفحه‌ای hidePageLoader رو صدا نزد، حداکثر این‌قدر صبر کن
+    const safetyNet = 8000;  
     const fadeDuration = 600;
     const startedAt = Date.now();
     let hidden = false;
@@ -123,10 +113,9 @@ function showToast(message, type) {
     return value || fallback;
   }
 
-  // نگه‌داری نمونه‌ی نمودارها و ویجت گیج، تا موقع عوض شدن تم بتونیم رنگ‌هاشون رو به‌روز کنیم
   const chartInstances = {};
 
-  // ===== ۳. نمودارها (دونات و میله‌ای) =====
+  // =====  نمودارها (دونات و میله‌ای) =====
   function initCharts() {
     const donutEl = document.getElementById('donutChart');
     if (donutEl && typeof Chart !== 'undefined') {
@@ -136,8 +125,6 @@ function showToast(message, type) {
           labels: ['خوراک', 'خرید و پوشاک', 'حمل و نقل', 'تفریح و سرگرمی', 'سلامت', 'آموزش', 'سرمایه', 'بدهی', 'مسکن', 'سایر'],
           datasets: [{
             data: [30, 15, 10, 25, 12, 8, 5, 6, 7, 2],
-            // این‌ها رنگ‌های دسته‌بندی (categorical) هستن؛ چون هر رنگ نماینده‌ی یک دسته‌ی
-            // ثابته و ربطی به روشن/تیره بودن پس‌زمینه نداره، عمداً دست‌نخورده باقی می‌مونن.
             backgroundColor: ['#FF9B44', '#FF9EE7', '#C8AC4E', '#55B5B1', '#9DE18B', '#9D5C8F', '#E5DC44', '#B9403C', '#745C52', '#DADADA'],
             borderWidth: 0,
             cutout: '70%'
@@ -180,7 +167,6 @@ function showToast(message, type) {
     }
   }
 
-  // موقع تغییر تم، رنگ نمودار میله‌ای (که رنگ‌هاش برای تم مهمن) رو به‌روز می‌کنیم
   function updateChartsTheme() {
     const bar = chartInstances.bar;
     if (bar) {
@@ -196,7 +182,7 @@ function showToast(message, type) {
     initExpenseRatioChart();
   }
 
-  // ===== ۴. نمودار نسبت هزینه به درآمد =====
+  // =====  نمودار نسبت هزینه به درآمد =====
   function initExpenseRatioChart() {
     const container = document.getElementById('expenseChart');
     if (!container) return;
@@ -243,7 +229,7 @@ function showToast(message, type) {
     });
   }
 
-  // ===== ۵. نوار پیشرفت =====
+  // =====  نوار پیشرفت =====
   function initProgressBar() {
     const fill = document.getElementById('barFill');
     const text = document.getElementById('percentText');
@@ -267,9 +253,6 @@ function showToast(message, type) {
           $(input).pDatepicker?.({
             format: 'YYYY/MM/DD',
             initialValue: false,
-            // پلاگین موقع انتخاب تاریخ فقط .val() رو ست می‌کنه و رویداد change رو
-            // dispatch نمی‌کنه؛ بدون این، لیسنرهای change (مثلاً فیلترهای تاریخ)
-            // هیچ‌وقت اجرا نمی‌شدن. پس خودمون بعد از هر انتخاب change رو شبیه‌سازی می‌کنیم.
             onSelect: function () {
               input.dispatchEvent(new Event('change', { bubbles: true }));
             },
@@ -334,28 +317,14 @@ function initTimePickers() {
     });
 }
 
-  // ===== ۸. سلکت باکس سفارشی =====
-  // دراپ‌داون هر سلکت موقع باز شدن از داخل کانتینرش به انتهای body منتقل می‌شه
-  // و با position:fixed نسبت به دکمه‌ی سلکت جای‌گذاری می‌شه. این‌طوری دراپ‌داون
-  // کاملاً از جریان صفحه (و مهم‌تر از همه از overflow-y مودال‌ها) خارج می‌مونه
-  // و باز شدنش باعث اسکرول خوردن مودال نمی‌شه؛ دقیقاً شبیه سلکت‌باکس معمولی.
-
-  // select => { close, reposition, dropdown, openedAt } — برای بستن/ری‌پوزیشن کردن از
-  // بیرون (کلیک بیرون، اسکرول، resize). بیرون از تابع نگه داشته می‌شه چون initCustomSelects
-  // ممکنه چند بار صدا زده بشه (مثلاً وقتی مودالی به‌صورت داینامیک بعد از لود اولیه‌ی صفحه ساخته می‌شه)
+  // ===== سلکت باکس سفارشی =====
   const openSelects = new Map();
   let customSelectGlobalListenersBound = false;
 
   // تشخیص دستگاه‌های لمسی (موبایل/تبلت)؛ برای جلوگیری از فوکوس خودکار روی اینپوت جستجو
-  // که باعث باز شدن کیبورد و بسته‌شدن ناخواسته‌ی دراپ‌داون می‌شه (توضیح کامل پایین‌تر)
   function isCoarsePointerDevice() {
     return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
   }
-
-  // بعد از باز شدن دراپ‌داون، تا این مدت (میلی‌ثانیه) رویداد scroll نادیده گرفته می‌شه.
-  // روی موبایل، حتی وقتی فوکوس خودکار غیرفعاله، ممکنه خودِ باز شدن دراپ‌داون (تغییر
-  // چیدمان صفحه، یا اسکرول خودکار مرورگر برای نگه داشتن دکمه در دید) یه رویداد scroll
-  // فوری صادر کنه؛ بدون این فرصت، همون رویداد بلافاصله دراپ‌داونی رو که تازه باز شده می‌بست.
   const SCROLL_CLOSE_GRACE_MS = 350;
 
   function initCustomSelects(root) {
@@ -371,9 +340,6 @@ function initTimePickers() {
       const icon = btn.querySelector('svg');
       const dropdownHeight = 260;
 
-      // نکته‌ی مهم: بعد از این‌که dropdown به body منتقل می‌شه، دیگه داخل select
-      // نیست؛ پس همه‌جا از همین رفرنس‌های بسته‌شده (closure) استفاده می‌کنیم، نه
-      // select.querySelector('.dropdown') که بعد از جابه‌جایی چیزی پیدا نمی‌کنه.
       let placeholder = null;
       let openedAt = 0;
 
@@ -398,7 +364,6 @@ function initTimePickers() {
           if (s !== select) entry.close();
         });
 
-        // یه کامنت جای خالیِ دراپ‌داون رو نگه می‌داره تا موقع بسته شدن سرجاش برگرده
         if (!placeholder) {
           placeholder = document.createComment('dropdown-placeholder');
           dropdown.after(placeholder);
@@ -412,11 +377,6 @@ function initTimePickers() {
 
         openedAt = Date.now();
 
-        // روی موبایل، فوکوس خودکار اینپوت جستجو باعث باز شدن کیبورد می‌شه و مرورگر برای
-        // نگه‌داشتن اینپوت بالای کیبورد، صفحه رو اسکرول می‌کنه؛ همین اسکرول قبلاً به‌عنوان
-        // «اسکرول بیرون از دراپ‌داون» تشخیص داده می‌شد و دراپ‌داون رو همون لحظه‌ی باز شدن
-        // می‌بست. برای همین روی دستگاه‌های لمسی فوکوس خودکار رو غیرفعال می‌کنیم؛ کاربر
-        // در صورت نیاز خودش روی اینپوت جستجو ضربه می‌زنه.
         if (search && !isCoarsePointerDevice()) search.focus();
         if (icon) icon.classList.add('rotate-180');
         openSelects.set(select, { close: closeDropdown, reposition: positionDropdown, dropdown, get openedAt() { return openedAt; } });
@@ -449,10 +409,7 @@ function initTimePickers() {
         }
       });
 
-      // وایر کردن کلیک روی آپشن‌ها و جستجو، به‌صورت تابعی جدا که بعد از بازسازی داینامیک
-      // آپشن‌ها (مثلاً وقتی این کامپوننت دور یک <select> اصلی ساخته شده و آپشن‌هاش عوض
-      // می‌شن) دوباره صدا زده می‌شه؛ برای همین رفرنس آپشن‌ها هر بار تازه خونده می‌شه
-      // و نه فقط یک بار موقع ست‌آپ اولیه.
+
       function wireOptions() {
         const options = select.querySelectorAll('.option');
 
@@ -464,16 +421,12 @@ function initTimePickers() {
             const optValue = 'value' in item.dataset ? item.dataset.value : text;
 
             value.textContent = text;
-            // سازگار با کدهای هر صفحه (مثل debts.js/cheques.js) که مقدار انتخاب‌شده‌ی
-            // فیلترها رو از dataset.value خودِ کانتینر می‌خونن
+
             select.dataset.value = optValue;
 
             options.forEach(opt => opt.classList.remove('bg-gray-100'));
             item.classList.add('bg-gray-100');
 
-            // اگه این سلکت سفارشی دور یک <select> اصلی ساخته شده (نگاه کنید به
-            // enhanceNativeSelects)، مقدارش رو هم‌گام می‌کنیم تا هر جای دیگه‌ی برنامه
-            // که با .value یا رویداد change با همون سلکت اصلی کار می‌کنه، بدون تغییر کار کنه
             const nativeSelect = select.__hbNativeSelect;
             if (nativeSelect) {
               nativeSelect.value = optValue;
@@ -488,9 +441,6 @@ function initTimePickers() {
         });
 
         if (search) {
-          // به‌جای addEventListener، از oninput استفاده می‌شه تا هر بار wireOptions
-          // دوباره صدا زده می‌شه (بعد از بازسازی آپشن‌ها)، لیسنر قبلی خودش جایگزین بشه
-          // و لیسنرهای تکراری روی هم انباشته نشن
           search.oninput = () => {
             const text = search.value.toLowerCase();
             options.forEach(item => {
@@ -500,8 +450,6 @@ function initTimePickers() {
         }
       }
 
-      // در دسترس گذاشتنش برای enhanceNativeSelects، تا بعد از بازسازی آپشن‌های یک
-      // سلکت اصلیِ داینامیک (پر شدن دوباره‌ی گزینه‌ها با AJAX)، دوباره وایر بشه
       select.__hbWireOptions = wireOptions;
       wireOptions();
     });
@@ -514,9 +462,7 @@ function initTimePickers() {
     });
 
     // اسکرول شدن صفحه یا هر کانتینر داخلی (مثل بدنه‌ی مودال) => دراپ‌داون‌های باز بسته بشن،
-    // مگر این‌که خودِ اسکرول داخل لیست آپشن‌های همون دراپ‌داون اتفاق افتاده باشه، یا
-    // دراپ‌داون همین چند لحظه پیش باز شده باشه (نگاه کنید به SCROLL_CLOSE_GRACE_MS)
-    // (چون از capture:true استفاده شده، اسکرول هر عنصر داخلی هم که رویدادش bubble نمی‌شه گرفته می‌شه)
+  
     document.addEventListener('scroll', (e) => {
       const now = Date.now();
       openSelects.forEach((entry) => {
@@ -531,13 +477,7 @@ function initTimePickers() {
     });
   }
 
-  // ===== ۸-۱. تبدیل خودکار <select>های معمولی به همین سلکت‌باکس سفارشی =====
-  // به‌جای این‌که مارک‌آپ هر select رو دستی توی هر view عوض کنیم، همه‌ی select های
-  // معمولی صفحه رو دور یک select اصلیِ (مخفی‌شده ولی هنوز در DOM و فرم حاضر) می‌پیچیم.
-  // این‌طوری همه‌ی select ها دقیقاً از یک نوع کامپوننت (دکمه + جستجو) و ظاهر یکسان
-  // استفاده می‌کنن، و از طرفی چون خودِ select اصلی دست‌نخورده باقی می‌مونه، کدهای
-  // موجود صفحه که با select.value / select.selectedIndex / addEventListener('change')
-  // و FormData کار می‌کنن، بدون هیچ تغییری همچنان درست کار می‌کنن.
+  // =====  تبدیل خودکار <select>های معمولی به همین سلکت‌باکس سفارشی =====
   function buildOptionRow(optionEl) {
     const item = document.createElement('div');
     item.className = 'option px-4 py-3 cursor-pointer hover:bg-gray-100';
@@ -554,7 +494,6 @@ function initTimePickers() {
     const scope = root || document;
 
     scope.querySelectorAll('select:not([data-hb-enhanced]):not([data-no-enhance]):not([multiple])').forEach((nativeSelect) => {
-      // اگه از قبل داخل یک .custom-select قرار داره (مثلاً کد صفحه خودش این کارو کرده)، دست نمی‌زنیم
       if (nativeSelect.closest('.custom-select')) return;
 
       nativeSelect.setAttribute('data-hb-enhanced', '1');
@@ -562,9 +501,6 @@ function initTimePickers() {
       const wrapper = document.createElement('div');
       wrapper.className = 'custom-select relative';
 
-      // کلاس‌های اندازه/چیدمان select اصلی (مثل w-full h-10 یا اندازه‌های فشرده‌ی
-      // سلکت‌های داخل هدر) روی دکمه هم اعمال می‌شه تا فضای صفحه به‌هم نریزه؛
-      // کلاس‌های لازم برای رفتار دکمه هم به‌شون اضافه می‌شه
       const originalClasses = (nativeSelect.getAttribute('class') || '').split(/\s+/).filter(Boolean);
       const btnClasses = new Set(['select-btn', 'flex', 'items-center', 'justify-between', 'gap-2', 'cursor-pointer', ...originalClasses]);
       if (!originalClasses.includes('bg-white')) btnClasses.add('bg-white');
@@ -614,10 +550,7 @@ function initTimePickers() {
       wrapper.appendChild(btn);
       wrapper.appendChild(dropdown);
 
-      // select اصلی همون‌جا کنار می‌مونه (نه با display:none حذف‌شده از فرم و نه با
-      // aria-hidden از دسترس خارج‌شده)، فقط با یک استایل inline از دید مخفی می‌شه؛
-      // این‌طوری هم فرم/FormData/کوئری‌های موجود صفحه بدون تغییر کار می‌کنن، هم
-      // کاربرهای صفحه‌خوان از طریق تب هنوز بهش دسترسی دارن
+
       nativeSelect.parentNode.insertBefore(wrapper, nativeSelect);
       nativeSelect.style.position = 'absolute';
       nativeSelect.style.width = '1px';
@@ -643,19 +576,12 @@ function initTimePickers() {
           optionsContainer.appendChild(buildOptionRow(optionEl));
         });
         syncFromSelect();
-        // آپشن‌های تازه ساخته‌شده باید دوباره وایر بشن (initCustomSelects فقط یک بار،
-        // موقع ست‌آپ اولیه‌ی این wrapper، این کارو می‌کنه)
+
         if (typeof wrapper.__hbWireOptions === 'function') wrapper.__hbWireOptions();
       }
 
       wrapper.__hbNativeSelect = nativeSelect;
 
-      // بقیه‌ی کد صفحه معمولاً با select.value = x یا select.selectedIndex = i مقدار
-      // رو تغییر می‌ده (بدون dispatch کردن رویداد change)؛ برای این‌که ظاهر دکمه هم با
-      // این تغییرات هم‌گام بمونه، getter/setter اصلی رو override می‌کنیم. علاوه بر این،
-      // یه لیسنر change/input هم روی خودِ select می‌ذاریم تا اگه یک کاربر صفحه‌خوان با
-      // کیبورد مستقیماً select اصلی رو تغییر بده (که از مسیر همین setter رد نمی‌شه)، باز
-      // هم دکمه‌ی سفارشی به‌روز بشه.
       ['value', 'selectedIndex'].forEach((propName) => {
         const descriptor = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, propName);
         if (!descriptor || !descriptor.set || !descriptor.get) return;
@@ -677,8 +603,6 @@ function initTimePickers() {
       nativeSelect.addEventListener('change', syncFromSelect);
       nativeSelect.addEventListener('input', syncFromSelect);
 
-      // اگه بعداً کدی innerHTML سلکت رو عوض کنه (پر کردن داینامیک گزینه‌ها با AJAX،
-      // مثل حساب‌های مقصد/مبدأ انتقال یا ماه‌های درآمد)، آپشن‌های سفارشی هم دوباره ساخته بشن
       const observer = new MutationObserver(rebuildOptions);
       observer.observe(nativeSelect, { childList: true, subtree: true });
 
@@ -688,19 +612,11 @@ function initTimePickers() {
     initCustomSelects(scope);
   }
 
-  // امکان صدا زدن دوباره‌ی این توابع برای مودال‌هایی که بعد از لود اولیه‌ی صفحه
-  // به‌صورت داینامیک با جاوااسکریپت ساخته می‌شن (مثل مودال «افزودن اولین حساب»)
   window.HesabinoUI = window.HesabinoUI || {};
   window.HesabinoUI.initCustomSelects = initCustomSelects;
   window.HesabinoUI.enhanceNativeSelects = enhanceNativeSelects;
 
-  // ===== ۹. مودال تأیید یکپارچه (به‌جای confirm()/alert() مرورگر) =====
-  // این مودال فقط یک‌بار (اولین باری که لازم بشه) ساخته و به body اضافه می‌شه؛ چون
-  // توی public.js تعریف شده، توی همه‌ی صفحات اپ در دسترسه، بدون این‌که لازم باشه
-  // مارک‌آپش رو توی تک‌تک view ها تکرار کنیم.
-  // نکته‌ی مهم: عمداً به‌جای closeModal سراسری هر صفحه (که هر مودال بازی رو می‌بنده)،
-  // خودش open/close مستقل داره؛ این‌طوری اگه از داخل یک مودال دیگه (مثلاً فرم ویرایش)
-  // صدا زده بشه، با انصراف از حذف، اون مودال زیرین باز می‌مونه.
+  // ===== مودال تأیید یکپارچه (به‌جای confirm()/alert() مرورگر) =====
   function ensureConfirmModal() {
     let modal = document.getElementById('hbConfirmModal');
     if (modal) return modal;
@@ -728,9 +644,6 @@ function initTimePickers() {
     return modal;
   }
 
-  // options: { title, confirmText, cancelText, danger } — همه اختیاری
-  // خروجی یک Promise<boolean> هست: true اگه کاربر تأیید کرد، false اگه انصراف داد
-  // (با کلیک بیرون از کارت، دکمه‌ی ضربدر، یا کلید Escape هم انصراف حساب می‌شه)
   function confirmDialog(message, options) {
     const opts = options || {};
     const modal = ensureConfirmModal();
@@ -744,7 +657,6 @@ function initTimePickers() {
     messageEl.textContent = message || 'آیا از این عملیات مطمئن هستید؟';
     confirmBtn.textContent = opts.confirmText || 'حذف';
     cancelBtn.textContent = opts.cancelText || 'انصراف';
-    // برای عملیات حذف (خطرناک) دکمه‌ی تأیید قرمزه؛ فقط اگه صریحاً danger:false داده بشه، رنگ اصلی اپ می‌شه
     confirmBtn.className = opts.danger === false
       ? 'main-btn px-4 py-2 rounded-lg'
       : 'bg-red-color text-white px-4 py-2 rounded-lg';
@@ -789,13 +701,8 @@ function initTimePickers() {
   window.HesabinoUI = window.HesabinoUI || {};
   window.HesabinoUI.confirmDialog = confirmDialog;
 
-  // page-loader همین الان تنظیم می‌شه (نه داخل onReady) تا هر صفحه بلافاصله بعد از
-  // fetch اولیه‌ی دیتاش بتونه window.HesabinoUI.hidePageLoader رو صدا بزنه، بدون
-  // اینکه به ترتیب اجرای اسکریپت‌های deferred دیگه وابسته باشه؛ چون این اسکریپت هم
-  // deferred است، DOM (شامل #page-loader) موقع اجرا کامل پارس شده.
   setupLoader();
 
-  // ===== ۱۰. اجرای همه توابع بعد از آماده شدن DOM =====
   function onReady() {
     initCharts();
     initExpenseRatioChart();
@@ -812,7 +719,6 @@ function initTimePickers() {
     onReady();
   }
 
-  // وقتی کاربر تم رو عوض می‌کنه (از هدر یا تنظیمات)، رنگ نمودارها هم آپدیت بشه
   document.addEventListener('hesabino:theme-changed', updateChartsTheme);
   document.addEventListener('hesabino:accent-changed', updateChartsTheme);
 

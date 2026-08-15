@@ -3,13 +3,9 @@
 
   const API_BASE = '/api';
 
-  // لیست کامل تراکنش‌های کاربر که از سرور خونده شده (فیلترها روی همین آرایه اعمال می‌شن)
   let allTransactions = [];
 
-  // لیست حساب‌های فعال کاربر؛ برای پر کردن سلکت‌باکس «حساب» در فرم ثبت/ویرایش تراکنش
   let userAccounts = [];
-  // برای مقایسه‌ی درست فیلتر تاریخ: چه رقم فارسی/انگلیسی باشه و چه بدون صفرِ ابتدایی
-  // (مثلاً «۱۴۰۵/۵/۱» و «1405/05/01»)، هر دو باید یکی حساب بشن.
   function normalizeDateForCompare(str) {
     const normalized = toEnglishDigits(str).trim();
     const match = normalized.match(/^(\d{3,4})[/-](\d{1,2})[/-](\d{1,2})$/);
@@ -64,7 +60,6 @@
 
   // ===== ساخت یک سطر جدول برای یک تراکنش (داینامیک) =====
   function renderRow(tx) {
-    // const dateTime = tx.time ? `${tx.date} - ${tx.time}` : tx.date;
     const dateTime = tx.time
       ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}`
       : toPersianDigits(tx.date);
@@ -126,7 +121,6 @@
       valueEl.textContent = matched.textContent.trim();
       container.dataset.value = matched.dataset.value || matched.textContent.trim();
     } else {
-      // مقداری که در لیست گزینه‌ها نیست (مثلاً دسته‌ی دلخواه)؛ به همون شکل نمایش داده می‌شه
       valueEl.textContent = value;
       container.dataset.value = value;
     }
@@ -137,10 +131,6 @@
   }
 
   // ===== واکنش فرم به انتخاب «نوع مالی» (واریز / برداشت / انتقال بین حساب‌ها) =====
-  // ۱) گزینه‌های «نوع تراکنش» و «دسته» فقط گزینه‌های مرتبط با نوع انتخاب‌شده رو نشون می‌دن
-  //    (مثلاً وقتی «واریز» انتخاب شده، «خرید فروشگاه» که مخصوص هزینه‌هاست نشون داده نمی‌شه)
-  // ۲) برای «انتقال بین حساب‌ها» اصلاً نوع تراکنش/دسته/حساب تکی معنی نداره؛ به‌جاش
-  //    دو فیلد «از حساب» و «به حساب» نشون داده می‌شه (چون این حرکت نه درآمده نه هزینه)
   const TITLE_PLACEHOLDERS = {
     income: 'عنوان (مثلاً حقوق تیر)',
     expense: 'عنوان (مثلاً بنزین ماشین)',
@@ -225,10 +215,6 @@
     }
   }
 
-  // اگه حساب‌ها هنوز لود نشده باشن (مثلاً چون کاربر سریع «انتقال» رو زده و
-  // fetch مربوط به لود اولیه‌ی حساب‌ها هنوز تموم نشده)، اول حساب‌ها رو می‌گیریم
-  // و بعد سلکت‌های «از حساب»/«به حساب» رو پر می‌کنیم؛ این‌طوری هیچ‌وقت این دوتا
-  // خالی نمی‌مونن و انتقال بی‌دلیل رد نمی‌شه
   async function refreshTransferAccountSelects() {
     if (!userAccounts.length) {
       await loadUserAccounts();
@@ -278,7 +264,6 @@
           setCustomSelectValue('modalCategorySelect', data.category);
         }
       } catch (err) {
-        // شکست خاموش: پیشنهاد خودکار دسته صرفاً یک کمک است، نیازی به نمایش خطا به کاربر نیست
       }
     }, 600);
 
@@ -297,7 +282,6 @@
       if (!res.ok) throw new Error('خطا در دریافت حساب‌ها');
       userAccounts = await res.json();
 
-      // ذخیره مقدار قبلی
       const previousValue = hiddenInput.value;
 
       // ساخت گزینه‌ها
@@ -305,13 +289,11 @@
         .map(a => `<div class="option px-4 py-3 cursor-pointer hover:bg-gray-100" data-value="${a.id}">${escapeHtml(a.name)}</div>`)
         .join('');
 
-      // اگر مقدار قبلی معتبر بود، آن را انتخاب‌شده نشان بده
       if (previousValue) {
         const matched = optionsContainer.querySelector(`.option[data-value="${previousValue}"]`);
         if (matched) {
           container.querySelector('.selected-value').textContent = matched.textContent;
         } else {
-          // اگر حسابی که قبلاً انتخاب شده بود دیگر وجود ندارد
           hiddenInput.value = '';
           container.querySelector('.selected-value').textContent = 'بدون حساب';
         }
@@ -437,12 +419,6 @@
   }
 
   // ===== هشدار «حذف از چالش» =====
-  // چالش‌های داشبورد («پرهیز از خرج در دسته‌ی X») سمت سرور فقط وقتی ارزیابی می‌شن که
-  // endpoint مربوطه (GET /api/challenges) خونده بشه (نگاه کنید به ChallengesService.evaluate)؛
-  // یعنی تا قبل از این تغییر، کاربر فقط با مراجعه‌ی بعدی به داشبورد متوجه‌ی شکست چالشش می‌شد.
-  // اینجا بلافاصله بعد از ثبت/ویرایش هر تراکنشِ هزینه، دوباره همون overview رو می‌خونیم؛
-  // اگه دسته‌ی تراکنش دقیقاً با دسته‌ی «پرهیز»ِ چالش فعال یکی باشه و همون چالش به همین
-  // خاطر به نتیجه‌ی «failed» رسیده باشه، بلافاصله به کاربر اطلاع می‌دیم.
   async function checkChallengeAfterTransactionSave(type, category) {
     if (type !== 'expense' || !category) return;
 
@@ -693,7 +669,6 @@
     badge.textContent = typeText;
     badge.className = 'transaction-type-badge inline-block font-bold px-6 py-2 rounded-full text-sm ' + typeBadgeClass;
 
-    // document.getElementById('viewDate').textContent = tx.time ? `${tx.date} - ${tx.time}` : tx.date;
     document.getElementById('viewDate').textContent = tx.time
       ? `${toPersianDigits(tx.date)} - ${toPersianDigits(tx.time)}`
       : toPersianDigits(tx.date);
@@ -718,11 +693,6 @@
   }
 
   // ===== چاپ =====
-  // محتوای innerHtml رو داخل ناحیه‌ی مخصوص چاپ (که خارج از هر عنصر اسکرول‌شونده/مودالی
-  // قرار داره) می‌ذاره و پرینت مرورگر رو باز می‌کنه. چون از تکنیک visibility (نگاه کنید
-  // به استایل #hbPrintArea توی transactions.ejs) استفاده شده، نه از خودِ جدولِ روی صفحه،
-  // نه محدودیت اسکرول جدول و نه ارتفاع مودال روی چاپ اثری نداره؛ کل محتوا چاپ می‌شه و
-  // اگه از یک صفحه بلندتر باشه، مرورگر خودش می‌ره صفحه‌ی بعد (thead هم تکرار می‌شه).
   function printHtml(innerHtml) {
     let area = document.getElementById('hbPrintArea');
     if (!area) {
@@ -745,7 +715,6 @@
     return toPersianDigits(new Date().toLocaleString('fa-IR'));
   }
 
-  // چاپ جزئیات همون تراکنشی که مودال «جزئیات» (چشم) الان بازش کرده
   function printCurrentTransactionDetails() {
     const tx = currentViewTx;
     if (!tx) {
@@ -786,8 +755,6 @@
     printHtml(html);
   }
 
-  // چاپ کل جدول تراکنش‌ها؛ روی همون لیستِ در حال حاضر فیلترشده (lastFilteredList) کار
-  // می‌کنه، نه فقط چیزی که توی اسکرول جدول دیده می‌شه، تا کل محتوا چاپ بشه
   function printTransactionsList() {
     const list = lastFilteredList;
     if (!list.length) {
@@ -836,7 +803,6 @@
   }
 
   // ===== خواندن csv بانکی (وارد کردن) =====
-  // پارسر ساده و مقاوم csv: از کوتیشن، کاما/سِمی‌کالن به‌عنوان جداکننده، و \r\n/\n پشتیبانی می‌کنه
   function parseCsvText(text) {
     const cleaned = text.replace(/^\uFEFF/, ''); // حذف BOM اگه بود
     const delimiter = (cleaned.slice(0, 500).match(/;/g) || []).length > (cleaned.slice(0, 500).match(/,/g) || []).length ? ';' : ',';
@@ -878,8 +844,6 @@
     return rows;
   }
 
-  // حدس زدن این‌که کدوم ستون فایل csv بانکی به کدوم فیلد ما (تاریخ/عنوان/مبلغ/نوع/دسته) مربوطه،
-  // بر اساس اسم ستون‌ها؛ کاربر می‌تونه توی مودال، این حدس رو دستی عوض کنه
   const COLUMN_GUESS_KEYWORDS = {
     date: ['تاریخ', 'date'],
     title: ['شرح', 'توضیح', 'عنوان', 'title', 'description', 'detail'],
@@ -897,7 +861,7 @@
     return -1;
   }
 
-  let csvParsedRows = []; // شامل ردیف هدر هم هست؛ ردیف ۰ = هدر
+  let csvParsedRows = []; 
   let csvHeaders = [];
 
   function fillCsvColumnSelect(containerId, headers, selectedIndex) {
@@ -921,10 +885,8 @@
       }
     }
 
-    // گزینه‌های تازه‌ساخته‌شده باید کلیک‌شون وایر بشه (منطق مشترک در public.js)
     if (typeof container.__hbWireOptions === 'function') container.__hbWireOptions();
     else {
-      // کانتینرهایی که هنوز توسط initCustomSelects وایر نشدن (اولین بار مودال باز می‌شه)
       window.HesabinoUI && window.HesabinoUI.initCustomSelects(container.parentElement || document);
     }
   }
@@ -951,7 +913,7 @@
 
     head.innerHTML = `<tr>${csvHeaders.map((h, i) => `<th class="px-3 py-2 text-right whitespace-nowrap">${escapeHtml(h || `ستون ${toPersianDigits(i + 1)}`)}</th>`).join('')}</tr>`;
 
-    const previewRows = csvParsedRows.slice(1, 6); // بدون ردیف هدر، فقط ۵ ردیف اول
+    const previewRows = csvParsedRows.slice(1, 6); 
     body.innerHTML = previewRows
       .map((r) => `<tr class="border-t border-gray-100">${csvHeaders.map((_, i) => `<td class="px-3 py-2 whitespace-nowrap">${escapeHtml(r[i] || '')}</td>`).join('')}</tr>`)
       .join('');
@@ -1022,7 +984,6 @@
     window.openModal('csvImportModal');
   }
 
-  // نسخه‌ی سبک loadUserAccounts که فقط userAccounts رو پر می‌کنه، بدون دست‌کاری سلکت‌باکس مودال ثبت تراکنش
   async function loadUserAccountsQuietly() {
     try {
       const res = await fetch(`${API_BASE}/accounts`, { headers: authHeaders() });
@@ -1034,7 +995,6 @@
   }
 
   function parseCsvAmount(raw) {
-    // حذف هرچیزی غیر از رقم، نقطه و منفی (جداکننده‌ی هزارگان، واحد پول، فاصله و...)
     const cleaned = toEnglishDigits(raw).replace(/[^\d.-]/g, '');
     const num = Number(cleaned);
     return Number.isNaN(num) ? null : num;
@@ -1130,15 +1090,12 @@
 
     await loadTransactions();
 
-    // اگه در بین ردیف‌های وارد‌شده، تراکنش هزینه‌ای با دسته‌ی «پرهیز»ِ چالش فعال بود، همینجا هم اطلاع بده
     for (const category of importedExpenseCategories) {
       await checkChallengeAfterTransactionSave('expense', category);
     }
   }
 
-  // لیست تراکنش‌هایی که در حال حاضر (بعد از اعمال فیلترها) روی صفحه نمایش داده می‌شه؛
-  // برای «چاپ لیست» و «دریافت خروجی» دقیقاً از همین لیست استفاده می‌کنیم، نه کل تراکنش‌ها،
-  // تا خروجی/چاپ دقیقاً همون چیزی باشه که کاربر الان می‌بینه
+
   let lastFilteredList = [];
 
   // ===== فیلترها (روی داده‌ی از قبل خونده‌شده، سمت کلاینت اعمال می‌شن) =====
@@ -1152,7 +1109,6 @@
 
     let list = allTransactions;
 
-    // ===== فیلتر سراسری بازه‌ی زمانی از هدر (روز/هفته/ماه/سال)؛ فقط وقتی فیلتر تاریخ دستی خالی باشه اعمال می‌شه =====
     if (!dateFrom && !dateTo && window.HesabinoPeriod) {
       list = list.filter((t) => window.HesabinoPeriod.matches(t.date, period));
     }
@@ -1222,7 +1178,6 @@
       }
 
       const data = await res.json();
-      // اگه به هر دلیلی خروجی سرور یک آرایه‌ی خام نبود (مثلاً بسته‌بندی شده در یک آبجکت)، بازم مقاوم عمل کن
       allTransactions = Array.isArray(data) ? data : (data.data || data.transactions || []);
       console.debug('تراکنش‌های دریافت‌شده از سرور:', allTransactions);
       applyFilters();
@@ -1234,9 +1189,6 @@
     }
   }
 
-  // ===== وقتی از صفحه‌ی دیگری (مثل داشبورد) با لینک ?view=/?edit=/?delete=<id> به این صفحه
-  // میایم، همون مودالِ مربوطه رو خودکار باز می‌کنه؛ بعد پارامتر رو از URL پاک می‌کنه که
-  // با رفرش صفحه دوباره باز نشه =====
   function openModalFromQueryParams() {
     const params = new URLSearchParams(window.location.search);
     const viewId = params.get('view');
@@ -1281,7 +1233,6 @@
     const dateToInput = document.getElementById('filterDateToPicker');
     if (dateToInput) dateToInput.addEventListener('change', applyFilters);
 
-    // ===== فیلتر سراسری بازه‌ی زمانی (هدر): با تغییرش، لیست همین‌جا (بدون درخواست جدید) دوباره فیلتر می‌شه =====
     document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', applyFilters);
 
     loadTransactions()
@@ -1289,7 +1240,6 @@
       .finally(() => window.HesabinoUI && window.HesabinoUI.hidePageLoader && window.HesabinoUI.hidePageLoader());
   }
 
-  // توابعی که از HTML (onclick های داخل سطرهای داینامیک و دکمه‌ی بازنشانی) صدا زده می‌شن
   window.openAddTransactionModal = openAddTransactionModal;
   window.resetFilter = resetFilter;
   window.TransactionsApp = {

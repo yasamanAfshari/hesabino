@@ -158,6 +158,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('resize', handleResize);
 
-  // اعمال وضعیت ذخیره شده در اولین بار
   handleResize();
 });

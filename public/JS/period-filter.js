@@ -1,9 +1,3 @@
-// ===== فیلتر سراسری بازه‌ی زمانی (روز/هفته/ماه/سال) توی هدر =====
-// این فایل روی همه‌ی صفحات لود می‌شه (از main.ejs). یک select ساده توی هدر
-// (partials/header.ejs) هست؛ این اسکریپت مقدارش رو توی localStorage نگه می‌داره
-// تا بین صفحات هم باقی بمونه، و با هر تغییر یک رویداد سراسری (hesabino:period-change)
-// پخش می‌کنه تا اسکریپت هر صفحه (dashboard.js، transactions.js، ...) داده‌ی خودش رو
-// بر همون اساس دوباره بگیره/فیلتر کنه.
 (function () {
   'use strict';
 
@@ -23,13 +17,13 @@
     try {
       var stored = localStorage.getItem(STORAGE_KEY);
       if (VALID_PERIODS.indexOf(stored) !== -1) return stored;
-    } catch (e) { /* localStorage در دسترس نبود */ }
+    } catch (e) {  }
     return DEFAULT_PERIOD;
   }
 
   function setPeriod(period, options) {
     if (VALID_PERIODS.indexOf(period) === -1) return;
-    try { localStorage.setItem(STORAGE_KEY, period); } catch (e) { /* در دسترس نبود */ }
+    try { localStorage.setItem(STORAGE_KEY, period); } catch (e) {  }
 
     var select = document.getElementById('global-period-select');
     if (select && select.value !== period) select.value = period;
@@ -39,7 +33,6 @@
     }
   }
 
-  // ===== تبدیل ارقام فارسی/عربی به انگلیسی (برای پارس کردن رشته‌ی تاریخ) =====
   function toEnglishDigits(str) {
     var persian = '۰۱۲۳۴۵۶۷۸۹';
     var arabic = '٠١٢٣٤٥٦٧٨٩';
@@ -55,9 +48,6 @@
     return { y: Number(match[1]), m: Number(match[2]), d: Number(match[3]) };
   }
 
-  // ===== آیا یک تاریخ شمسی (رشته‌ی YYYY/MM/DD) داخل بازه‌ی انتخابی قرار داره؟ =====
-  // برای فیلترهای کاملاً سمت کلاینت (مثل صفحه‌ی تراکنش‌ها که داده‌اش از قبل لود شده)
-  // از persian-date (که سراسری روی همه‌ی صفحات لود می‌شه) برای محاسبه‌ی دقیق استفاده می‌کنه
   function matchesPeriod(dateStr, period) {
     var parts = parseParts(dateStr);
     if (!parts || typeof persianDate !== 'function') return true;
@@ -76,7 +66,6 @@
         var diffDays = today.diff(target, 'day');
         return diffDays >= 0 && diffDays <= 6;
       }
-      // month (پیش‌فرض)
       return target.year() === today.year() && target.month() === today.month();
     } catch (e) {
       return true;

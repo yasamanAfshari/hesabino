@@ -7,7 +7,7 @@
   let latestAccounts = [];
   let showArchived = false;
 
-  // آخرین لیست انتقال‌های بین حساب‌ها که از سرور خونده شده
+  // آخرین لیست انتقال‌های بین حساب‌ها
   let latestTransfers = [];
   const CURRENCY_LABELS = {
     IRR: 'تومان',
@@ -17,7 +17,7 @@
     AED: 'درهم امارات',
   };
 
-  // واحد پول رو از روی کد ارز حساب می‌ذاره (مثلاً «۲۰ دلار» به‌جای «۲۰ تومان» برای حساب دلاری)
+  // واحد پول رو از روی کد ارز حساب می‌ذاره
   function formatAmount(amount, currency) {
     const grouped = Math.round(Number(amount || 0)).toLocaleString('en-US');
     const unitLabel = CURRENCY_LABELS[currency] || CURRENCY_LABELS.IRR;
@@ -224,7 +224,7 @@
     }
   }
 
-  // ===== آرشیو / بازگرداندن حساب (حذف امن) =====
+  // ===== آرشیو / بازگرداندن حساب  =====
   async function submitArchiveToggle() {
     const id = document.getElementById('editAccountId').value;
     const account = latestAccounts.find((a) => a.id === Number(id));
@@ -254,7 +254,6 @@
 
   // ===== انتقال بین حساب‌ها =====
 
-  // پر کردن سلکت‌باکس‌های «از حساب» و «به حساب» با حساب‌های فعال کاربر
   function populateTransferAccountSelects() {
     const active = latestAccounts.filter((a) => !a.isArchived);
     const optionsHtml = active
@@ -266,7 +265,7 @@
     if (fromSelect) fromSelect.innerHTML = optionsHtml;
     if (toSelect) toSelect.innerHTML = optionsHtml;
 
-    // به‌صورت پیش‌فرض دو حساب متفاوت انتخاب بشن (اگر حداقل دو حساب فعال وجود داشته باشه)
+    // به‌صورت پیش‌فرض دو حساب متفاوت انتخاب بشن 
     if (toSelect && active.length > 1) {
       toSelect.value = String(active[1].id);
     }

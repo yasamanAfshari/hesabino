@@ -74,7 +74,6 @@
   let latestData = null;
   let hasAccounts = false;
 
-  // ===== نابودسازی امن هر نموداری که قبلاً روی این canvas ساخته شده، فارغ از این‌که کدام متغیر آن را ردیابی می‌کرد =====
   // (این حالت وقتی پیش می‌آید که مثلاً صفحه بدون رفرش کامل دوباره اسکریپت را اجرا کند، یا رندر دو بار صدا زده شود)
   function destroyExistingChart(canvas) {
     if (!canvas || !window.Chart) return;
@@ -84,9 +83,6 @@
 
   // ===== بنر هوشمند بالای صفحه =====
   function renderHero(data) {
-    // نکته: آمار درآمد/هزینه/پس‌انداز/بیشترین‌خرج در باکس‌های آماری «row 1» پایین‌تر نمایش داده می‌شوند،
-    // پس دیگر نیازی به تکرارشان در باکس دستیار هوشمند نیست.
-
     const behaviorEl = document.getElementById('hero-insight-behavior');
     if (behaviorEl) {
       if (data.topCategory && data.topCategory.amount > 0) {
@@ -117,8 +113,6 @@
     }
   }
 
-  // ===== وقتی مبلغ ماه قبل خیلی کوچیک باشه، درصد تغییر می‌تونه عددی نجومی (مثلاً ۱۱۱۷۵٪) بشه؛
-  // این تابع درصد رو به یک بازه‌ی معقول محدود می‌کنه تا فقط بزرگ‌تر از حد نمایش داده نشه =====
   function capPercentChange(change) {
     return Math.max(-999, Math.min(999, change));
   }
@@ -204,8 +198,6 @@
     const savingsTrendEl = document.getElementById('stat-savings-trend');
     if (savingsTrendEl) {
       if (data.totals.hasIncomeData && previousPeriod.income > 0) {
-        // مقایسه به‌صورت اختلاف نقطه‌ای (percentage point) انجام می‌شه، نه درصدِ درصد؛
-        // چون اگه نرخ پس‌انداز بازه‌ی قبل نزدیک صفر باشه، محاسبه‌ی درصدِ تغییر هم مثل باگ هزینه منفجر می‌شه
         const prevBalance = previousPeriod.income - previousPeriod.expense;
         const prevSavingsRatePercent = Math.round((prevBalance / previousPeriod.income) * 100);
         const savingsPointsChange = data.totals.savingsRatePercent - prevSavingsRatePercent;
@@ -221,7 +213,6 @@
     setText('stat-health-label', data.health.label);
   }
 
-  // ===== نمودار دسته‌بندی هزینه‌ها (دونات) + لیست رنگی؛ periodLabel از فیلتر سراسری هدر میاد =====
   function renderCategoryChart(data, periodLabel) {
     const label = periodLabel || (window.HesabinoPeriod && window.HesabinoPeriod.LABELS[data.period || 'month']) || 'این ماه';
     setText('category-chart-title', `هزینه به تفکیک دسته (${label})`);
@@ -247,7 +238,6 @@
       destroyExistingChart(canvas);
       donutChartInstance = null;
 
-      // اگه هیچ هزینه‌ای برای این ماه ثبت نشده، دیگه دایره‌ی «الکی پر» رسم نمی‌کنیم؛ فقط خالی می‌مونه
       if (!data.categoryBreakdown.length) return;
 
       const labels = data.categoryBreakdown.map((c) => c.category);
@@ -590,7 +580,6 @@
     subscriptionsById = {};
     data.subscriptions.subscriptions.forEach((s) => { subscriptionsById[s.id] = s; });
 
-    // فقط اشتراک‌های فعال روی داشبورد نمایش داده می‌شوند؛ نزدیک‌ترین تاریخ تمدید بالاتر می‌آید
     const active = data.subscriptions.subscriptions
       .filter((s) => s.isActive)
       .sort((a, b) => a.daysLeft - b.daysLeft);
@@ -649,8 +638,6 @@
       el.innerHTML = '<p class="text-zinc-400 !text-sm">وام یا قسط فعالی ثبت نشده است.</p>';
       return;
     }
-    // هر وام همیشه با همین ساختار کامل (عنوان + پروگرس‌بار + باکس قسط بعدی) نمایش داده می‌شود؛
-    // اضافه‌شدن یک قسط جدید هیچ تغییری در ساختار وام‌های قبلی ایجاد نمی‌کند.
     el.innerHTML = loans.map((l, index) => `
       <div class="${index > 0 ? 'border-t border-gray-100 pt-3 mt-3' : ''}">
         <p class="!text-sm text-zinc-700 mb-1">${escapeHtml(l.title)}</p>
@@ -879,7 +866,6 @@
     try {
       localStorage.setItem(AI_INSIGHT_CACHE_KEY, JSON.stringify(cache));
     } catch (err) {
-      // پر بودن فضای localStorage یا مسدود بودنش نباید کل بارگذاری داشبورد رو خراب کنه
     }
   }
 
@@ -1014,12 +1000,7 @@
       renderDebtSummary(data);
       renderTransactionsTable(data);
 
-      // توجه: قبلاً اینجا loadAiInsight() صدا زده می‌شد و یعنی هر بار داشبورد لود می‌شد
-      // (یا فیلتر بازه عوض می‌شد، یا هر افزودن/ویرایش/حذفی که loadDashboard رو دوباره صدا
-      // می‌زد)، یک درخواست تحلیل هوشمند (که پشتش مدل Ollama محلیه و می‌تونه چند ثانیه طول
-      // بکشه) هم می‌رفت. حالا فقط آخرین تحلیلِ ذخیره‌شده (اگه از قبل گرفته شده) رو از
-      // localStorage نشون می‌دیم؛ برای گرفتن تحلیل تازه، کاربر خودش روی آیکون به‌روزرسانی
-      // کنار بج «به‌روزرسانی: ...» کلیک می‌کنه (نگاه کنید به restoreCachedAiInsight/refreshAiInsight).
+
       restoreCachedAiInsight();
     } catch (err) {
       showToast(err.message || 'خطا در بارگذاری داشبورد', 'error');
@@ -1052,7 +1033,6 @@
     });
   }
 
-  // ===== فرم‌هایی که هم افزودن و هم ویرایش دارند: اگر فیلد مخفی id مقدار داشته باشد، PATCH؛ وگرنه POST =====
   function bindEditableForm(formId, endpoint, buildBody) {
     const form = document.getElementById(formId);
     if (!form) return;
@@ -1136,7 +1116,6 @@
     bindAiChat();
     bindAiInsightRefreshButton();
 
-    // ===== فیلتر سراسری بازه‌ی زمانی (هدر): با هر تغییر، کل داشبورد دوباره لود می‌شه =====
     document.addEventListener(window.HesabinoPeriod ? window.HesabinoPeriod.EVENT_NAME : 'hesabino:period-change', loadDashboard);
 
     const typeSelect = document.getElementById('assetTypeSelect');
