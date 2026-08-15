@@ -599,7 +599,10 @@
     window.AmountInput.refreshForm(document.getElementById('loanModal'));
     document.getElementById('loanModalTitle').textContent = 'ثبت قسط/وام جدید';
     document.getElementById('loanSubmitBtn').textContent = 'ثبت';
-    document.getElementById('loanExtraFieldsGrid').classList.remove('hidden');
+    // موقع ثبت وام جدید، تاریخِ اولین سررسید اختیاریه (اگر خالی بمونه، خودِ سرور از فردا/ماه بعد حساب می‌کنه)
+    const dateInput = document.getElementById('loanFirstDueDatePicker');
+    dateInput.required = false;
+    dateInput.placeholder = 'سررسید قسط بعدی (اختیاری)';
     hideFormError('loanModalFormError');
     window.openModal('loanModal');
   }
@@ -612,11 +615,17 @@
     const form = document.getElementById('loanForm');
     if (form) form.reset();
     document.getElementById('loanTitleInput').value = loan.title || '';
+    document.getElementById('loanTotalAmountInput').value = loan.totalAmount;
+    document.getElementById('loanInstallmentsCountInput').value = loan.installmentsCount;
+    document.getElementById('loanAlreadyPaidInput').value = loan.paidCount;
     window.AmountInput.refreshForm(document.getElementById('loanModal'));
-    document.getElementById('loanModalTitle').textContent = 'ویرایش عنوان وام';
+    document.getElementById('loanModalTitle').textContent = 'ویرایش وام/قسط';
     document.getElementById('loanSubmitBtn').textContent = 'ذخیره تغییرات';
-    // مبلغ/تعداد اقساط/سررسید بعد از ساخته‌شدنِ اقساط قابل تغییر نیستن
-    document.getElementById('loanExtraFieldsGrid').classList.add('hidden');
+    // موقع ویرایش، تاریخ سررسید قسط بعدی الزامیه
+    const dateInput = document.getElementById('loanFirstDueDatePicker');
+    dateInput.value = loan.nextDueDate || '';
+    dateInput.required = true;
+    dateInput.placeholder = 'سررسید قسط بعدی *';
     hideFormError('loanModalFormError');
     window.openModal('loanModal');
   }
@@ -628,18 +637,43 @@
     const title = (document.getElementById('loanTitleInput').value || '').trim();
     if (!title) return showFormError('loanModalFormError', 'لطفاً عنوان وام را وارد کنید');
 
+    const totalAmount = Number(window.AmountInput.parse(document.getElementById('loanTotalAmountInput').value));
+    const installmentsCount = Number(window.AmountInput.parse(document.getElementById('loanInstallmentsCountInput').value));
+    const paidCount = Number(window.AmountInput.parse(document.getElementById('loanAlreadyPaidInput').value)) || 0;
+    const dueDateRaw = (document.getElementById('loanFirstDueDatePicker').value || '').trim();
+
+    if (!totalAmount || totalAmount <= 0) {
+      return showFormError('loanModalFormError', 'لطفاً مبلغ کل وام را به‌درستی وارد کنید');
+    }
+    if (!installmentsCount || installmentsCount <= 0) {
+      return showFormError('loanModalFormError', 'لطفاً تعداد کل اقساط را به‌درستی وارد کنید');
+    }
+    if (paidCount > installmentsCount) {
+      return showFormError('loanModalFormError', 'تعداد اقساط پرداخت‌شده نمی‌تواند از تعداد کل اقساط بیشتر باشد');
+    }
+
     const btn = document.getElementById('loanSubmitBtn');
     const originalText = btn.textContent;
     btn.disabled = true;
 
-    // ===== حالت ویرایش: فقط عنوان =====
+    // ===== حالت ویرایش: همه‌ی فیلدها با هم ارسال می‌شن؛ سررسید قسط بعدی الزامیه =====
     if (editingLoanId) {
+      if (!dueDateRaw) {
+        btn.disabled = false;
+        return showFormError('loanModalFormError', 'لطفاً تاریخ سررسید قسط بعدی را وارد کنید');
+      }
       btn.textContent = 'در حال ذخیره...';
       try {
         const res = await fetch(`${API_BASE}/installments/${editingLoanId}`, {
           method: 'PATCH',
           headers: authHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify({ title }),
+          body: JSON.stringify({
+            title,
+            totalAmount,
+            installmentsCount,
+            paidCount,
+            nextDueDate: dueDateRaw,
+          }),
         });
         const data = await res.json().catch(() => ({}));
 
@@ -651,7 +685,7 @@
 
         applyLoansOverview(data);
         window.closeModal();
-        showToast('عنوان وام ویرایش شد', 'success');
+        showToast('وام ویرایش شد', 'success');
       } catch (err) {
         console.error('Loan edit network error:', err);
         showFormError('loanModalFormError', 'ارتباط با سرور برقرار نشد');
@@ -663,20 +697,6 @@
     }
 
     // ===== حالت ثبت جدید =====
-    const totalAmount = Number(window.AmountInput.parse(document.getElementById('loanTotalAmountInput').value));
-    const installmentsCount = Number(window.AmountInput.parse(document.getElementById('loanInstallmentsCountInput').value));
-    const alreadyPaidCount = Number(window.AmountInput.parse(document.getElementById('loanAlreadyPaidInput').value)) || 0;
-    const firstDueDateRaw = (document.getElementById('loanFirstDueDatePicker').value || '').trim();
-
-    if (!totalAmount || totalAmount <= 0) {
-      btn.disabled = false;
-      return showFormError('loanModalFormError', 'لطفاً مبلغ کل وام را به‌درستی وارد کنید');
-    }
-    if (!installmentsCount || installmentsCount <= 0) {
-      btn.disabled = false;
-      return showFormError('loanModalFormError', 'لطفاً تعداد کل اقساط را به‌درستی وارد کنید');
-    }
-
     btn.textContent = 'در حال ثبت...';
 
     try {
@@ -687,8 +707,8 @@
           title,
           totalAmount,
           installmentsCount,
-          alreadyPaidCount,
-          firstDueDate: firstDueDateRaw || undefined,
+          alreadyPaidCount: paidCount,
+          firstDueDate: dueDateRaw || undefined,
         }),
       });
       const data = await res.json().catch(() => ({}));

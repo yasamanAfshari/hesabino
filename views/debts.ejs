@@ -461,8 +461,8 @@
             <input type="text" id="loanTitleInput" placeholder="عنوان وام (مثلاً وام خرید خودرو) *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
           </div>
 
-          <!-- مبلغ/تعداد اقساط/سررسید فقط موقع ثبتِ وام جدید نمایش داده می‌شن؛ چون بعد از
-               ساخته‌شدنِ اقساط، این‌ها دیگه قابل ویرایش نیستن (فقط عنوان قابل تغییره) -->
+          <!-- مبلغ/تعداد اقساط/اقساطِ پرداخت‌شده/سررسید؛ هم موقع ثبت وام جدید و هم موقع
+               ویرایش یه وام موجود نمایش داده می‌شن و قابل تغییرن -->
           <div id="loanExtraFieldsGrid" class="grid grid-cols-2 gap-3">
             <div class="relative">
               <input type="number" min="1" id="loanTotalAmountInput" placeholder="مبلغ کل وام (تومان) *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
@@ -471,11 +471,11 @@
               <input type="number" min="1" id="loanInstallmentsCountInput" data-unit="قسط" placeholder="تعداد کل اقساط *" required class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
             </div>
             <div class="relative">
-              <input type="number" min="0" id="loanAlreadyPaidInput" data-unit="قسط" placeholder="اقساط پرداخت‌شده‌ی قبلی" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
+              <input type="number" min="0" id="loanAlreadyPaidInput" data-unit="قسط" placeholder="اقساط پرداخت‌شده" class="w-full h-10 border border-main-color rounded-lg pr-4 pl-4 outline-none">
             </div>
             <div class="relative">
-              <input type="text" id="loanFirstDueDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-4 outline-none" placeholder="سررسید قسط بعدی (اختیاری)" autocomplete="off">
-              <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <input type="text" id="loanFirstDueDatePicker" class="date w-full h-10 date-none-txt wt-datepicker-input-element border border-main-color rounded-lg pr-4 pl-11 outline-none" placeholder="سررسید قسط بعدی (اختیاری)" autocomplete="off">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <path d="M16 2v4M8 2v4M3 10h18"></path>
               </svg>
